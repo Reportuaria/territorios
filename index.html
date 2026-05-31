@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Territórios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  
+  <!-- Configuração do PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(function() { console.log('PWA configurado no GitHub!'); })
+        .catch(function(err) { console.log('Erro SW:', err); });
+    }
+  </script>
+
+  <style>
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f9;
+      color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      box-sizing: border-box;
+    }
+    
+    .container {
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    h2 { text-align: center; color: #1a73e8; margin-top: 10px; margin-bottom: 20px; }
+    label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 16px; }
+    
+    select, input[type="text"] { 
+      width: 100%; 
+      padding: 14px; 
+      font-size: 16px; 
+      border: 1px solid #ccc; 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      background-color: #fff;
+      -webkit-appearance: none; 
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%231a73e8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    
+    input[type="text"] { background-image: none; }
+    
+    .rua-container { 
+      background: #fff; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-top: 15px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    }
+    
+    .rua-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .rua-titulo { font-weight: bold; color: #1a73e8; font-size: 18px; }
+    
+    .btn-concluido {
+      background-color: #e8f0fe;
+      color: #1a73e8;
+      border: 1px solid #1a73e8;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-concluido.ativo {
+      background-color: #34a853;
+      color: white;
+      border-color: #34a853;
+    }
+    
+    .hist-box { 
+      font-size: 15px; 
+      color: #202124; 
+      margin-bottom: 12px; 
+      background: #fff9c4; 
+      padding: 10px; 
+      border-radius: 6px; 
+      border-left: 6px solid #fbc02d; 
+      font-weight: bold; 
+    }
+    
+    .escondido { display: none !important; }
+    
+    .rua-concluida-aviso {
+      color: #34a853;
+      font-weight: bold;
+      font-style: italic;
+      padding: 5px 0;
+    }
+    
+    button.btn-principal { width: 100%; padding: 15px; font-size: 18px; color: white; background-color: #1a73e8; border: none; border-radius: 8px; margin-top: 25px; cursor: pointer; font-weight: bold; }
+    button:disabled { background-color: #ccc; }
+    #mensagem { text-align: center; font-weight: bold; margin-top: 15px; font-size: 18px; }
+    .loading-text { color: #666; font-style: italic; font-size: 16px; margin-top: 5px; }
+
+    .btn-instalar {
+      display: none;
+      width: 100%;
+      background-color: #34a853;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo de Territórios</button>
+
+    <h2>Sistema de Territórios</h2>
+
+    <label for="territorio">1. Escolha o Território:</label>
+    <select id="territorio" onchange="carregarQuadras()">
+      <option value="">Carregando territórios...</option>
+    </select>
+
+    <label for="quadra">2. Escolha a Quadra:</label>
+    <select id="quadra" onchange="carregarRuas()" disabled>
+      <option value="">Selecione um território primeiro</option>
+    </select>
+
+    <div id="area-ruas"></div>
+
+    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>Gravar no Histórico</button>
+    
+    <div id="mensagem"></div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ⚠️ ATENÇÃO: SUBSTITUA O TEXTO ABAIXO PELO SEU LINK DO GOOGLE (ATÉ O /exec)
+    // =========================================================================
+    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    
+    var deferredPrompt;
+
+    window.onload = function() {
+      fetchData("obterTerritorios", null, function(lista) {
+        var combo = document.getElementById("territorio");
+        combo.innerHTML = '<option value="">-- Selecione o Território --</option>';
+        lista.forEach(function(t) {
+          combo.innerHTML += '<option value="'+t+'">'+t+'</option>';
+        });
+      });
+    };
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btnInstalarApp').style.display = 'block';
+    });
+
+    document.getElementById('btnInstalarApp').addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function() {
+          deferredPrompt = null;
+          document.getElementById('btnInstalarApp').style.display = 'none';
+        });
+      }
+    });
+
+    function carregarQuadras() {
+      var territorio = document.getElementById("territorio").value;
+      var comboQuadra = document.getElementById("quadra");
+      
+      document.getElementById("area-ruas").innerHTML = "";
+      document.getElementById("btnSalvar").disabled = true;
+      document.getElementById("mensagem").innerHTML = "";
+      
+      if (!territorio) {
+        comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+        comboQuadra.disabled = true;
+        return;
+      }
+      
+      comboQuadra.innerHTML = '<option value="">Carregando quadras...</option>';
+      comboQuadra.disabled = true;
+      
+      fetchData("obterQuadras", territorio, function(lista) {
+        comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
+        lista.forEach(function(q) {
+          comboQuadra.innerHTML += '<option value="'+q+'">'+q+'</option>';
+        });
+        comboQuadra.disabled = false;
+      });
+    }
+
+    function carregarRuas() {
+      var quadra = document.getElementById("quadra").value;
+      var areaRuas = document.getElementById("area-ruas");
+      var btn = document.getElementById("btnSalvar");
+      document.getElementById("mensagem").innerHTML = "";
+      
+      if (!quadra) {
+        areaRuas.innerHTML = "";
+        btn.disabled = true;
+        return;
+      }
+      
+      areaRuas.innerHTML = '<p class="loading-text">Buscando ruas e histórico...</p>';
+      
+      fetchData("obterRuas", quadra, function(lista) {
+        if (lista.length === 0) {
+          areaRuas.innerHTML = "<p style='color:red;'>Nenhuma rua encontrada.</p>";
+          btn.disabled = true;
+          return;
+        }
+        
+        var htmlFinal = "";
+        lista.forEach(function(item, index) {
+          htmlFinal += `
+            <div class="rua-container" id="container_${index}">
+              <div class="rua-header">
+                <div class="rua-titulo">${item.nome}</div>
+                <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+              </div>
+              <div id="conteudoRua_${index}">
+                <div class="hist-box">Casas feitas: ${item.historico}</div>
+                <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
+                <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
+              </div>
+              <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
+            </div>
+          `;
+        });
+        
+        areaRuas.innerHTML = htmlFinal;
+        btn.disabled = false;
+      });
+    }
+
+    function alternarConclusao(index, nomeRua) {
+      var botao = document.getElementById("btnConcluir_" + index);
+      var conteudo = document.getElementById("conteudoRua_" + index);
+      var aviso = document.getElementById("avisoConcluido_" + index);
+      
+      var dadosConclusao = {
+        territorio: document.getElementById("territorio").value,
+        quadra: document.getElementById("quadra").value,
+        rua: nomeRua,
+        status: ""
+      };
+
+      if (!botao.classList.contains("ativo")) {
+        botao.classList.add("ativo");
+        botao.innerText = "Desmarcar";
+        conteudo.classList.add("escondido"); 
+        aviso.classList.remove("escondido"); 
+        dadosConclusao.status = "Concluída";
+      } else {
+        botao.classList.remove("ativo");
+        botao.innerText = "Concluir";
+        conteudo.classList.remove("escondido"); 
+        aviso.classList.add("escondido"); 
+        dadosConclusao.status = "Reaberta";
+      }
+
+      fetchData("registrarConclusaoRua", dadosConclusao, function() {});
+    }
+
+    function enviarDados() {
+  var btn = document.getElementById("btnSalvar");
+  var msg = document.getElementById("mensagem");
+  var territorio = document.getElementById("territorio").value;
+  var quadra = document.getElementById("quadra").value;
+  
+  if (!territorio || !quadra) {
+    msg.innerHTML = "<span style='color:red;'>Preencha o território e a quadra!</span>";
+    return;
+  }
+  
+  var containers = document.querySelectorAll(".rua-container");
+  var ruasDados = [];
+
+  containers.forEach(function(el, index) {
+    var conteudo = document.getElementById("conteudoRua_" + index);
+    if (conteudo && !conteudo.classList.contains("escondido")) {
+      var nome = document.getElementById("ruaNome_" + index).value;
+      var casas = document.getElementById("ruaCasas_" + index).value.trim();
+      if (casas) {
+        ruasDados.push({ nome: nome, casas: casas });
+      }
+    }
+  });
+
+  if (ruasDados.length === 0) {
+    msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada para gravar!</span>";
+    return;
+  }
+
+  btn.disabled = true;
+  msg.innerHTML = "<span style='color:#1a73e8;'>Salvando dados, aguarde...</span>";
+
+  var formCompleto = {
+    territorio: territorio,
+    quadra: quadra,
+    ruas: ruasDados
+  };
+
+  fetchData("salvarDados", formCompleto, function(resposta) {
+    if (resposta === "Sucesso") {
+      msg.innerHTML = "<span style='color:#34a853;'>✓ Gravado com sucesso!</span>";
+      containers.forEach(function(el, index) {
+        var input = document.getElementById("ruaCasas_" + index);
+        if (input) input.value = "";
+      });
+      setTimeout(carregarRuas, 2000);
+    } else {
+      msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
+      btn.disabled = false;
+    }
+  });
+}
+
+// Função que faz a ponte segura de comunicação entre o GitHub e o Google Script
+function fetchData(funcao, parametro, callback) {
+  var url = URL_GOOGLE_SCRIPT + "?executar=" + funcao;
+  if (parametro) {
+    url += "&dados=" + encodeURIComponent(JSON.stringify(parametro));
+  }
+  
+  fetch(url)
+    .then(function(res) { return res.json(); })
+    .then(function(dados) { callback(dados); })
+    .catch(function(err) { console.error("Erro na comunicação:", err); });
+}
