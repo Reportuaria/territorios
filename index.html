@@ -174,21 +174,33 @@
       });
     };
 
+       var deferredPrompt;
+
+    // O Android avisa o app quando está pronto para instalar
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById('btnInstalarApp').style.display = 'block';
+      console.log('Android liberou a instalação nativa!');
     });
 
+    // Lógica do clique focada 100% no Android
     document.getElementById('btnInstalarApp').addEventListener('click', function() {
+      // Cenário A: O Chrome já validou o PWA e está pronto
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function() {
+        deferredPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('btnInstalarApp').style.display = 'none';
+          }
           deferredPrompt = null;
-          document.getElementById('btnInstalarApp').style.display = 'none';
         });
+      } 
+      // Cenário B: O Chrome está teimoso ou em cache. Ajuda o irmão manualmente!
+      else {
+        alert("Para instalar no seu Android:\n\n1. Clique nos 3 pontinhos (no topo direito do Chrome).\n2. Selecione a opção 'Instalar aplicativo' ou 'Adicionar à tela inicial'.\n3. Confirme em 'Instalar'!");
       }
     });
+
 
     function carregarQuadras() {
       var territorio = document.getElementById("territorio").value;
