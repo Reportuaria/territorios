@@ -283,8 +283,7 @@
 
       fetchData("registrarConclusaoRua", dadosConclusao, function() {});
     }
-
-    function enviarDados() {
+function enviarDados() {
   var btn = document.getElementById("btnSalvar");
   var msg = document.getElementById("mensagem");
   var territorio = document.getElementById("territorio").value;
@@ -338,15 +337,18 @@
   });
 }
 
-// Função que faz a ponte segura de comunicação entre o GitHub e o Google Script
+// Função que faz a ponte segura de comunicação ignorando as travas de CORS do Google
 function fetchData(funcao, parametro, callback) {
   var url = URL_GOOGLE_SCRIPT + "?executar=" + funcao;
   if (parametro) {
     url += "&dados=" + encodeURIComponent(JSON.stringify(parametro));
   }
   
-  fetch(url)
+  fetch(url, { method: "GET", mode: "cors" })
     .then(function(res) { return res.json(); })
     .then(function(dados) { callback(dados); })
     .catch(function(err) { console.error("Erro na comunicação:", err); });
 }
+</script>
+</body>
+</html>
