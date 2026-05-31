@@ -150,12 +150,8 @@
     
     <div id="mensagem"></div>
   </div>
-
   <script>
-    // =========================================================================
-    // ⚠️ ATENÇÃO: SUBSTITUA O TEXTO ABAIXO PELO SEU LINK DO GOOGLE (ATÉ O /exec)
-    // =========================================================================
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    var URL_GOOGLE_SCRIPT = "https://google.com";
     
     var deferredPrompt;
 
@@ -283,72 +279,72 @@
 
       fetchData("registrarConclusaoRua", dadosConclusao, function() {});
     }
-function enviarDados() {
-  var btn = document.getElementById("btnSalvar");
-  var msg = document.getElementById("mensagem");
-  var territorio = document.getElementById("territorio").value;
-  var quadra = document.getElementById("quadra").value;
-  
-  if (!territorio || !quadra) {
-    msg.innerHTML = "<span style='color:red;'>Preencha o território e a quadra!</span>";
-    return;
-  }
-  
-  var containers = document.querySelectorAll(".rua-container");
-  var ruasDados = [];
 
-  containers.forEach(function(el, index) {
-    var conteudo = document.getElementById("conteudoRua_" + index);
-    if (conteudo && !conteudo.classList.contains("escondido")) {
-      var nome = document.getElementById("ruaNome_" + index).value;
-      var casas = document.getElementById("ruaCasas_" + index).value.trim();
-      if (casas) {
-        ruasDados.push({ nome: nome, casas: casas });
+    function enviarDados() {
+      var btn = document.getElementById("btnSalvar");
+      var msg = document.getElementById("mensagem");
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
+      
+      if (!territorio || !quadra) {
+        msg.innerHTML = "<span style='color:red;'>Preencha o território e a quadra!</span>";
+        return;
       }
-    }
-  });
+      
+      var containers = document.querySelectorAll(".rua-container");
+      var ruasDados = [];
 
-  if (ruasDados.length === 0) {
-    msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada para gravar!</span>";
-    return;
-  }
-
-  btn.disabled = true;
-  msg.innerHTML = "<span style='color:#1a73e8;'>Salvando dados, aguarde...</span>";
-
-  var formCompleto = {
-    territorio: territorio,
-    quadra: quadra,
-    ruas: ruasDados
-  };
-
-  fetchData("salvarDados", formCompleto, function(resposta) {
-    if (resposta === "Sucesso") {
-      msg.innerHTML = "<span style='color:#34a853;'>✓ Gravado com sucesso!</span>";
       containers.forEach(function(el, index) {
-        var input = document.getElementById("ruaCasas_" + index);
-        if (input) input.value = "";
+        var conteudo = document.getElementById("conteudoRua_" + index);
+        if (conteudo && !conteudo.classList.contains("escondido")) {
+          var nome = document.getElementById("ruaNome_" + index).value;
+          var casas = document.getElementById("ruaCasas_" + index).value.trim();
+          if (casas) {
+            ruasDados.push({ nome: nome, casas: casas });
+          }
+        }
       });
-      setTimeout(carregarRuas, 2000);
-    } else {
-      msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
-      btn.disabled = false;
+      
+      if (ruasDados.length === 0) {
+        msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada para gravar!</span>";
+        return;
+      }
+      
+      btn.disabled = true;
+      msg.innerHTML = "<span style='color:#1a73e8;'>Salvando dados, aguarde...</span>";
+      
+      var formCompleto = {
+        territorio: territorio,
+        quadra: quadra,
+        ruas: ruasDados
+      };
+      
+      fetchData("salvarDados", formCompleto, function(resposta) {
+        if (resposta === "Sucesso") {
+          msg.innerHTML = "<span style='color:#34a853;'>✓ Gravado com sucesso!</span>";
+          containers.forEach(function(el, index) {
+            var input = document.getElementById("ruaCasas_" + index);
+            if (input) input.value = "";
+          });
+          setTimeout(carregarRuas, 2000);
+        } else {
+          msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
+          btn.disabled = false;
+        }
+      });
     }
-  });
-}
 
-// Função que faz a ponte segura de comunicação ignorando as travas de CORS do Google
-function fetchData(funcao, parametro, callback) {
-  var url = URL_GOOGLE_SCRIPT + "?executar=" + funcao;
-  if (parametro) {
-    url += "&dados=" + encodeURIComponent(JSON.stringify(parametro));
-  }
-  
-  fetch(url, { method: "GET", mode: "cors" })
-    .then(function(res) { return res.json(); })
-    .then(function(dados) { callback(dados); })
-    .catch(function(err) { console.error("Erro na comunicação:", err); });
-}
-</script>
+    function fetchData(funcao, parametro, callback) {
+      var url = URL_GOOGLE_SCRIPT + "?executar=" + funcao;
+      if (parametro) {
+        url += "&dados=" + encodeURIComponent(JSON.stringify(parametro));
+      }
+      
+      fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(dados) { callback(dados); })
+        .catch(function(err) { console.error("Erro na comunicação:", err); });
+    }
+  </script>
 </body>
 </html>
