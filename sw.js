@@ -1,25 +1,35 @@
-const CACHE_NAME = 'territorios-v1';
+const CACHE_NAME = 'territorios-v4';
 const ASSETS = [
-  './',
   './index.html',
   './manifest.json'
 ];
 
-// Instala o aplicativo no celular
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       return cache.addAll(ASSETS);
+    }).then(function() {
+      return self.skipWaiting();
     })
   );
 });
 
-// Ativa o aplicativo
 self.addEventListener('activate', function(e) {
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.map(function(key) {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
+  );
 });
 
-// Gerencia a internet (Regra para o Chrome liberar a instalação)
 self.addEventListener('fetch', function(e) {
   e.respondWith(
     fetch(e.request).catch(function() {
