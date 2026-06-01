@@ -39,10 +39,11 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      scroll-behavior: smooth;
     }
     
     .container {
-      padding: 20px 16px;
+      padding: 20px 16px 100px 16px; /* Aumentado o espaçamento do fundo para o botão flutuante não tampar o texto */
       max-width: 500px;
       margin: 0 auto;
     }
@@ -76,7 +77,7 @@
       box-sizing: border-box; 
       background-color: var(--card-bg);
       color: var(--text);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
       -webkit-appearance: none; 
       appearance: none;
     }
@@ -99,15 +100,22 @@
       cursor: not-allowed;
     }
 
+    /* ANIMAÇÃO FADE-IN: Faz os blocos surgirem deslizando suavemente */
     .rua-container { 
       background: var(--card-bg); 
       padding: 18px; 
       border-radius: 16px; 
       margin-top: 16px; 
       border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      animation: fadeInSuave 0.4s ease forwards;
     }
     
+    @keyframes fadeInSuave {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .rua-header {
       display: flex;
       justify-content: space-between;
@@ -126,7 +134,7 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .btn-concluido.ativo {
@@ -135,6 +143,22 @@
       border-color: var(--success);
     }
     
+    /* EFEITO DE COLAPSO: Esconde o conteúdo da rua com suavidade ao concluir */
+    .conteudo-rua-animado {
+      max-height: 200px;
+      opacity: 1;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    }
+
+    .conteudo-rua-animado.recolhido {
+      max-height: 0;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
     .hist-box { 
       font-size: 13px; 
       color: #b06000; 
@@ -155,25 +179,33 @@
       border-radius: 8px;
       text-align: center;
       font-size: 14px;
+      margin-top: 5px;
+      animation: fadeInSuave 0.3s ease forwards;
     }
     
+    /* BOTÃO PRINCIPAL FLUTUANTE: Fica fixo no canto inferior direito estilo WhatsApp */
     button.btn-principal { 
-      width: 100%; 
-      padding: 16px; 
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: auto;
+      min-width: 140px;
+      padding: 16px 24px; 
       font-size: 16px; 
       color: white; 
       background-color: var(--primary); 
       border: none; 
-      border-radius: 12px; 
-      margin-top: 24px; 
+      border-radius: 30px; /* Bem arredondado para parecer um botão flutuante nativo */
+      margin-top: 0; 
       cursor: pointer; 
       font-weight: 600; 
-      box-shadow: 0 4px 6px rgba(26, 115, 232, 0.15);
-      transition: background-color 0.2s;
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
+      transition: background-color 0.25s, transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+      z-index: 999;
     }
 
-    button.btn-principal:hover { background-color: var(--primary-dark); }
-    button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; }
+    button.btn-principal:active { transform: scale(0.96); }
+    button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; transform: none !important; }
     
     #mensagem { text-align: center; font-weight: 500; margin-top: 16px; font-size: 15px; }
 
@@ -200,7 +232,6 @@
 </head>
 <body>
 
-  <!-- Tela de Sincronização Inicial -->
   <div id="loader" class="loader-overlay">
     <div class="spinner"></div>
     <div style="color: var(--text-secondary); font-weight: 500;">Sincronizando dados...</div>
@@ -227,18 +258,18 @@
 
     <div id="area-ruas"></div>
 
-    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>Gravar no Histórico</button>
+    <!-- O botão agora traz um ícone de check e fica flutuando na tela -->
+    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>💾 Gravar</button>
     
     <div id="mensagem"></div>
   </div>
 
   <script>
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    var URL_GOOGLE_SCRIPT = "https://google.com";
     var BD_GLOBAL = null; 
     var deferredPrompt;
 
     window.onload = function() {
-      // Puxa o banco de dados INTEIRO no início
       fetchData("obterBancoCompleto", null, function(banco) {
         BD_GLOBAL = banco;
         
@@ -325,12 +356,13 @@
       var htmlFinal = "";
       ruasFiltradas.forEach(function(item, index) {
         htmlFinal += `
-          <div class="rua-container" id="container_${index}">
+          <div class="rua-container" id="container_${index}" style="animation-delay: ${index * 0.05}s;">
             <div class="rua-header">
               <div class="rua-titulo">${item.nome}</div>
               <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
             </div>
-            <div id="conteudoRua_${index}">
+            <!-- Aplicada classe animada de controle de transição -->
+            <div id="conteudoRua_${index}" class="conteudo-rua-animado">
               <div class="hist-box">Casas feitas: ${item.historico}</div>
               <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
               <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
@@ -344,6 +376,7 @@
       btn.disabled = false;
     }
 
+    // FUNÇÃO ADAPTADA: Cria o recolhimento suave do bloco ao marcar concluído
     function alternarConclusao(index, nomeRua) {
       var botao = document.getElementById("btnConcluir_" + index);
       var conteudo = document.getElementById("conteudoRua_" + index);
@@ -359,14 +392,22 @@
       if (!botao.classList.contains("ativo")) {
         botao.classList.add("ativo");
         botao.innerText = "Desmarcar";
-        conteudo.classList.add("escondido"); 
-        aviso.classList.remove("escondido"); 
+        
+        // Adiciona classe de recolhimento suave com CSS Transitions
+        conteudo.classList.add("recolhido"); 
+        
+        // Exibe o aviso de sucesso após o início da animação
+        setTimeout(function() {
+          aviso.classList.remove("escondido"); 
+        }, 150);
+        
         dadosConclusao.status = "Concluída";
       } else {
         botao.classList.remove("ativo");
         botao.innerText = "Concluir";
-        conteudo.classList.remove("escondido"); 
-        aviso.classList.add("escondido"); 
+        
+        aviso.classList.add("escondido");
+        conteudo.classList.remove("recolhido"); 
         dadosConclusao.status = "Reaberta";
       }
 
@@ -389,7 +430,8 @@
 
       containers.forEach(function(el, index) {
         var conteudo = document.getElementById("conteudoRua_" + index);
-        if (conteudo && !conteudo.classList.contains("escondido")) {
+        // Ajustada validação para verificar a nova classe de animação
+        if (conteudo && !conteudo.classList.contains("recolhido")) {
           var nome = document.getElementById("ruaNome_" + index).value;
           var casas = document.getElementById("ruaCasas_" + index).value.trim();
           if (casas) { ruasDados.push({ nome: nome, casas: casas }); }
@@ -410,7 +452,6 @@
         if (resposta === "Sucesso") {
           msg.innerHTML = "<span style='color:var(--success);'>✓ Gravado com sucesso!</span>";
           
-          // Mantém a velocidade: atualiza o histórico na memória local sem precisar rebaixar da internet
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
             if (ruaNoBD) {
