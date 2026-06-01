@@ -456,7 +456,7 @@
     }
 
 
-    function alternarConclusao(index, nomeRua) {
+       function alternarConclusao(index, nomeRua) {
       var botao = document.getElementById("btnConcluir_" + index);
       var conteudo = document.getElementById("conteudoRua_" + index);
       var aviso = document.getElementById("avisoConcluido_" + index);
@@ -478,7 +478,8 @@
         }, 150);
         
         dadosConclusao.status = "Concluída";
-        exibirToast("check_circle", "Rua marcada como concluída");
+        // Ícone check_circle em SVG
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>', 'Rua marcada como concluída');
       } else {
         botao.classList.remove("ativo");
         botao.innerText = "Concluir";
@@ -496,7 +497,8 @@
       var quadra = document.getElementById("quadra").value;
       
       if (!territorio || !quadra) {
-        exibirToast("error", "Preencha território e quadra!");
+        // Ícone error em SVG
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Preencha território e quadra!');
         return;
       }
       
@@ -513,19 +515,21 @@
       });
       
       if (ruasDados.length === 0) {
-        exibirToast("warning", "Nenhuma casa digitada!");
+        // Ícone warning em SVG
+        exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhuma casa digitada!');
         return;
       }
       
       btn.disabled = true;
-      exibirToast("sync", "Salvando dados, aguarde...");
+      // Ícone sync em SVG
+      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Salvando dados, aguarde...');
       
       var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso") {
-          // Toast flutuante de sucesso
-          exibirToast("cloud_done", "Gravado com sucesso!");
+          // Ícone cloud_done em SVG
+          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Gravado com sucesso!');
           
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
@@ -539,13 +543,14 @@
             carregarRuasDoCacheLocal();
           }, 1500);
         } else {
-          exibirToast("error", resposta);
+          // Ícone error em SVG
+          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
           btn.disabled = false;
         }
       });
     }
 
-       // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante em SVG na tela
+    // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante em SVG na tela
     function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
       toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
@@ -568,9 +573,11 @@
       .then(function(dados) { callback(dados); })
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
-        exibirToast("cloud_off", "Erro na conexão.");
+        // Ícone cloud_off em SVG
+        exibirToast('<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c2.76 0 5 2.24 5 5v1h1.5c1.38 0 2.5 1.12 2.5 2.5 0 .81-.39 1.54-1 2l1.42 1.42c1.01-.91 1.58-2.2 1.58-3.67 0-2.76-2.12-5.04-4.65-5.41zM3.55 3.57L2.28 4.84l2.12 2.12C2.42 8.08 1 10.37 1 13c0 3.87 3.13 7 7 7h10.73l2.43 2.43 1.27-1.27L3.55 3.57zM8 18c-2.76 0-5-2.24-5-5 0-2.05 1.23-3.81 3-4.58l5.83 5.83L11 15v1h1v-1l.73-.73 2.73 2.73H8z"/>', 'Erro na conexão.');
       });
     }
   </script>
+
 </body>
 </html>
