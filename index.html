@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Sistema de Territórios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   
-     <!-- Configuração PWA Limpa -->
+  <!-- Configuração PWA -->
   <link rel="manifest" href="./manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
@@ -18,133 +18,211 @@
   </script>
   
   <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1557b0;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --success: #1e8e3e;
+      --success-bg: #e6f4ea;
+    }
+
     html, body {
       width: 100%;
       margin: 0;
       padding: 0;
-      background-color: #f4f6f9;
-      color: #333;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .container {
-      padding: 15px;
-      max-width: 600px;
+      padding: 20px 16px;
+      max-width: 500px;
       margin: 0 auto;
     }
     
-    h2 { text-align: center; color: #1a73e8; margin-top: 10px; margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 16px; }
+    h2 { 
+      text-align: center; 
+      color: var(--primary); 
+      margin: 10px 0 24px 0; 
+      font-weight: 600;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label { 
+      font-weight: 500; 
+      display: block; 
+      margin-bottom: 8px; 
+      font-size: 15px; 
+      color: var(--text-secondary);
+    }
     
     select, input[type="text"] { 
       width: 100%; 
-      padding: 14px; 
+      padding: 14px 16px; 
       font-size: 16px; 
-      border: 1px solid #ccc; 
-      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
       box-sizing: border-box; 
-      background-color: #fff;
+      background-color: var(--card-bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
       -webkit-appearance: none; 
-      -moz-appearance: none;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%231a73e8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%235f6368' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 12px center;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
     }
     
-    input[type="text"] { background-image: none; }
-    
+    select:disabled {
+      background-color: #f1f3f4;
+      color: #9aa0a6;
+      cursor: not-allowed;
+    }
+
     .rua-container { 
-      background: #fff; 
-      padding: 15px; 
-      border-radius: 8px; 
-      margin-top: 15px; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      background: var(--card-bg); 
+      padding: 18px; 
+      border-radius: 16px; 
+      margin-top: 16px; 
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
     }
     
     .rua-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
     
-    .rua-titulo { font-weight: bold; color: #1a73e8; font-size: 18px; }
+    .rua-titulo { font-weight: 600; color: var(--text); font-size: 17px; }
     
     .btn-concluido {
-      background-color: #e8f0fe;
-      color: #1a73e8;
-      border: 1px solid #1a73e8;
-      padding: 6px 12px;
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
     }
+
     .btn-concluido.ativo {
-      background-color: #34a853;
+      background-color: var(--success);
       color: white;
-      border-color: #34a853;
+      border-color: var(--success);
     }
     
     .hist-box { 
-      font-size: 15px; 
-      color: #202124; 
+      font-size: 13px; 
+      color: #b06000; 
       margin-bottom: 12px; 
-      background: #fff9c4; 
-      padding: 10px; 
-      border-radius: 6px; 
-      border-left: 6px solid #fbc02d; 
-      font-weight: bold; 
+      background: #fff8e1; 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      border-left: 4px solid #ffb300; 
     }
     
     .escondido { display: none !important; }
     
     .rua-concluida-aviso {
-      color: #34a853;
-      font-weight: bold;
-      font-style: italic;
-      padding: 5px 0;
+      color: var(--success);
+      font-weight: 600;
+      background-color: var(--success-bg);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
     }
     
-    button.btn-principal { width: 100%; padding: 15px; font-size: 18px; color: white; background-color: #1a73e8; border: none; border-radius: 8px; margin-top: 25px; cursor: pointer; font-weight: bold; }
-    button:disabled { background-color: #ccc; }
-    #mensagem { text-align: center; font-weight: bold; margin-top: 15px; font-size: 18px; }
-    .loading-text { color: #666; font-style: italic; font-size: 16px; margin-top: 5px; }
+    button.btn-principal { 
+      width: 100%; 
+      padding: 16px; 
+      font-size: 16px; 
+      color: white; 
+      background-color: var(--primary); 
+      border: none; 
+      border-radius: 12px; 
+      margin-top: 24px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      box-shadow: 0 4px 6px rgba(26, 115, 232, 0.15);
+      transition: background-color 0.2s;
+    }
+
+    button.btn-principal:hover { background-color: var(--primary-dark); }
+    button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; }
+    
+    #mensagem { text-align: center; font-weight: 500; margin-top: 16px; font-size: 15px; }
+
+    .loader-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; z-index: 9999;
+      transition: opacity 0.3s;
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     .btn-instalar {
-      display: none;
-      width: 100%;
-      background-color: #34a853;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      cursor: pointer;
-      text-align: center;
+      display: none; width: 100%; background-color: var(--success);
+      color: white; border: none; padding: 14px; font-size: 15px;
+      font-weight: 600; border-radius: 12px; margin-bottom: 20px;
+      cursor: pointer; text-align: center; box-shadow: 0 4px 6px rgba(30, 142, 62, 0.15);
     }
   </style>
 </head>
 <body>
+
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <div style="color: var(--text-secondary); font-weight: 500;">Sincronizando dados...</div>
+  </div>
 
   <div class="container">
     <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo de Territórios</button>
 
     <h2>Sistema de Territórios</h2>
 
-    <label for="territorio">1. Escolha o Território:</label>
-    <select id="territorio" onchange="carregarQuadras()">
-      <option value="">Carregando territórios...</option>
-    </select>
+    <div class="form-group">
+      <label for="territorio">1. Escolha o Território:</label>
+      <select id="territorio" onchange="filtrarQuadras()">
+        <option value="">Carregando...</option>
+      </select>
+    </div>
 
-    <label for="quadra">2. Escolha a Quadra:</label>
-    <select id="quadra" onchange="carregarRuas()" disabled>
-      <option value="">Selecione um território primeiro</option>
-    </select>
+    <div class="form-group">
+      <label for="quadra">2. Escolha a Quadra:</label>
+      <select id="quadra" onchange="carregarRuasDoCache()" disabled>
+        <option value="">Selecione um território primeiro</option>
+      </select>
+    </div>
 
     <div id="area-ruas"></div>
 
@@ -152,33 +230,34 @@
     
     <div id="mensagem"></div>
   </div>
+
   <script>
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
-    
+    var URL_GOOGLE_SCRIPT = "https://google.com";
+    var BD_GLOBAL = null; 
     var deferredPrompt;
 
     window.onload = function() {
-      fetchData("obterTerritorios", null, function(lista) {
+      fetchData("obterBancoCompleto", null, function(banco) {
+        BD_GLOBAL = banco;
+        
+        var loader = document.getElementById("loader");
+        loader.style.opacity = 0;
+        setTimeout(function() { loader.classList.add("escondido"); }, 300);
+
         var combo = document.getElementById("territorio");
         combo.innerHTML = '<option value="">-- Selecione o Território --</option>';
-        lista.forEach(function(t) {
+        banco.territorios.forEach(function(t) {
           combo.innerHTML += '<option value="'+t+'">'+t+'</option>';
         });
       });
     };
-
-       var deferredPrompt;
-
-    // O Android avisa o app quando está pronto para instalar
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
-      console.log('Android liberou a instalação nativa!');
+      document.getElementById('btnInstalarApp').style.display = 'block';
     });
 
-    // Lógica do clique focada 100% no Android
     document.getElementById('btnInstalarApp').addEventListener('click', function() {
-      // Cenário A: O Chrome já validou o PWA e está pronto
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(function(choiceResult) {
@@ -187,15 +266,13 @@
           }
           deferredPrompt = null;
         });
-      } 
-      // Cenário B: O Chrome está teimoso ou em cache. Ajuda o irmão manualmente!
-      else {
-        alert("Para instalar no seu Android:\n\n1. Clique nos 3 pontinhos (no topo direito do Chrome).\n2. Selecione a opção 'Instalar aplicativo' ou 'Adicionar à tela inicial'.\n3. Confirme em 'Instalar'!");
+      } else {
+        alert("Para instalar:\n1. Clique nos 3 pontinhos do Chrome.\n2. Escolha 'Instalar aplicativo' ou 'Adicionar à tela inicial'.");
       }
     });
 
-
-    function carregarQuadras() {
+    // FILTRAGEM INSTANTÂNEA: Quadras direto da memória do celular
+    function filtrarQuadras() {
       var territorio = document.getElementById("territorio").value;
       var comboQuadra = document.getElementById("quadra");
       
@@ -209,19 +286,19 @@
         return;
       }
       
-      comboQuadra.innerHTML = '<option value="">Carregando quadras...</option>';
-      comboQuadra.disabled = true;
-      
-      fetchData("obterQuadras", territorio, function(lista) {
-        comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
-        lista.forEach(function(q) {
-          comboQuadra.innerHTML += '<option value="'+q+'">'+q+'</option>';
-        });
-        comboQuadra.disabled = false;
+      var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
+        return q.territorio === territorio;
       });
+
+      comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
+      quadrasFiltradas.forEach(function(q) {
+        comboQuadra.innerHTML += '<option value="'+q.nome+'">'+q.nome+'</option>';
+      });
+      comboQuadra.disabled = false;
     }
 
-        function carregarRuas() {
+    // FILTRAGEM INSTANTÂNEA: Ruas e Histórico direto da memória do celular
+    function carregarRuasDoCache() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
       var btn = document.getElementById("btnSalvar");
@@ -233,36 +310,36 @@
         return;
       }
       
-      areaRuas.innerHTML = '<p class="loading-text">Buscando ruas e histórico...</p>';
-      
-      fetchData("obterRuas", quadra, function(lista) {
-        if (!lista || lista.length === 0) {
-          areaRuas.innerHTML = "<p style='color:red;'>Nenhuma rua encontrada.</p>";
-          btn.disabled = true;
-          return;
-        }
-        
-        var htmlFinal = "";
-        lista.forEach(function(item, index) {
-          htmlFinal += `
-            <div class="rua-container" id="container_${index}">
-              <div class="rua-header">
-                <div class="rua-titulo">${item.nome}</div>
-                <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
-              </div>
-              <div id="conteudoRua_${index}">
-                <div class="hist-box">Casas feitas: ${item.historico}</div>
-                <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
-                <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
-              </div>
-              <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
-            </div>
-          `;
-        });
-        
-        areaRuas.innerHTML = htmlFinal;
-        btn.disabled = false;
+      var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
+        return r.quadra === quadra;
       });
+
+      if (ruasFiltradas.length === 0) {
+        areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
+        btn.disabled = true;
+        return;
+      }
+      
+      var htmlFinal = "";
+      ruasFiltradas.forEach(function(item, index) {
+        htmlFinal += `
+          <div class="rua-container" id="container_${index}">
+            <div class="rua-header">
+              <div class="rua-titulo">${item.nome}</div>
+              <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+            </div>
+            <div id="conteudoRua_${index}">
+              <div class="hist-box">Casas feitas: ${item.historico}</div>
+              <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
+              <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
+            </div>
+            <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
+          </div>
+        `;
+      });
+      
+      areaRuas.innerHTML = htmlFinal;
+      btn.disabled = false;
     }
 
     function alternarConclusao(index, nomeRua) {
@@ -313,34 +390,36 @@
         if (conteudo && !conteudo.classList.contains("escondido")) {
           var nome = document.getElementById("ruaNome_" + index).value;
           var casas = document.getElementById("ruaCasas_" + index).value.trim();
-          if (casas) {
-            ruasDados.push({ nome: nome, casas: casas });
-          }
+          if (casas) { ruasDados.push({ nome: nome, casas: casas }); }
         }
       });
       
       if (ruasDados.length === 0) {
-        msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada para gravar!</span>";
+        msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada!</span>";
         return;
       }
       
       btn.disabled = true;
-      msg.innerHTML = "<span style='color:#1a73e8;'>Salvando dados, aguarde...</span>";
+      msg.innerHTML = "<span style='color:var(--primary);'>Salvando dados, aguarde...</span>";
       
-      var formCompleto = {
-        territorio: territorio,
-        quadra: quadra,
-        ruas: ruasDados
-      };
+      var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso") {
-          msg.innerHTML = "<span style='color:#34a853;'>✓ Gravado com sucesso!</span>";
-          containers.forEach(function(el, index) {
-            var input = document.getElementById("ruaCasas_" + index);
-            if (input) input.value = "";
+          msg.innerHTML = "<span style='color:var(--success);'>✓ Gravado com sucesso!</span>";
+          
+          // Atualiza a memória local para o novo histórico aparecer na tela sem recarregar da internet
+          ruasDados.forEach(function(rd) {
+            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+            if (ruaNoBD) {
+              if (ruaNoBD.historico === "Nenhum registro recente") { ruaNoBD.historico = rd.casas; }
+              else { ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; }
+            }
           });
-          setTimeout(carregarRuas, 2000);
+          
+          setTimeout(function() {
+            carregarRuasDoCache();
+          }, 1500);
         } else {
           msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
           btn.disabled = false;
@@ -348,30 +427,16 @@
       });
     }
 
-    // FUNÇÃO REESCRITA PARA USAR POST SEM PARÂMETROS NA URL
     function fetchData(funcao, parametro, callback) {
-      var dadosEnvio = {
-        executar: funcao,
-        dados: parametro
-      };
-      
       fetch(URL_GOOGLE_SCRIPT, {
         method: "POST",
         mode: "cors",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(dadosEnvio)
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ executar: funcao, dados: parametro })
       })
-      .then(function(res) { 
-        if (!res.ok) throw new Error('Erro na rede do Google');
-        return res.json(); 
-      })
-      .then(function(dados) { 
-        callback(dados); 
-      })
-      .catch(function(err) { 
-        console.error("Erro na comunicação:", err); 
+      .then(function(res) { if (!res.ok) throw new Error(); return res.json(); })
+      .then(function(dados) { callback(dados); })
+      .catch(function() { 
         document.getElementById("mensagem").innerHTML = "<span style='color:red;'>Erro na conexão.</span>";
       });
     }
