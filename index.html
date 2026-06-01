@@ -500,64 +500,71 @@
       fetchData("registrarConclusaoRua", dadosConclusao, function() {});
     }
 
-    function enviarDados() {
-      var btn = document.getElementById("btnSalvar");
-      var territorio = document.getElementById("territorio").value;
-      var quadra = document.getElementById("quadra").value;
-      
-      if (!territorio || !quadra) {
-        // Ícone error em SVG
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Preencha território e quadra!');
-        return;
-      }
-      
-      var containers = document.querySelectorAll(".rua-container");
-      var ruasDados = [];
+function enviarDados() {
+  var btn = document.getElementById("btnSalvar");
+  var territorio = document.getElementById("territorio").value;
+  var quadra = document.getElementById("quadra").value;
+  
+  if (!territorio || !quadra) {
+    exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Preencha território e quadra!');
+    return;
+  }
+  
+  var containers = document.querySelectorAll(".rua-container");
+  var ruasDados = [];
 
-      containers.forEach(function(el, index) {
-        var conteudo = document.getElementById("conteudoRua_" + index);
-        if (conteudo && !conteudo.classList.contains("recolhido")) {
-          var nome = document.getElementById("ruaNome_" + index).value;
-          var casas = document.getElementById("ruaCasas_" + index).value.trim();
-          if (casas) { ruasDados.push({ nome: nome, casas: casas }); }
-        }
-      });
+  containers.forEach(function(el, index) {
+    var conteudo = document.getElementById("conteudoRua_" + index);
+    if (conteudo && !conteudo.classList.contains("recolhido")) {
       
-      if (ruasDados.length === 0) {
-        // Ícone warning em SVG
-        exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhuma casa digitada!');
-        return;
+      // CORREÇÃO AQUI: Tenta pegar o .value (se for input), se não conseguir, pega o .innerText (se for texto comum)
+      var elNome = document.getElementById("ruaNome_" + index);
+      var nome = "";
+      if (elNome) {
+        nome = elNome.value !== undefined ? elNome.value : elNome.innerText;
       }
       
-      btn.disabled = true;
-      // Ícone sync em SVG
-      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Salvando dados, aguarde...');
+      var elCasas = document.getElementById("ruaCasas_" + index);
+      var casas = elCasas ? elCasas.value.trim() : "";
       
-      var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
+      if (nome && casas) { 
+        ruasDados.push({ nome: nome.trim(), casas: casas }); 
+      }
+    }
+  });
+  
+  if (ruasDados.length === 0) {
+    exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhuma casa digitada!');
+    return;
+  }
+  
+  btn.disabled = true;
+  exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Salvando dados, aguarde...');
+  
+  var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
+  
+  fetchData("salvarDados", formCompleto, function(resposta) {
+    if (resposta === "Sucesso") {
+      exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Gravado com sucesso!');
       
-      fetchData("salvarDados", formCompleto, function(resposta) {
-        if (resposta === "Sucesso") {
-          // Ícone cloud_done em SVG
-          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Gravado com sucesso!');
-          
-          ruasDados.forEach(function(rd) {
-            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
-            if (ruaNoBD) {
-              if (ruaNoBD.historico === "Nenhum registro recente") { ruaNoBD.historico = rd.casas; }
-              else { ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; }
-            }
-          });
-          
-          setTimeout(function() {
-            carregarRuasDoCacheLocal();
-          }, 1500);
-        } else {
-          // Ícone error em SVG
-          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
-          btn.disabled = false;
+      ruasDados.forEach(function(rd) {
+        var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+        if (ruaNoBD) {
+          if (ruaNoBD.historico === "Nenhum registro recente") { ruaNoBD.historico = rd.casas; }
+          else { ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; }
         }
       });
+      
+      setTimeout(function() {
+        carregarRuasDoCacheLocal();
+      }, 1500);
+    } else {
+      exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
+      btn.disabled = false;
     }
+  });
+}
+
 
     // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante em SVG na tela
     function exibirToast(svgPath, texto) {
