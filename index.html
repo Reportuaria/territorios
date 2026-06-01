@@ -350,7 +350,12 @@
     var BD_GLOBAL = null; 
     var deferredPrompt;
 
-    window.onload = function() {
+        window.onload = function() {
+      // 🚀 SE JÁ ESTIVER INSTALADO: Garante que o botão de instalação suma de vez
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        document.getElementById('btnInstalarApp').style.display = 'none';
+      }
+
       fetchData("obterBancoCompleto", null, function(banco) {
         BD_GLOBAL = banco;
         
@@ -365,6 +370,7 @@
         });
       });
     };
+
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
