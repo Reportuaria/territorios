@@ -221,7 +221,7 @@
       });
     }
 
-    function carregarRuas() {
+        function carregarRuas() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
       var btn = document.getElementById("btnSalvar");
@@ -236,7 +236,7 @@
       areaRuas.innerHTML = '<p class="loading-text">Buscando ruas e histórico...</p>';
       
       fetchData("obterRuas", quadra, function(lista) {
-        if (lista.length === 0) {
+        if (!lista || lista.length === 0) {
           areaRuas.innerHTML = "<p style='color:red;'>Nenhuma rua encontrada.</p>";
           btn.disabled = true;
           return;
@@ -348,16 +348,32 @@
       });
     }
 
+    // FUNÇÃO REESCRITA PARA USAR POST SEM PARÂMETROS NA URL
     function fetchData(funcao, parametro, callback) {
-      var url = URL_GOOGLE_SCRIPT + "?executar=" + funcao;
-      if (parametro) {
-        url += "&dados=" + encodeURIComponent(JSON.stringify(parametro));
-      }
+      var dadosEnvio = {
+        executar: funcao,
+        dados: parametro
+      };
       
-      fetch(url)
-        .then(function(res) { return res.json(); })
-        .then(function(dados) { callback(dados); })
-        .catch(function(err) { console.error("Erro na comunicação:", err); });
+      fetch(URL_GOOGLE_SCRIPT, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(dadosEnvio)
+      })
+      .then(function(res) { 
+        if (!res.ok) throw new Error('Erro na rede do Google');
+        return res.json(); 
+      })
+      .then(function(dados) { 
+        callback(dados); 
+      })
+      .catch(function(err) { 
+        console.error("Erro na comunicação:", err); 
+        document.getElementById("mensagem").innerHTML = "<span style='color:red;'>Erro na conexão.</span>";
+      });
     }
   </script>
 </body>
