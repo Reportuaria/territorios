@@ -176,19 +176,7 @@
     button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; }
     
     #mensagem { text-align: center; font-weight: 500; margin-top: 16px; font-size: 15px; }
-
-    .loader-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: white; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; z-index: 9999;
-      transition: opacity 0.3s;
-    }
-    .spinner {
-      width: 40px; height: 40px; border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin-bottom: 16px;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-text { color: var(--text-secondary); font-style: italic; font-size: 15px; margin-top: 8px; text-align: center; }
 
     .btn-instalar {
       display: none; width: 100%; background-color: var(--success);
@@ -200,11 +188,6 @@
 </head>
 <body>
 
-  <div id="loader" class="loader-overlay">
-    <div class="spinner"></div>
-    <div style="color: var(--text-secondary); font-weight: 500;">Sincronizando dados...</div>
-  </div>
-
   <div class="container">
     <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo de Territórios</button>
 
@@ -212,14 +195,14 @@
 
     <div class="form-group">
       <label for="territorio">1. Escolha o Território:</label>
-      <select id="territorio" onchange="filtrarQuadras()">
-        <option value="">Carregando...</option>
+      <select id="territorio" onchange="carregarQuadras()">
+        <option value="">Carregando territórios...</option>
       </select>
     </div>
 
     <div class="form-group">
       <label for="quadra">2. Escolha a Quadra:</label>
-      <select id="quadra" onchange="carregarRuasDoCache()" disabled>
+      <select id="quadra" onchange="carregarRuas()" disabled>
         <option value="">Selecione um território primeiro</option>
       </select>
     </div>
@@ -233,20 +216,13 @@
 
   <script>
     var URL_GOOGLE_SCRIPT = "https://google.com";
-    var BD_GLOBAL = null; 
     var deferredPrompt;
 
     window.onload = function() {
-      fetchData("obterBancoCompleto", null, function(banco) {
-        BD_GLOBAL = banco;
-        
-        var loader = document.getElementById("loader");
-        loader.style.opacity = 0;
-        setTimeout(function() { loader.classList.add("escondido"); }, 300);
-
+      fetchData("obterTerritorios", null, function(lista) {
         var combo = document.getElementById("territorio");
         combo.innerHTML = '<option value="">-- Selecione o Território --</option>';
-        banco.territorios.forEach(function(t) {
+        lista.forEach(function(t) {
           combo.innerHTML += '<option value="'+t+'">'+t+'</option>';
         });
       });
@@ -271,8 +247,7 @@
       }
     });
 
-    // FILTRAGEM INSTANTÂNEA: Quadras direto da memória do celular
-    function filtrarQuadras() {
+    function carregarQuadras() {
       var territorio = document.getElementById("territorio").value;
       var comboQuadra = document.getElementById("quadra");
       
@@ -286,19 +261,19 @@
         return;
       }
       
-      var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
-        return q.territorio === territorio;
+      comboQuadra.innerHTML = '<option value="">Carregando quadras...</option>';
+      comboQuadra.disabled = true;
+      
+      fetchData("obterQuadras", territorio, function(lista) {
+        comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
+        lista.forEach(function(q) {
+          comboQuadra.innerHTML += '<option value="'+q+'">'+q+'</option>';
+        });
+        comboQuadra.disabled = false;
       });
-
-      comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
-      quadrasFiltradas.forEach(function(q) {
-        comboQuadra.innerHTML += '<option value="'+q.nome+'">'+q.nome+'</option>';
-      });
-      comboQuadra.disabled = false;
     }
 
-    // FILTRAGEM INSTANTÂNEA: Ruas e Histórico direto da memória do celular
-    function carregarRuasDoCache() {
+    function carregarRuas() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
       var btn = document.getElementById("btnSalvar");
@@ -310,36 +285,36 @@
         return;
       }
       
-      var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
-        return r.quadra === quadra;
-      });
-
-      if (ruasFiltradas.length === 0) {
-        areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
-        btn.disabled = true;
-        return;
-      }
+      areaRuas.innerHTML = '<p class="loading-text">Buscando ruas e histórico...</p>';
       
-      var htmlFinal = "";
-      ruasFiltradas.forEach(function(item, index) {
-        htmlFinal += `
-          <div class="rua-container" id="container_${index}">
-            <div class="rua-header">
-              <div class="rua-titulo">${item.nome}</div>
-              <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+      fetchData("obterRuas", quadra, function(lista) {
+        if (!lista || lista.length === 0) {
+          areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
+          btn.disabled = true;
+          return;
+        }
+        
+        var htmlFinal = "";
+        lista.forEach(function(item, index) {
+          htmlFinal += `
+            <div class="rua-container" id="container_${index}">
+              <div class="rua-header">
+                <div class="rua-titulo">${item.nome}</div>
+                <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+              </div>
+              <div id="conteudoRua_${index}">
+                <div class="hist-box">Casas feitas: ${item.historico}</div>
+                <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
+                <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
+              </div>
+              <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
             </div>
-            <div id="conteudoRua_${index}">
-              <div class="hist-box">Casas feitas: ${item.historico}</div>
-              <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
-              <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
-            </div>
-            <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
-          </div>
-        `;
+          `;
+        });
+        
+        areaRuas.innerHTML = htmlFinal;
+        btn.disabled = false;
       });
-      
-      areaRuas.innerHTML = htmlFinal;
-      btn.disabled = false;
     }
 
     function alternarConclusao(index, nomeRua) {
@@ -407,19 +382,11 @@
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso") {
           msg.innerHTML = "<span style='color:var(--success);'>✓ Gravado com sucesso!</span>";
-          
-          // Atualiza a memória local para o novo histórico aparecer na tela sem recarregar da internet
-          ruasDados.forEach(function(rd) {
-            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
-            if (ruaNoBD) {
-              if (ruaNoBD.historico === "Nenhum registro recente") { ruaNoBD.historico = rd.casas; }
-              else { ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; }
-            }
+          containers.forEach(function(el, index) {
+            var input = document.getElementById("ruaCasas_" + index);
+            if (input) input.value = "";
           });
-          
-          setTimeout(function() {
-            carregarRuasDoCache();
-          }, 1500);
+          setTimeout(carregarRuas, 2000);
         } else {
           msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
           btn.disabled = false;
@@ -436,7 +403,8 @@
       })
       .then(function(res) { if (!res.ok) throw new Error(); return res.json(); })
       .then(function(dados) { callback(dados); })
-      .catch(function() { 
+      .catch(function(err) { 
+        console.error("Erro na comunicação:", err);
         document.getElementById("mensagem").innerHTML = "<span style='color:red;'>Erro na conexão.</span>";
       });
     }
