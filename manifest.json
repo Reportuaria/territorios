@@ -3,13 +3,19 @@
   "name": "Sistema de Gestão de Territórios",
   "icons": [
     {
-      "src": "https://flaticon.com",
+      "src": "https://imgbox.com",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "https://imgbox.com",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "https://flaticon.com",
+      "src": "https://imgbox.com",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
