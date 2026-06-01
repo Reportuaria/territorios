@@ -545,10 +545,10 @@
       });
     }
 
-    // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante na tela
-    function exibirToast(icone, texto) {
+       // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante em SVG na tela
+    function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
-      toast.innerHTML = `<span class="material-icons">${icone}</span> <span>${texto}</span>`;
+      toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
       toast.classList.add("visivel");
       
       // Remove o aviso automaticamente após 3 segundos
