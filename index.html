@@ -248,6 +248,9 @@
       }
     });
 
+    // VARIÁVEL LOCAL PARA GUARDAR AS RUAS NA MEMÓRIA DO APP
+    var RUAS_CACHE = [];
+
     function carregarQuadras() {
       var territorio = document.getElementById("territorio").value;
       var comboQuadra = document.getElementById("quadra");
@@ -262,18 +265,24 @@
         return;
       }
       
-      comboQuadra.innerHTML = '<option value="">Carregando quadras...</option>';
+      comboQuadra.innerHTML = '<option value="">Carregando quadras e ruas...</option>';
       comboQuadra.disabled = true;
       
-      fetchData("obterQuadras", territorio, function(lista) {
+      // BUSCA AS QUADRAS E AS RUAS JUNTAS DE UMA VEZ SÓ
+      fetchData("obterQuadrasERuas", territorio, function(resposta) {
+        // Preenche o combo de quadras
         comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
-        lista.forEach(function(q) {
+        resposta.quadras.forEach(function(q) {
           comboQuadra.innerHTML += '<option value="'+q+'">'+q+'</option>';
         });
         comboQuadra.disabled = false;
+
+        // Guarda todas as ruas desse território na memória do celular/PC
+        RUAS_CACHE = resposta.ruas;
       });
     }
 
+    // AGORA ESSA FUNÇÃO FICA INSTANTÂNEA (SEM IR PARA A INTERNET)
     function carregarRuas() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
@@ -286,36 +295,37 @@
         return;
       }
       
-      areaRuas.innerHTML = '<p class="loading-text">Buscando ruas e histórico...</p>';
-      
-      fetchData("obterRuas", quadra, function(lista) {
-        if (!lista || lista.length === 0) {
-          areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
-          btn.disabled = true;
-          return;
-        }
-        
-        var htmlFinal = "";
-        lista.forEach(function(item, index) {
-          htmlFinal += `
-            <div class="rua-container" id="container_${index}">
-              <div class="rua-header">
-                <div class="rua-titulo">${item.nome}</div>
-                <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
-              </div>
-              <div id="conteudoRua_${index}">
-                <div class="hist-box">Casas feitas: ${item.historico}</div>
-                <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
-                <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
-              </div>
-              <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
-            </div>
-          `;
-        });
-        
-        areaRuas.innerHTML = htmlFinal;
-        btn.disabled = false;
+      // Filtra as ruas da memória local que pertencem à quadra selecionada
+      var lista = RUAS_CACHE.filter(function(r) {
+        return r.quadra === quadra;
       });
+
+      if (!lista || lista.length === 0) {
+        areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
+        btn.disabled = true;
+        return;
+      }
+      
+      var htmlFinal = "";
+      lista.forEach(function(item, index) {
+        htmlFinal += `
+          <div class="rua-container" id="container_${index}">
+            <div class="rua-header">
+              <div class="rua-titulo">${item.nome}</div>
+              <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+            </div>
+            <div id="conteudoRua_${index}">
+              <div class="hist-box">Casas feitas: ${item.historico}</div>
+              <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
+              <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
+            </div>
+            <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
+          </div>
+        `;
+      });
+      
+      areaRuas.innerHTML = htmlFinal;
+      btn.disabled = false;
     }
 
     function alternarConclusao(index, nomeRua) {
@@ -346,6 +356,7 @@
 
       fetchData("registrarConclusaoRua", dadosConclusao, function() {});
     }
+
 
     function enviarDados() {
       var btn = document.getElementById("btnSalvar");
