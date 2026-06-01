@@ -5,6 +5,9 @@
   <title>Sistema de Territórios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   
+  <!-- Biblioteca Oficial de Ícones do Google (Material Icons) -->
+  <link href="https://googleapis.com" rel="stylesheet">
+
   <!-- Configuração PWA -->
   <link rel="manifest" href="./manifest.json">
   <script>
@@ -43,7 +46,7 @@
     }
     
     .container {
-      padding: 20px 16px 100px 16px; /* Aumentado o espaçamento do fundo para o botão flutuante não tampar o texto */
+      padding: 20px 16px 100px 16px; 
       max-width: 500px;
       margin: 0 auto;
     }
@@ -60,12 +63,20 @@
       margin-bottom: 20px;
     }
 
+    /* Alinhamento dos novos rótulos com ícones incorporados */
     label { 
       font-weight: 500; 
-      display: block; 
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 8px; 
       font-size: 15px; 
       color: var(--text-secondary);
+    }
+
+    label .material-icons {
+      font-size: 18px;
+      color: var(--primary);
     }
     
     select, input[type="text"] { 
@@ -100,7 +111,6 @@
       cursor: not-allowed;
     }
 
-    /* ANIMAÇÃO FADE-IN: Faz os blocos surgirem deslizando suavemente */
     .rua-container { 
       background: var(--card-bg); 
       padding: 18px; 
@@ -123,7 +133,19 @@
       margin-bottom: 14px;
     }
     
-    .rua-titulo { font-weight: 600; color: var(--text); font-size: 17px; }
+    .rua-titulo { 
+      font-weight: 600; 
+      color: var(--text); 
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rua-titulo .material-icons {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
     
     .btn-concluido {
       background-color: transparent;
@@ -143,7 +165,6 @@
       border-color: var(--success);
     }
     
-    /* EFEITO DE COLAPSO: Esconde o conteúdo da rua com suavidade ao concluir */
     .conteudo-rua-animado {
       max-height: 200px;
       opacity: 1;
@@ -183,7 +204,6 @@
       animation: fadeInSuave 0.3s ease forwards;
     }
     
-    /* BOTÃO PRINCIPAL FLUTUANTE: Fica fixo no canto inferior direito estilo WhatsApp */
     button.btn-principal { 
       position: fixed;
       bottom: 24px;
@@ -195,19 +215,49 @@
       color: white; 
       background-color: var(--primary); 
       border: none; 
-      border-radius: 30px; /* Bem arredondado para parecer um botão flutuante nativo */
-      margin-top: 0; 
+      border-radius: 30px; 
       cursor: pointer; 
       font-weight: 600; 
       box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
-      transition: background-color 0.25s, transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+      transition: background-color 0.25s, transform 0.25s, box-shadow 0.25s;
       z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     button.btn-principal:active { transform: scale(0.96); }
     button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; transform: none !important; }
     
-    #mensagem { text-align: center; font-weight: 500; margin-top: 16px; font-size: 15px; }
+    /* 🚨 NOTIFICAÇÃO TOAST FLUTUANTE ESTILO ANDROID/INSTAGRAM */
+    .toast-aviso {
+      position: fixed;
+      bottom: 100px; /* Fica acima do botão flutuante */
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background-color: #323232;
+      color: #ffffff;
+      padding: 14px 24px;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .toast-aviso.visivel {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
 
     .loader-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -242,15 +292,16 @@
 
     <h2>Sistema de Territórios</h2>
 
+    <!-- Incorporado os novos ícones nas labels das caixas -->
     <div class="form-group">
-      <label for="territorio">1. Escolha o Território:</label>
+      <label for="territorio"><span class="material-icons">public</span> 1. Escolha o Território:</label>
       <select id="territorio" onchange="filtrarQuadrasLocalmente()">
         <option value="">Carregando...</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="quadra">2. Escolha a Quadra:</label>
+      <label for="quadra"><span class="material-icons">map</span> 2. Escolha a Quadra:</label>
       <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
         <option value="">Selecione um território primeiro</option>
       </select>
@@ -258,13 +309,16 @@
 
     <div id="area-ruas"></div>
 
-    <!-- O botão agora traz um ícone de check e fica flutuando na tela -->
-    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>💾 Gravar</button>
+    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>
+      <span class="material-icons">save</span> Gravar
+    </button>
     
-    <div id="mensagem"></div>
+    <!-- Nova div estrutural do Toast Flutuante -->
+    <div id="toast" class="toast-aviso"></div>
   </div>
 
   <script>
+    // SEU LINK DEFINIDO DIRETAMENTE AQUI
     var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
     var BD_GLOBAL = null; 
     var deferredPrompt;
@@ -311,7 +365,6 @@
       
       document.getElementById("area-ruas").innerHTML = "";
       document.getElementById("btnSalvar").disabled = true;
-      document.getElementById("mensagem").innerHTML = "";
       
       if (!territorio) {
         comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
@@ -330,12 +383,11 @@
       comboQuadra.disabled = false;
     }
 
-    // ⚡ INSTANTÂNEO: Filtra as ruas e históricos direto da memória local
+    // ⚡ INSTANTÂNEO: Filtra as ruas e adiciona ícone de rua nativo
     function carregarRuasDoCacheLocal() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
       var btn = document.getElementById("btnSalvar");
-      document.getElementById("mensagem").innerHTML = "";
       
       if (!quadra) {
         areaRuas.innerHTML = "";
@@ -358,10 +410,12 @@
         htmlFinal += `
           <div class="rua-container" id="container_${index}" style="animation-delay: ${index * 0.05}s;">
             <div class="rua-header">
-              <div class="rua-titulo">${item.nome}</div>
+              <!-- Adicionado o ícone de estrada ao lado do nome da rua -->
+              <div class="rua-titulo">
+                <span class="material-icons">add_location_alt</span> ${item.nome}
+              </div>
               <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
             </div>
-            <!-- Aplicada classe animada de controle de transição -->
             <div id="conteudoRua_${index}" class="conteudo-rua-animado">
               <div class="hist-box">Casas feitas: ${item.historico}</div>
               <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
@@ -376,7 +430,6 @@
       btn.disabled = false;
     }
 
-    // FUNÇÃO ADAPTADA: Cria o recolhimento suave do bloco ao marcar concluído
     function alternarConclusao(index, nomeRua) {
       var botao = document.getElementById("btnConcluir_" + index);
       var conteudo = document.getElementById("conteudoRua_" + index);
@@ -392,20 +445,17 @@
       if (!botao.classList.contains("ativo")) {
         botao.classList.add("ativo");
         botao.innerText = "Desmarcar";
-        
-        // Adiciona classe de recolhimento suave com CSS Transitions
         conteudo.classList.add("recolhido"); 
         
-        // Exibe o aviso de sucesso após o início da animação
         setTimeout(function() {
           aviso.classList.remove("escondido"); 
         }, 150);
         
         dadosConclusao.status = "Concluída";
+        exibirToast("check_circle", "Rua marcada como concluída");
       } else {
         botao.classList.remove("ativo");
         botao.innerText = "Concluir";
-        
         aviso.classList.add("escondido");
         conteudo.classList.remove("recolhido"); 
         dadosConclusao.status = "Reaberta";
@@ -416,12 +466,11 @@
 
     function enviarDados() {
       var btn = document.getElementById("btnSalvar");
-      var msg = document.getElementById("mensagem");
       var territorio = document.getElementById("territorio").value;
       var quadra = document.getElementById("quadra").value;
       
       if (!territorio || !quadra) {
-        msg.innerHTML = "<span style='color:red;'>Preencha o território e a quadra!</span>";
+        exibirToast("error", "Preencha território e quadra!");
         return;
       }
       
@@ -430,7 +479,6 @@
 
       containers.forEach(function(el, index) {
         var conteudo = document.getElementById("conteudoRua_" + index);
-        // Ajustada validação para verificar a nova classe de animação
         if (conteudo && !conteudo.classList.contains("recolhido")) {
           var nome = document.getElementById("ruaNome_" + index).value;
           var casas = document.getElementById("ruaCasas_" + index).value.trim();
@@ -439,18 +487,19 @@
       });
       
       if (ruasDados.length === 0) {
-        msg.innerHTML = "<span style='color:orange;'>Nenhuma casa digitada!</span>";
+        exibirToast("warning", "Nenhuma casa digitada!");
         return;
       }
       
       btn.disabled = true;
-      msg.innerHTML = "<span style='color:var(--primary);'>Salvando dados, aguarde...</span>";
+      exibirToast("sync", "Salvando dados, aguarde...");
       
       var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso") {
-          msg.innerHTML = "<span style='color:var(--success);'>✓ Gravado com sucesso!</span>";
+          // Toast flutuante de sucesso
+          exibirToast("cloud_done", "Gravado com sucesso!");
           
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
@@ -464,10 +513,22 @@
             carregarRuasDoCacheLocal();
           }, 1500);
         } else {
-          msg.innerHTML = "<span style='color:red;'>" + resposta + "</span>";
+          exibirToast("error", resposta);
           btn.disabled = false;
         }
       });
+    }
+
+    // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante na tela
+    function exibirToast(icone, texto) {
+      var toast = document.getElementById("toast");
+      toast.innerHTML = `<span class="material-icons">${icone}</span> <span>${texto}</span>`;
+      toast.classList.add("visivel");
+      
+      // Remove o aviso automaticamente após 3 segundos
+      setTimeout(function() {
+        toast.classList.remove("visivel");
+      }, 3000);
     }
 
     function fetchData(funcao, parametro, callback) {
@@ -481,7 +542,7 @@
       .then(function(dados) { callback(dados); })
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
-        document.getElementById("mensagem").innerHTML = "<span style='color:red;'>Erro na conexão.</span>";
+        exibirToast("cloud_off", "Erro na conexão.");
       });
     }
   </script>
