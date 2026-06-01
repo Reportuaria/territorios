@@ -1,29 +1,28 @@
 {
+  "name": "Sistema de Territórios",
   "short_name": "Territórios",
-  "name": "Sistema de Gestão de Territórios",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#1a73e8",
   "icons": [
     {
-      "src": "./icone-192.png",
-      "type": "image/png",
+      "src": "icone-192.png",
       "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icone-512.png",
-      "type": "image/png",
+      "src": "icone-512.png",
       "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icone-512.png",
-      "type": "image/png",
+      "src": "icone-mascaravel.png",
       "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#f4f6f9",
-  "theme_color": "#1a73e8",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
