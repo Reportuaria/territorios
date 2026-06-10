@@ -1,4 +1,4 @@
-const CACHE_NAME = 'territorios-v7'; // 
+const CACHE_NAME = 'territorios-v1'; // 
 const ASSETS = [
   './',
   './index.html',
