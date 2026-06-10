@@ -590,8 +590,11 @@
               <button type="button" class="btn-cartas ${classBotaoAtivo}" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome}')">${txtBotaoCartas}</button>
             </div>
             
-            <div class="hist-box">Casas já faladas: ${item.historico}</div>
-            
+            <div class="hist-box">
+  <strong>Casas já faladas:</strong> <br>
+  ${String(item.historico).split(/[\s,\|]+/).filter(Boolean).map(num => `<span class="numero-antigo">${num}</span>`).join('') || 'Nenhum registro recente'}
+</div>
+           
             <div id="avisoCartasContainer_${index}" ${avisoEscondido} class="aviso-cartas-texto">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Cartas deixadas nesta rua!
             </div>
