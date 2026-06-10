@@ -559,7 +559,7 @@
         `;
       });
 
-      areaRuas.innerHTML = htmlFinal;
+            areaRuas.innerHTML = htmlFinal;
 
       ruasFiltradas.forEach(function(item, index) {
         atualizarVisualCasasTemporarias(index, item.nome);
@@ -567,6 +567,7 @@
 
       btn.disabled = true; 
     }
+
     function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
       var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { return lista.length > 0; });
@@ -645,9 +646,6 @@
       verificarSeTemDadosParaEnviar(); 
     }
 
-    /* ==========================================================================
-       10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS (CORRIGIDO)
-       ========================================================================== */
     function abrirModalConfirmacao() {
       var territorio = document.getElementById("territorio").value;
       var quadra = document.getElementById("quadra").value;
@@ -708,17 +706,21 @@
       var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
       fetchData("salvarDados", formCompleto, function(resposta) {
-        // CORREÇÃO DEFINITIVA: Valida texto de sucesso limpo retornado pela nova API
         if (resposta === "Sucesso" || resposta === "OK") {
           exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', '✓ Enviado com sucesso!');
           
+          // Data atual formatada para atualizar o visual local instantaneamente
+          var d = new Date();
+          var dataFormatoLocal = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
             if (ruaNoBD) {
-              if (ruaNoBD.historico === "Nenhum registro recente") { 
-                ruaNoBD.historico = rd.casas; 
+              var textoParaAdicionar = dataFormatoLocal + ": " + rd.casas;
+              if (!ruaNoBD.historico || ruaNoBD.historico === "Nenhum registro recente") { 
+                ruaNoBD.historico = textoParaAdicionar; 
               } else { 
-                ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; 
+                ruaNoBD.historico = textoParaAdicionar + " | " + ruaNoBD.historico; 
               }
             }
           });
@@ -727,6 +729,7 @@
           CARTAS_POR_RUA = {};
           
           setTimeout(function() {
+            // Força a atualização visual imediata das "Casas já faladas" na tela
             carregarRuasDoCacheLocal();
           }, 1500);
         } else {
@@ -736,9 +739,6 @@
       });
     }
 
-    /* ==========================================================================
-       11. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH UNIFICADOS COM CORS)
-       ========================================================================== */
     function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
       if (!toast) return;
@@ -751,7 +751,6 @@
     }
 
     function fetchData(funcao, parametro, callback) {
-      // Unificado para usar CORS puro e limpo, integrado ao novo padrão do Apps Script
       fetch(URL_GOOGLE_SCRIPT, {
         method: "POST",
         mode: "cors", 
@@ -760,7 +759,7 @@
         body: JSON.stringify({ executar: funcao, dados: parametro })
       })
       .then(function(res) { 
-        if (!res.ok) throw new Error("Falha de comunicação com o servidor."); 
+        if (!res.ok) throw new Error("Falha de comunicação."); 
         return res.json(); 
       })
       .then(function(dados) { 
