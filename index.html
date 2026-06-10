@@ -422,19 +422,29 @@
         navigator.serviceWorker.register('./sw.js')
           .then(function(reg) { 
             console.log('PWA Pronto'); 
-            // Se houver uma atualização de sw.js esperando, limpa o cache antigo
+            
+            // Monitora o download real dos arquivos
             reg.addEventListener('updatefound', function() {
               var newWorker = reg.installing;
               newWorker.addEventListener('statechange', function() {
+                
+                // 1. PRIMEIRA INSTALAÇÃO: Dispara APENAS quando o app terminar de baixar tudo pela primeira vez
+                if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
+                  alert("Aplicativo instalado com sucesso");
+                }
+                
+                // 2. ATUALIZAÇÃO: Se você mudar o sw.js no futuro, atualiza a página para o usuário
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   window.location.reload();
                 }
+                
               });
             });
           })
           .catch(function(err) { console.log('Erro SW:', err); });
       });
     }
+
 
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
