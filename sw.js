@@ -1,4 +1,4 @@
-const CACHE_NAME = 'territorios-v3'; // Mudamos para v3 para forçar o Chrome a esquecer os erros antigos
+const CACHE_NAME = 'territorios-v4'; // Mudei para v4 para aplicar as correções agora
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  // Força o novo Service Worker a se tornar ativo imediatamente
+  self.skipWaiting();
+  
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS).catch(() => console.log("Aviso: Ícones locais ainda não enviados"));
@@ -15,8 +18,23 @@ self.addEventListener('install', (e) => {
   );
 });
 
+// NOVO: Limpa os caches antigos (v1, v2, v3) automaticamente ao ativar
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Apagando cache antigo:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim()) // Assume o controle das páginas abertas na hora
+  );
+});
+
 self.addEventListener('fetch', (e) => {
-  // Ignora requisições do Google Apps Script e foca apenas nos arquivos locais
   if (e.request.url.includes('script.google.com')) {
     return;
   }
