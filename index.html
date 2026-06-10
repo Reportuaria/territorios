@@ -38,9 +38,9 @@
       scroll-behavior: smooth;
     }
     
-    /* Container principal ajustado para telas de celulares */
+    /* Espaçamento inferior de 140px para os balões não sumirem atrás do botão fixo */
     .container {
-      padding: 20px 16px 120px 16px; 
+      padding: 20px 16px 140px 16px; 
       max-width: 500px;
       margin: 0 auto;
     }
@@ -62,7 +62,6 @@
       color: var(--text);
     }
     
-    /* Caixas de seleção viraram botões grandes fáceis de tocar */
     select { 
       width: 100%; 
       padding: 16px; 
@@ -102,7 +101,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
 
-    /* Quando a rua recebe cartas, ela muda para uma cor suave */
     .rua-container.com-cartas {
       border-color: var(--success);
       background-color: var(--success-bg);
@@ -124,7 +122,6 @@
       align-items: center;
     }
 
-    /* Botão de Cartas Grande e Chamativo */
     .btn-cartas {
       background-color: transparent;
       color: var(--text-secondary);
@@ -135,6 +132,7 @@
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
+      transition: all 0.2s;
     }
 
     .btn-cartas.ativo {
@@ -143,7 +141,6 @@
       border-color: var(--success);
     }
 
-    /* Caixa de Histórico com texto ampliado para idosos */
     .hist-box { 
       font-size: 16px; 
       font-weight: 600;
@@ -156,246 +153,239 @@
     }
   </style>
 </head>
-<style>
+  <style>
     /* ==========================================================================
        4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES)
        ========================================================================== */
-    .DIGITACAO-CONTAINER {
-      DISPLAY: flex;
-      GAP: 10px;
-      MARGIN-TOP: 12px;
+    .digitacao-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    INPUT[TYPE="TEL"] { 
-      FLEX: 1;
-      PADDING: 16px; 
-      FONT-SIZE: 18px; 
-      FONT-WEIGHT: 600;
-      BORDER: 2px SOLID var(--border); 
-      BORDER-RADIUS: 14px; 
-      BACKGROUND-COLOR: var(--card-bg);
-      COLOR: var(--text);
-      BOX-SIZING: border-box;
+    input[type="tel"] { 
+      flex: 1;
+      padding: 16px; 
+      font-size: 18px; 
+      font-weight: 600;
+      border: 2px solid var(--border); 
+      border-radius: 14px; 
+      background-color: var(--card-bg);
+      color: var(--text);
+      box-sizing: border-box;
     }
 
-    INPUT[TYPE="TEL"]:FOCUS {
-      OUTLINE: none;
-      BORDER-COLOR: var(--primary);
+    input[type="tel"]:focus {
+      outline: none;
+      border-color: var(--primary);
     }
 
-    .BTN-ADICIONAR {
-      BACKGROUND-COLOR: var(--primary);
-      COLOR: white;
-      BORDER: none;
-      PADDING: 0 24px;
-      FONT-SIZE: 16px;
-      FONT-WEIGHT: 700;
-      BORDER-RADIUS: 14px;
-      CURSOR: pointer;
+    .btn-adicionar {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 24px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
     }
 
-    /* Área onde os balões das casas adicionadas vão se acumular */
-    .LISTA-CASAS-PROVISORIAS {
-      DISPLAY: flex;
-      FLEX-WRAP: wrap;
-      GAP: 8px;
-      MARGIN-TOP: 12px;
-      MIN-HEIGHT: 30px;
+    .lista-casas-provisorias {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      min-height: 30px;
     }
 
-    /* Balões grandes das casas com o "X" para apagar se errar */
-    .BALAO-CASA {
-      BACKGROUND-COLOR: #e8f0fe;
-      COLOR: var(--primary-dark);
-      PADDING: 10px 16px;
-      BORDER-RADIUS: 20px;
-      FONT-SIZE: 16px;
-      FONT-WEIGHT: 700;
-      DISPLAY: inline-flex;
-      ALIGN-ITEMS: center;
-      GAP: 8px;
-      BORDER: 1px SOLID #aecbfa;
+    .balao-casa {
+      background-color: #e8f0fe;
+      color: var(--primary-dark);
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #aecbfa;
     }
 
-    .BALAO-CASA .BTN-APAGAR-CASA {
-      COLOR: #c5221f;
-      FONT-WEIGHT: 800;
-      CURSOR: pointer;
-      FONT-SIZE: 16px;
-      PADDING: 0 4px;
+    .balao-casa .btn-pagar-casa {
+      color: #c5221f;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
     }
 
-    .AVISO-CARTAS-TEXTO {
-      COLOR: var(--success);
-      FONT-WEIGHT: 700;
-      FONT-SIZE: 15px;
-      MARGIN-TOP: 10px;
-      DISPLAY: flex;
-      ALIGN-ITEMS: center;
-      GAP: 6px;
+    .aviso-cartas-texto {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* ==========================================================================
        5. BOTÕES FIXOS E AVISOS FLUTUANTES (TOAST / LOADER)
        ========================================================================== */
-    BUTTON.BTN-PRINCIPAL { 
-      POSITION: fixed;
-      BOTTOM: 0;
-      LEFT: 0;
-      WIDTH: 100%;
-      PADDING: 20px; 
-      FONT-SIZE: 18px; 
-      COLOR: white; 
-      BACKGROUND-COLOR: var(--primary); 
-      BORDER: none; 
-      CURSOR: pointer; 
-      FONT-WEIGHT: 700; 
-      BOX-SHADOW: 0 -4px 12px RGBA(0,0,0,0.1);
-      Z-INDEX: 999;
-      TEXT-ALIGN: center;
+    button.btn-principal { 
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 22px; 
+      font-size: 18px; 
+      color: white; 
+      background-color: var(--primary); 
+      border: none; 
+      cursor: pointer; 
+      font-weight: 700; 
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+      z-index: 999;
+      text-align: center;
     }
 
-    BUTTON.BTN-PRINCIPAL:DISABLED { 
-      BACKGROUND-COLOR: #dadce0 !IMPORTANT; 
-      COLOR: #9aa0a6 !IMPORTANT; 
-      BOX-SHADOW: none !IMPORTANT; 
-      CURSOR: not-allowed; 
+    button.btn-principal:disabled { 
+      background-color: #dadce0 !important; 
+      color: #9aa0a6 !important; 
+      box-shadow: none !important; 
+      cursor: not-allowed; 
     }
     
-    .TOAST-AVISO {
-      POSITION: fixed;
-      BOTTOM: 90px;
-      LEFT: 50%;
-      TRANSFORM: translateX(-50%) translateY(20px);
-      BACKGROUND-COLOR: #323232;
-      COLOR: #ffffff;
-      PADDING: 16px 28px;
-      BORDER-RADIUS: 30px;
-      FONT-SIZE: 16px;
-      FONT-WEIGHT: 600;
-      BOX-SHADOW: 0 4px 16px RGBA(0,0,0,0.3);
-      Z-INDEX: 1000;
-      OPACITY: 0;
-      POINTER-EVENTS: none;
-      TRANSITION: opacity 0.3s ease, transform 0.3s ease;
-      DISPLAY: flex;
-      ALIGN-ITEMS: center;
-      GAP: 10px;
-      WHITE-SPACE: nowrap;
+    .toast-aviso {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background-color: #323232;
+      color: #ffffff;
+      padding: 16px 28px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
     }
 
-    .TOAST-AVISO.VISIVEL {
-      OPACITY: 1;
-      POINTER-EVENTS: auto;
-      TRANSFORM: translateX(-50%) translateY(0);
+    .toast-aviso.visivel {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
     }
 
-    /* Loader simplificado: Conectando... Conectado! */
-    .LOADER-OVERLAY {
-      POSITION: fixed; TOP: 0; LEFT: 0; WIDTH: 100%; HEIGHT: 100%;
-      BACKGROUND: white; DISPLAY: flex; FLEX-DIRECTION: column;
-      JUSTIFY-CONTENT: center; ALIGN-ITEMS: center; Z-INDEX: 9999;
-      TRANSITION: opacity 0.3s;
+    .loader-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; z-index: 9999;
+      transition: opacity 0.3s;
     }
-    .SPINNER {
-      WIDTH: 45px; HEIGHT: 45px; BORDER: 5px SOLID #f3f3f3;
-      BORDER-TOP: 5px SOLID var(--primary); BORDER-RADIUS: 50%;
-      ANIMATION: spin 0.8s linear infinite; MARGIN-BOTTOM: 20px;
+    .spinner {
+      width: 45px; height: 45px; border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 20px;
     }
-    @KEYFRAMES spin { 0% { TRANSFORM: rotate(0deg); } 100% { TRANSFORM: rotate(360deg); } }
+    .escondido { display: none !important; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .BTN-INSTALAR {
-      DISPLAY: none; WIDTH: 100%; BACKGROUND-COLOR: var(--success);
-      COLOR: white; BORDER: none; PADDING: 16px; FONT-SIZE: 16px;
-      FONT-WEIGHT: 700; BORDER-RADIUS: 14px; MARGIN-BOTTOM: 22px;
-      CURSOR: pointer; TEXT-ALIGN: center;
+    .btn-instalar {
+      display: none; width: 100%; background-color: var(--success);
+      color: white; border: none; padding: 16px; font-size: 16px;
+      font-weight: 700; border-radius: 14px; margin-bottom: 22px;
+      cursor: pointer; text-align: center;
     }
   </style>
 </head>
 <body>
 
   <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
-  <div ID="loader" CLASS="loader-overlay">
-    <div CLASS="spinner" ID="loaderSpinner"></div>
-    <div ID="loaderTexto" STYLE="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
+  <div id="loader" class="loader-overlay">
+    <div class="spinner" id="loaderSpinner"></div>
+    <div id="loaderTexto" style="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
   </div>
 
   <!-- CABEÇALHO DO APLICATIVO -->
-  <div STYLE="background: var(--card-bg); padding: 18px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
-    <svg WIDTH="26" HEIGHT="26" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-    <h2 STYLE="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
+  <div style="background: var(--card-bg); padding: 18px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+    <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
   </div>
 
-  <div CLASS="container">
-    <button ID="btnInstalarApp" CLASS="btn-instalar">📥 Instalar no meu Celular</button>
+  <div class="container">
+    <button id="btnInstalarApp" class="btn-instalar">📥 Instalar no meu Celular</button>
     
     <!-- SELEÇÃO DE TERRITÓRIO -->
-    <div CLASS="form-group">
-      <label FOR="territorio">
-        <svg WIDTH="20" HEIGHT="20" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+    <div class="form-group">
+      <label for="territorio">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
         1. Escolha o Território:
       </label>
-      <select ID="territorio" ONCHANGE="filtrarQuadrasLocalmente()">
-        <option VALUE="">Carregando...</option>
+      <select id="territorio" onchange="filtrarQuadrasLocalmente()">
+        <option value="">Carregando...</option>
       </select>
     </div>
 
     <!-- SELEÇÃO DE QUADRA -->
-    <div CLASS="form-group">
-      <label FOR="quadra">
-        <svg WIDTH="20" HEIGHT="20" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+    <div class="form-group">
+      <label for="quadra">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
         2. Escolha a Quadra:
       </label>
-      <select ID="quadra" ONCHANGE="carregarRuasDoCacheLocal()" DISABLED>
-        <option VALUE="">Selecione um território primeiro</option>
+      <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
+        <option value="">Selecione um território primeiro</option>
       </select>
     </div>
 
     <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
-    <div ID="area-ruas"></div>
+    <div id="area-ruas"></div>
 
     <!-- BOTÃO FIXADO DE ENVIAR -->
-    <button ID="btnSalvar" CLASS="btn-principal" ONCLICK="confirmarEEnviar()" DISABLED>
+    <button id="btnSalvar" class="btn-principal" onclick="confirmarEEnviar()" disabled>
       Enviar para o Dirigente
     </button>
     
     <!-- NOTIFICAÇÃO FLUTUANTE -->
-    <div ID="toast" CLASS="toast-aviso"></div>
+    <div id="toast" class="toast-aviso"></div>
   </div>
-<script>
+  <script>
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
        ========================================================================== */
-    // Seu link do Apps Script associado ao Google Planilhas
     var URL_GOOGLE_SCRIPT = "https://google.com";
     var BD_GLOBAL = null; 
     var deferredPrompt;
     
-    // Objeto global para guardar na memória as casas digitadas temporariamente por rua
-    // Exemplo: { "Rua A": ["10", "12"], "Rua B": ["54"] }
+    // Guarda os números das casas digitadas na memória por rua
     var CASAS_TEMPORARIAS_POR_RUA = {};
     
-    // Objeto global para guardar quais ruas receberam cartas nesta sessão
+    // Guarda quais ruas receberam cartas nesta sessão
     var CARTAS_POR_RUA = {};
 
     /* ==========================================================================
-       7. FLUXO DE ENTRADA DO APLICATIVO (LOADAER AMIGÁVEL E PWA)
+       7. FLUXO DE ENTRADA DO APLICATIVO (LOADER AMIGÁVEL E PWA)
        ========================================================================== */
     window.onload = function() {
-      // Se o app já estiver instalado e rodando fora do navegador, esconde o botão de instalar
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
         document.getElementById('btnInstalarApp').style.display = 'none';
       }
 
-      // Altera o texto para a frase simples que você pediu
       var txtLoader = document.getElementById("loaderTexto");
       txtLoader.innerText = "Conectando...";
 
-      // Busca os dados da sua planilha via Apps Script
       fetchData("obterBancoCompleto", null, function(banco) {
         BD_GLOBAL = banco;
         
-        // Sucesso na conexão: Muda o texto de forma amigável antes de fechar a tela branca
+        // Altera para a frase amigável que você pediu
         txtLoader.innerHTML = "<span style='color: var(--success);'>✓ Conectado!</span>";
         document.getElementById("loaderSpinner").style.display = "none";
         
@@ -405,7 +395,7 @@
           setTimeout(function() { loader.classList.add("escondido"); }, 300);
         }, 800);
 
-        // Preenche o menu de escolha de Território usando fragmentos para melhor performance
+        // Preenche o menu de Territórios de forma rápida
         var combo = document.getElementById("territorio");
         var fragmento = document.createDocumentFragment();
         
@@ -426,21 +416,37 @@
       });
     };
 
-    // Monitora o botão de instalação nativo do navegador
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js')
+          .then(function(reg) { 
+            console.log('PWA Pronto'); 
+            // Se houver uma atualização de sw.js esperando, limpa o cache antigo
+            reg.addEventListener('updatefound', function() {
+              var newWorker = reg.installing;
+              newWorker.addEventListener('statechange', function() {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              });
+            });
+          })
+          .catch(function(err) { console.log('Erro SW:', err); });
+      });
+    }
+
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
       document.getElementById('btnInstalarApp').style.display = 'block';
     });
 
-    // Ação do botão grande de instalação
     document.getElementById('btnInstalarApp').addEventListener('click', function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(function(choiceResult) {
           if (choiceResult.outcome === 'accepted') {
             document.getElementById('btnInstalarApp').style.display = 'none';
-            // 🚨 NOVO: Dispara um aviso bonito confirmando que instalou com sucesso!
             exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>', '🎉 Aplicativo instalado com sucesso!');
           }
           deferredPrompt = null;
@@ -451,7 +457,7 @@
     });
 
     /* ==========================================================================
-       8. LOGICA DE FILTRAGEM (TERRITÓRIOS -> QUADRAS)
+       8. LÓGICA DE FILTRAGEM (TERRITÓRIOS -> QUADRAS)
        ========================================================================== */
     function filtrarQuadrasLocalmente() {
       var territorio = document.getElementById("territorio").value;
@@ -513,12 +519,10 @@
       
       var htmlFinal = "";
       ruasFiltradas.forEach(function(item, index) {
-        // Inicializa a memória temporária dessa rua caso ela ainda não exista
         if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
           CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
         }
 
-        // Verifica se a rua já foi marcada com cartas nesta sessão
         var classCartas = CARTAS_POR_RUA[item.nome] ? "com-cartas" : "";
         var classBotaoAtivo = CARTAS_POR_RUA[item.nome] ? "ativo" : "";
         var txtBotaoCartas = CARTAS_POR_RUA[item.nome] ? "Deixou Cartas: Sim" : "Deixou Cartas?";
@@ -558,24 +562,6 @@
       });
     }
 
-    /* ==========================================================================
-       10. GERENCIAMENTO DAS CASAS DIGITADAS E DO BOTÃO DE CARTAS
-       ========================================================================== */
-    function adicionarCasaTemporaria(index, nomeRua) {
-      var input = document.getElementById("inputCasa_" + index);
-      var numero = input.value.trim();
-
-      if (!numero) {
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
-        return;
-      }
-
-      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
-      input.value = ""; 
-      input.focus();    
-
-      atualizarVisualCasasTemporarias(index, nomeRua);
-    }
     function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
       CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
       atualizarVisualCasasTemporarias(index, nomeRua);
@@ -592,7 +578,7 @@
         htmlBaloes += `
           <div class="balao-casa">
             ${num}
-            <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
+            <span class="btn-pagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
           </div>
         `;
       });
@@ -620,9 +606,8 @@
         aviso.style.display = "none";
       }
     }
-
     /* ==========================================================================
-       11. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
+       10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
        ========================================================================== */
     function confirmarEEnviar() {
       var confirmar = confirm("Deseja mesmo enviar este relatório para o Dirigente?");
@@ -702,7 +687,7 @@
     }
 
     /* ==========================================================================
-       12. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH)
+       11. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH)
        ========================================================================== */
     function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
