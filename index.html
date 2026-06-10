@@ -154,9 +154,7 @@
   </style>
 </head>
   <style>
-    /* ==========================================================================
-       4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES)
-       ========================================================================== */
+  
       /* ==========================================================================
        4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES) - ATUALIZADO
        ========================================================================== */
@@ -590,22 +588,28 @@
       verificarSeTemDadosParaEnviar(); // Desativa o botão se a tela ficar vazia
     }
     
-    function adicionarCasaTemporaria(index, nomeRua) {
-      var input = document.getElementById("inputCasa_" + index);
-      var numero = input.value.trim();
+   function adicionarCasaTemporaria(event, index, nomeRua) {
+  // Evita que a página recarregue ao apertar o Enter do teclado
+  if (event) event.preventDefault();
 
-      if (!numero) {
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
-        return;
-      }
+  var input = document.getElementById("inputCasa_" + index);
+  var numero = input.value.trim();
 
-      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
-      input.value = ""; 
-      input.focus();    
+  if (!numero) {
+    exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+    return;
+  }
 
-      atualizarVisualCasasTemporarias(index, nomeRua);
-      verificarSeTemDadosParaEnviar(); // <--- Essa é a linha que ativa o botão Enviar!
-    }
+  CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+  input.value = ""; 
+  
+  // Fecha o teclado do celular após adicionar o número
+  input.blur();    
+
+  atualizarVisualCasasTemporarias(index, nomeRua);
+  verificarSeTemDadosParaEnviar(); 
+}
+
 
     function atualizarVisualCasasTemporarias(index, nomeRua) {
       var listaDiv = document.getElementById("listaProvisoria_" + index);
