@@ -212,13 +212,14 @@
       border: 1px solid #aecbfa;
     }
 
-    .balao-casa .btn-pagar-casa {
+       .balao-casa .btn-apagar-casa {
       color: #c5221f;
       font-weight: 800;
       cursor: pointer;
       font-size: 16px;
       padding: 0 4px;
     }
+
 
     .aviso-cartas-texto {
       color: var(--success);
@@ -561,14 +562,30 @@
       ruasFiltradas.forEach(function(item, index) {
         atualizarVisualCasasTemporarias(index, item.nome);
       });
+      // CORREÇÃO DA TRAVA: Começa desligado até o irmão mexer em algo
+      btn.disabled = true; 
+    }
+
+        // Função auxiliar que gerencia se o botão "Enviar" fica azul ou cinza
+    function verificarSeTemDadosParaEnviar() {
+      var btn = document.getElementById("btnSalvar");
+      var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { return lista.length > 0; });
+      var temCartas = Object.values(CARTAS_POR_RUA).some(function(valor) { return valor === true; });
+      
+      if (temCasas || temCartas) {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
     }
 
     function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
       CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
       atualizarVisualCasasTemporarias(index, nomeRua);
+      verificarSeTemDadosParaEnviar(); // Desativa o botão se a tela ficar vazia
     }
 
-      function atualizarVisualCasasTemporarias(index, nomeRua) {
+    function atualizarVisualCasasTemporarias(index, nomeRua) {
       var listaDiv = document.getElementById("listaProvisoria_" + index);
       if (!listaDiv) return;
 
@@ -576,7 +593,6 @@
       var htmlBaloes = "";
 
       listaDeNumeros.forEach(function(num, idx) {
-        // CORRIGIDO: Agora a classe bate perfeitamente com o CSS (btn-apagar-casa)
         htmlBaloes += `
           <div class="balao-casa">
             ${num}
@@ -607,7 +623,9 @@
         container.classList.remove("com-cartas");
         aviso.style.display = "none";
       }
+      verificarSeTemDadosParaEnviar(); // Avalia se ativa ou desativa o botão de envio
     }
+
     /* ==========================================================================
        10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
        ========================================================================== */
