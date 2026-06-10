@@ -219,27 +219,28 @@
     /* ==========================================================================
        5. BOTÕES FIXOS E AVISOS FLUTUANTES (TOAST / LOADER)
        ========================================================================== */
-    button.btn-principal { 
-      display: flex;
+.btn-principal {
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px; /* Espaço entre o ícone e o texto */
+  gap: 10px;
   width: 100%;
-  max-width: 500px; /* Evita que o botão fique gigante no computador */
-  margin: 24px auto 10px auto; /* Afasta o botão dos elementos de cima */
+  max-width: 500px;
+  margin: 32px auto 40px auto; /* Aumentamos a margem de baixo para dar respiro na rolagem */
   padding: 16px 24px;
-  background: linear-gradient(135deg, #007bff, #0056b3); /* Degradê azul moderno */
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   font-size: 16px;
   font-weight: 700;
-  text-transform: uppercase; /* Letras maiúsculas elegantes */
-  letter-spacing: 0.5px; /* Espaçamento leve entre as letras */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   border: none;
-  border-radius: 12px; /* Cantos arredondados amigáveis */
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); /* Sombra azul suave */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
   cursor: pointer;
-  transition: all 0.2s ease-in-out; /* Animação suave ao clicar */
+  transition: all 0.2s ease-in-out;
 }
+
 
 /* Quando o botão puder ser clicado (Ativo) e o usuário passar o mouse/dedo */
 .btn-principal:not(:disabled):hover {
@@ -607,15 +608,33 @@
 
     function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
+      var textoBotao = btn.querySelector("span") || btn;
+      
       var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { return lista.length > 0; });
       var temCartas = Object.values(CARTAS_POR_RUA).some(function(valor) { return valor === true; });
       
-      if (temCasas || temCartas) {
+      // REGRA: Se houver marcação de cartas, bloqueia o envio da quadra e deixa o botão VERMELHO/CINZA de aviso
+      if (temCartas) {
+        btn.disabled = true;
+        btn.style.background = "linear-gradient(135deg, #d32f2f, #9a0007)"; /* Vermelho de bloqueio */
+        btn.style.boxShadow = "none";
+        if (textoBotao) textoBotao.innerText = "Quadra Bloqueada (Remova as cartas)";
+        return;
+      }
+      
+      if (temCasas) {
         btn.disabled = false;
+        btn.style.background = "linear-gradient(135deg, #2e7d32, #1b5e20)"; /* VERDE MODERNO QUANDO PRONTO */
+        btn.style.boxShadow = "0 4px 12px rgba(46, 125, 50, 0.3)";
+        if (textoBotao) textoBotao.innerText = "Enviar para o Dirigente";
       } else {
         btn.disabled = true;
+        btn.style.background = "#e0e0e0"; /* Cinza desativado padrão */
+        btn.style.boxShadow = "none";
+        if (textoBotao) textoBotao.innerText = "Enviar para o Dirigente";
       }
     }
+
 
     function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
       CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
@@ -661,10 +680,12 @@
       listaDiv.innerHTML = htmlBaloes;
     }
 
-    function alternarCartas(index, nomeRua) {
+     function alternarCartas(index, nomeRua) {
       var botao = document.getElementById("btnCartas_" + index);
       var container = document.getElementById("container_" + index);
       var aviso = document.getElementById("avisoCartasContainer_" + index);
+      var inputNumero = document.getElementById("inputCasa_" + index);
+      var botaoAdd = inputNumero ? inputNumero.parentNode.querySelector("button") : null;
 
       if (!CARTAS_POR_RUA[nomeRua]) {
         CARTAS_POR_RUA[nomeRua] = true;
@@ -672,13 +693,39 @@
         botao.innerText = "Deixou Cartas: Sim";
         container.classList.add("com-cartas");
         aviso.style.display = "flex";
-        exibirToast('<path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>', 'Registro de cartas anotado');
+        
+        // CORREÇÃO: Força o bloqueio real via propriedade JavaScript
+        if (inputNumero) {
+          inputNumero.disabled = true;
+          inputNumero.value = "";
+          inputNumero.placeholder = "Bloqueado: Cartas deixadas";
+          inputNumero.style.backgroundColor = "#f5f5f5";
+        }
+        if (botaoAdd) {
+          botaoAdd.disabled = true;
+          botaoAdd.style.backgroundColor = "#cccccc";
+        }
+        
+        CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+        atualizarVisualCasasTemporarias(index, nomeRua);
+        exibirToast('<path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>', 'Registro de cartas anotado. Rua bloqueada!');
       } else {
         CARTAS_POR_RUA[nomeRua] = false;
         botao.classList.remove("ativo");
         botao.innerText = "Deixou Cartas?";
         container.classList.remove("com-cartas");
         aviso.style.display = "none";
+        
+        // CORREÇÃO: Desbloqueia liberando os elementos
+        if (inputNumero) {
+          inputNumero.disabled = false;
+          inputNumero.placeholder = "Digite o número...";
+          inputNumero.style.backgroundColor = "";
+        }
+        if (botaoAdd) {
+          botaoAdd.disabled = false;
+          botaoAdd.style.backgroundColor = "var(--primary)";
+        }
       }
       verificarSeTemDadosParaEnviar(); 
     }
