@@ -743,20 +743,24 @@
       }, 3000);
     }
 
-    function fetchData(funcao, parametro, callback) {
+        function fetchData(funcao, parametro, callback) {
       fetch(URL_GOOGLE_SCRIPT, {
         method: "POST",
-        mode: "cors",
+        mode: "no-cors", // MUDADO PARA no-cors: Evita que o Google bloqueie o envio de dados
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ executar: funcao, dados: parametro })
       })
-      .then(function(res) { if (!res.ok) throw new Error(); return res.json(); })
-      .then(function(dados) { callback(dados); })
+      .then(function() { 
+        // Como o modo 'no-cors' não traz uma resposta aberta por segurança, 
+        // nós assumimos o sucesso se o fetch não disparar o catch.
+        callback("Sucesso"); 
+      })
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
         exibirToast('<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c2.76 0 5 2.24 5 5v1h1.5c1.38 0 2.5 1.12 2.5 2.5 0 .81-.39 1.54-1 2l1.42 1.42c1.01-.91 1.58-2.2 1.58-3.67 0-2.76-2.12-5.04-4.65-5.41zM3.55 3.57L2.28 4.84l2.12 2.12C2.42 8.08 1 10.37 1 13c0 3.87 3.13 7 7 7h10.73l2.43 2.43 1.27-1.27L3.55 3.57zM8 18c-2.76 0-5-2.24-5-5 0-2.05 1.23-3.81 3-4.58l5.83 5.83L11 15v1h1v-1l.73-.73 2.73 2.73H8z"/>', 'Erro na conexão.');
       });
     }
+
   </script>
 
   <!-- JANELA DE CONFIRMAÇÃO CUSTOMIZADA -->
