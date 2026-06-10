@@ -584,6 +584,23 @@
       atualizarVisualCasasTemporarias(index, nomeRua);
       verificarSeTemDadosParaEnviar(); // Desativa o botão se a tela ficar vazia
     }
+    
+    function adicionarCasaTemporaria(index, nomeRua) {
+      var input = document.getElementById("inputCasa_" + index);
+      var numero = input.value.trim();
+
+      if (!numero) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+        return;
+      }
+
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+      input.value = ""; 
+      input.focus();    
+
+      atualizarVisualCasasTemporarias(index, nomeRua);
+      verificarSeTemDadosParaEnviar(); // <--- Essa é a linha que ativa o botão Enviar!
+    }
 
     function atualizarVisualCasasTemporarias(index, nomeRua) {
       var listaDiv = document.getElementById("listaProvisoria_" + index);
