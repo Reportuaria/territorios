@@ -38,7 +38,7 @@
       scroll-behavior: smooth;
     }
     
-    /* Espaçamento inferior de 140px para os balões não sumirem atrás do botão fixo */
+    /* Espaçamento inferior para os balões não sumirem atrás do botão fixo */
     .container {
       padding: 20px 16px 140px 16px; 
       max-width: 500px;
@@ -151,12 +151,8 @@
       border-radius: 10px; 
       border-left: 5px solid #ffb300; 
     }
-  </style>
-</head>
-  <style>
-  
-      /* ==========================================================================
-       4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES) - ATUALIZADO
+    /* ==========================================================================
+       4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES)
        ========================================================================== */
     .digitacao-container {
       width: 100%;
@@ -165,7 +161,7 @@
     }
 
     input[type="tel"] { 
-      width: 100%; /* Ocupa 100% da largura já que não tem mais botão ao lado */
+      width: 100%; 
       padding: 16px; 
       font-size: 18px; 
       font-weight: 600;
@@ -180,9 +176,6 @@
       outline: none;
       border-color: var(--primary);
     }
-
-    /* O .btn-adicionar foi removido do CSS pois o botão físico sumiu da tela */
-
 
     .lista-casas-provisorias {
       display: flex;
@@ -205,14 +198,13 @@
       border: 1px solid #aecbfa;
     }
 
-       .balao-casa .btn-apagar-casa {
+    .balao-casa .btn-apagar-casa {
       color: #c5221f;
       font-weight: 800;
       cursor: pointer;
       font-size: 16px;
       padding: 0 4px;
     }
-
 
     .aviso-cartas-texto {
       color: var(--success);
@@ -285,11 +277,13 @@
       justify-content: center; align-items: center; z-index: 9999;
       transition: opacity 0.3s;
     }
+
     .spinner {
       width: 45px; height: 45px; border: 5px solid #f3f3f3;
       border-top: 5px solid var(--primary); border-radius: 50%;
       animation: spin 0.8s linear infinite; margin-bottom: 20px;
     }
+
     .escondido { display: none !important; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -343,8 +337,8 @@
     <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
     <div id="area-ruas"></div>
 
-    <!-- BOTÃO FIXADO DE ENVIAR -->
-    <button id="btnSalvar" class="btn-principal" onclick="confirmarEEnviar()" disabled>
+    <!-- BOTÃO FIXADO DE ENVIAR (Ajustado para abrir o modal de confirmação) -->
+    <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" disabled>
       Enviar para o Dirigente
     </button>
     
@@ -355,7 +349,7 @@
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
        ========================================================================== */
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    var URL_GOOGLE_SCRIPT = "https://google.com";
     var BD_GLOBAL = null; 
     var deferredPrompt;
     
@@ -379,7 +373,6 @@
       fetchData("obterBancoCompleto", null, function(banco) {
         BD_GLOBAL = banco;
         
-        // Altera para a frase amigável que você pediu
         txtLoader.innerHTML = "<span style='color: var(--success);'>✓ Conectado!</span>";
         document.getElementById("loaderSpinner").style.display = "none";
         
@@ -416,17 +409,14 @@
           .then(function(reg) { 
             console.log('PWA Pronto'); 
             
-            // Monitora o download real dos arquivos
             reg.addEventListener('updatefound', function() {
               var newWorker = reg.installing;
               newWorker.addEventListener('statechange', function() {
                 
-                // 1. PRIMEIRA INSTALAÇÃO: Dispara APENAS quando o app terminar de baixar tudo pela primeira vez
                 if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
                   alert("Aplicativo instalado com sucesso");
                 }
                 
-                // 2. ATUALIZAÇÃO: Se você mudar o sw.js no futuro, atualiza a página para o usuário
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   window.location.reload();
                 }
@@ -437,7 +427,6 @@
           .catch(function(err) { console.log('Erro SW:', err); });
       });
     }
-
 
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
@@ -459,7 +448,6 @@
         alert("Para instalar:\n1. Clique nos 3 pontinhos do Chrome ou navegador.\n2. Escolha 'Instalar aplicativo' ou 'Adicionar à tela inicial'.");
       }
     });
-
     /* ==========================================================================
        8. LÓGICA DE FILTRAGEM (TERRITÓRIOS -> QUADRAS)
        ========================================================================== */
@@ -497,8 +485,9 @@
       comboQuadra.appendChild(fragmento);
       comboQuadra.disabled = false;
     }
+
     /* ==========================================================================
-       9. RENDERIZAÇÃO DAS RUAS E O NOVO SISTEMA DE CASAS E CARTAS
+       9. RENDERIZAÇÃO DAS RUAS E O SISTEMA DE CASAS E CARTAS (CORRIGIDO)
        ========================================================================== */
     function carregarRuasDoCacheLocal() {
       var quadra = document.getElementById("quadra").value;
@@ -536,7 +525,7 @@
           <div class="rua-container ${classCartas}" id="container_${index}">
             <div class="rua-header">
               <div class="rua-titulo">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--text-secondary); margin-right: 8px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15Z"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--text-secondary); margin-right: 8px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15z"/></svg>
                 ${item.nome}
               </div>
               <button type="button" class="btn-cartas ${classBotaoAtivo}" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome}')">${txtBotaoCartas}</button>
@@ -548,32 +537,32 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Cartas deixadas nesta rua!
             </div>
 
-          <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome}')">
-  <input 
-    type="tel" 
-    inputmode="numeric" 
-    pattern="[0-9]*"
-    enterkeyhint="done"
-    id="inputCasa_${index}" 
-    placeholder="Digite o número e aperte Enter..."
-    required
-  >
-</form>
+            <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome}')">
+              <input 
+                type="tel" 
+                inputmode="numeric" 
+                pattern="[0-9]*"
+                enterkeyhint="done"
+                id="inputCasa_${index}" 
+                placeholder="Digite o número e aperte Enter..."
+                required
+              >
+            </form>
 
-<div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
-
+            <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
+          </div>
+        `;
+      });
       
       areaRuas.innerHTML = htmlFinal;
-      btn.disabled = false;
 
       ruasFiltradas.forEach(function(item, index) {
         atualizarVisualCasasTemporarias(index, item.nome);
       });
-      // CORREÇÃO DA TRAVA: Começa desligado até o irmão mexer em algo
+
       btn.disabled = true; 
     }
-
-        // Função auxiliar que gerencia se o botão "Enviar" fica azul ou cinza
+    // Função auxiliar que gerencia se o botão "Enviar" fica azul ou cinza
     function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
       var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { return lista.length > 0; });
@@ -589,31 +578,27 @@
     function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
       CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
       atualizarVisualCasasTemporarias(index, nomeRua);
-      verificarSeTemDadosParaEnviar(); // Desativa o botão se a tela ficar vazia
+      verificarSeTemDadosParaEnviar(); 
     }
     
-   function adicionarCasaTemporaria(event, index, nomeRua) {
-  // Evita que a página recarregue ao apertar o Enter do teclado
-  if (event) event.preventDefault();
+    function adicionarCasaTemporaria(event, index, nomeRua) {
+      if (event) event.preventDefault();
 
-  var input = document.getElementById("inputCasa_" + index);
-  var numero = input.value.trim();
+      var input = document.getElementById("inputCasa_" + index);
+      var numero = input.value.trim();
 
-  if (!numero) {
-    exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
-    return;
-  }
+      if (!numero) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+        return;
+      }
 
-  CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
-  input.value = ""; 
-  
-  // Fecha o teclado do celular após adicionar o número
-  input.blur();    
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+      input.value = ""; 
+      input.blur();    
 
-  atualizarVisualCasasTemporarias(index, nomeRua);
-  verificarSeTemDadosParaEnviar(); 
-}
-
+      atualizarVisualCasasTemporarias(index, nomeRua);
+      verificarSeTemDadosParaEnviar(); 
+    }
 
     function atualizarVisualCasasTemporarias(index, nomeRua) {
       var listaDiv = document.getElementById("listaProvisoria_" + index);
@@ -626,7 +611,7 @@
         htmlBaloes += `
           <div class="balao-casa">
             ${num}
-            <span class="btn-apagar-casa" style="color: #c5221f; font-weight: 800; cursor: pointer; font-size: 16px; padding: 0 4px;" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
+            <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
           </div>
         `;
       });
@@ -653,61 +638,12 @@
         container.classList.remove("com-cartas");
         aviso.style.display = "none";
       }
-      verificarSeTemDadosParaEnviar(); // Avalia se ativa ou desativa o botão de envio
+      verificarSeTemDadosParaEnviar(); 
     }
-
     /* ==========================================================================
        10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
        ========================================================================== */
-   // Exemplo de como deve ficar a sua função de envio:
-function enviarParaDirigente() {
-  // 1. Mostra a nossa janela bonita na tela
-  var modal = document.getElementById('modalConfirmacao');
-  modal.style.display = 'flex';
-
-  // 2. Se o usuário clicar em Cancelar, fecha a janela e não faz nada
-  document.getElementById('btnCancelarModal').onclick = function() {
-    modal.style.display = 'none';
-  };
-
-   // 3. Se o usuário clicar em Confirmar, fecha a janela e executa o envio real
-  document.getElementById('btnConfirmarModal').onclick = function() {
-    modal.style.display = 'none';
-    
-    // Criamos a caixinha de aviso que o envio começou
-    exibirToast("Enviando dados para o dirigente...", "carregando");
-
-    // Aqui fica o código real que conversa com a sua URL do Google
-    fetch("https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec", {
-      method: "POST",
-      mode: "no-cors", // Evita erros de segurança do navegador
-      headers: {
-        "Content-Type": "application/json"
-      },
-      // Transforma as suas marcações guardadas em texto para o Google ler
-      body: JSON.stringify({
-        casas: CASAS_TEMPORARIAS_POR_RUA 
-      })
-    })
-    .then(function() {
-      // Quando o Google recebe com sucesso:
-      exibirToast("Enviado com sucesso para a planilha!", "sucesso");
-      
-      // Limpa os balõezinhos da tela já que salvou na planilha
-      CASAS_TEMPORARIAS_POR_RUA = {}; 
-      if (typeof atualizarVisualTodasAsRuas === "function") {
-         atualizarVisualTodasAsRuas();
-      }
-    })
-    .catch(function(erro) {
-      console.error("Erro ao enviar:", erro);
-      exibirToast("Erro ao enviar. Tente novamente!", "erro");
-    });
-  };
-
-
-    function enviarDados() {
-      var btn = document.getElementById("btnSalvar");
+    function abrirModalConfirmacao() {
       var territorio = document.getElementById("territorio").value;
       var quadra = document.getElementById("quadra").value;
       
@@ -715,6 +651,24 @@ function enviarParaDirigente() {
         exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Escolha o território e a quadra!');
         return;
       }
+
+      var modal = document.getElementById('modalConfirmacao');
+      modal.style.display = 'flex';
+
+      document.getElementById('btnCancelarModal').onclick = function() {
+        modal.style.display = 'none';
+      };
+
+      document.getElementById('btnConfirmarModal').onclick = function() {
+        modal.style.display = 'none';
+        enviarDados();
+      };
+    }
+
+    function enviarDados() {
+      var btn = document.getElementById("btnSalvar");
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
       
       var ruasDados = [];
       var chavesRuas = Object.keys(CASAS_TEMPORARIAS_POR_RUA);
@@ -737,7 +691,7 @@ function enviarParaDirigente() {
           });
         }
       });
-      
+
       if (ruasDados.length === 0) {
         exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhum dado digitado ou marcado!');
         return;
@@ -804,16 +758,17 @@ function enviarParaDirigente() {
       });
     }
   </script>
-<!-- Janela de Confirmação Customizada -->
-<div id="modalConfirmacao" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 20000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
-  <div style="background: white; padding: 24px; border-radius: 16px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-    <h3 style="margin-top: 0; color: #333; font-size: 18px;">Confirmar Envio</h3>
-    <p style="color: #666; margin: 14px 0 24px 0; font-size: 15px;">Tem certeza que deseja enviar as marcações para o dirigente?</p>
-    <div style="display: flex; gap: 12px; justify-content: center;">
-      <button id="btnCancelarModal" style="flex: 1; padding: 12px; border: 1px solid #ccc; background: #f5f5f5; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
-      <button id="btnConfirmarModal" style="flex: 1; padding: 12px; border: none; background: #007bff; color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">Sim, Enviar</button>
+
+  <!-- JANELA DE CONFIRMAÇÃO CUSTOMIZADA -->
+  <div id="modalConfirmacao" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 20000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: white; padding: 24px; border-radius: 16px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+      <h3 style="margin-top: 0; color: #333; font-size: 18px;">Confirmar Envio</h3>
+      <p style="color: #666; margin: 14px 0 24px 0; font-size: 15px;">Tem certeza que deseja enviar as marcações para o dirigente?</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="btnCancelarModal" style="flex: 1; padding: 12px; border: 1px solid #ccc; background: #f5f5f5; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+        <button id="btnConfirmarModal" style="flex: 1; padding: 12px; border: none; background: #007bff; color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">Sim, Enviar</button>
+      </div>
     </div>
   </div>
-</div>
 </body>
 </html>
