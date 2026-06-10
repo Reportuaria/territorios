@@ -1,4 +1,4 @@
-const CACHE_NAME = 'territorios-v4'; // Mudei para v4 para aplicar as correções agora
+const CACHE_NAME = 'territorios-v5'; // Mudei para v4 para aplicar as correções agora
 const ASSETS = [
   './',
   './index.html',
