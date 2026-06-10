@@ -876,7 +876,7 @@
       };
     }
 
-    function enviarDados() {
+       function enviarDados() {
       var btn = document.getElementById("btnSalvar");
       var territorio = document.getElementById("territorio").value;
       var quadra = document.getElementById("quadra").value;
@@ -886,19 +886,15 @@
 
       chavesRuas.forEach(function(nomeRua) {
         var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
-        var teveCartas = CARTAS_POR_RUA[nomeRua] ? "Sim" : "Não";
 
-        if (casasMarcadas.length > 0 || teveCartas === "Sim") {
-          var stringCasas = casasMarcadas.join(", ");
-          var informacaoFinal = stringCasas;
-          
-          if (teveCartas === "Sim") {
-            informacaoFinal = stringCasas ? stringCasas + " [Deixou Cartas]" : "[Deixou Cartas]";
-          }
+        // Se houver números de casas digitados nesta rua, adiciona na lista de envio
+        if (casasMarcadas && casasMarcadas.length > 0) {
+          // CORREÇÃO: Junta as casas por vírgula pura (ex: "12, 14, 16"), SEM nenhuma data, hora ou texto extra!
+          var stringCasasPura = casasMarcadas.join(", ");
 
           ruasDados.push({ 
             nome: nomeRua, 
-            casas: informacaoFinal 
+            casas: stringCasasPura 
           });
         }
       });
@@ -915,7 +911,7 @@
       
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso" || resposta === "OK") {
-          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
+          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', '✓ Enviado com sucesso!');
           
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
@@ -929,6 +925,7 @@
             }
           });
 
+          // Limpa os dados temporários gravados na tela após o sucesso
           CASAS_TEMPORARIAS_POR_RUA = {};
           CARTAS_POR_RUA = {};
           
@@ -941,6 +938,7 @@
         }
       });
     }
+
     function alternarExpansaoRua(index) {
       var corpo = document.getElementById("corpoRua_" + index);
       var seta = document.getElementById("setaRua_" + index);
