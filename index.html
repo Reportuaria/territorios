@@ -5,19 +5,13 @@
   <title>Sistema de Territórios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   
-  <!-- Configuração PWA -->
+  <!-- CONFIGURAÇÃO PWA -->
   <link rel="manifest" href="./manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./sw.js')
-          .then(function() { console.log('PWA Pronto'); })
-          .catch(function(err) { console.log('Erro SW:', err); });
-      });
-    }
-  </script>
   
   <style>
+    /* ==========================================================================
+       1. VARIÁVEIS DE CORES E ESTILO GLOBAL
+       ========================================================================== */
     :root {
       --primary: #1a73e8;
       --primary-dark: #1557b0;
@@ -28,23 +22,9 @@
       --border: #dadce0;
       --success: #1e8e3e;
       --success-bg: #e6f4ea;
+      --warning: #b06000;
+      --warning-bg: #fff8e1;
     }
-/* Força o navegador a renderizar o texto como ícone */
-.material-icons {
-  font-family: 'Material Icons' !important;
-  font-weight: normal;
-  font-style: normal;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-}
 
     html, body {
       width: 100%;
@@ -52,346 +32,427 @@
       padding: 0;
       background-color: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       scroll-behavior: smooth;
     }
     
+    /* Container principal ajustado para telas de celulares */
     .container {
-      padding: 20px 16px 100px 16px; 
+      padding: 20px 16px 120px 16px; 
       max-width: 500px;
       margin: 0 auto;
     }
-    
-    h2 { 
-      text-align: center; 
-      color: var(--primary); 
-      margin: 10px 0 24px 0; 
-      font-weight: 600;
-      font-size: 24px;
-    }
 
+    /* ==========================================================================
+       2. BOTÕES E SELETORES GIGANTES PARA IDOSOS
+       ========================================================================== */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
-    /* Alinhamento dos novos rótulos com ícones incorporados */
     label { 
-      font-weight: 500; 
+      font-weight: 600; 
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 8px; 
-      font-size: 15px; 
-      color: var(--text-secondary);
-    }
-
-    label .material-icons {
-      font-size: 18px;
-      color: var(--primary);
+      gap: 8px;
+      margin-bottom: 10px; 
+      font-size: 16px; 
+      color: var(--text);
     }
     
-    select, input[type="text"] { 
+    /* Caixas de seleção viraram botões grandes fáceis de tocar */
+    select { 
       width: 100%; 
-      padding: 14px 16px; 
-      font-size: 16px; 
-      border: 1px solid var(--border); 
-      border-radius: 12px; 
-      box-sizing: border-box; 
+      padding: 16px; 
+      font-size: 17px; 
+      font-weight: 500;
+      border: 2px solid var(--border); 
+      border-radius: 14px; 
       background-color: var(--card-bg);
       color: var(--text);
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
-      -webkit-appearance: none; 
       appearance: none;
-    }
-
-    select {
+      -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%235f6368' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
-      padding-right: 40px;
     }
-    select:focus, input[type="text"]:focus {
+
+    select:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
     }
-    
+
     select:disabled {
-      background-color: #f1f3f4;
-      color: #9aa0a6;
+      background-color: #e8eaed;
+      color: #7f868d;
       cursor: not-allowed;
     }
 
+    /* ==========================================================================
+       3. CAIXA DA RUA E FLUXO DE COMPONENTES
+       ========================================================================== */
     .rua-container { 
       background: var(--card-bg); 
-      padding: 18px; 
-      border-radius: 16px; 
-      margin-top: 16px; 
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      animation: fadeInSuave 0.4s ease forwards;
+      padding: 20px; 
+      border-radius: 18px; 
+      margin-top: 18px; 
+      border: 2px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
-    
-    @keyframes fadeInSuave {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    /* Quando a rua recebe cartas, ela muda para uma cor suave */
+    .rua-container.com-cartas {
+      border-color: var(--success);
+      background-color: var(--success-bg);
     }
 
     .rua-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      gap: 10px;
     }
     
     .rua-titulo { 
-      font-weight: 600; 
+      font-weight: 700; 
       color: var(--text); 
-      font-size: 17px;
+      font-size: 18px;
       display: flex;
       align-items: center;
-      gap: 6px;
     }
 
-    .rua-titulo .material-icons {
-      font-size: 18px;
-      color: var(--text-secondary);
-    }
-    
-    .btn-concluido {
+    /* Botão de Cartas Grande e Chamativo */
+    .btn-cartas {
       background-color: transparent;
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
+      color: var(--text-secondary);
+      border: 2px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
     }
 
-    .btn-concluido.ativo {
+    .btn-cartas.ativo {
       background-color: var(--success);
       color: white;
       border-color: var(--success);
     }
-    
-    .conteudo-rua-animado {
-      max-height: 200px;
-      opacity: 1;
-      overflow: hidden;
-      transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
-    }
 
-    .conteudo-rua-animado.recolhido {
-      max-height: 0;
-      opacity: 0;
-      margin: 0;
-      padding: 0;
-      pointer-events: none;
-    }
-
+    /* Caixa de Histórico com texto ampliado para idosos */
     .hist-box { 
-      font-size: 13px; 
-      color: #b06000; 
-      margin-bottom: 12px; 
-      background: #fff8e1; 
-      padding: 10px 14px; 
-      border-radius: 8px; 
-      border-left: 4px solid #ffb300; 
-    }
-    
-    .escondido { display: none !important; }
-    
-    .rua-concluida-aviso {
-      color: var(--success);
-      font-weight: 600;
-      background-color: var(--success-bg);
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 14px;
-      margin-top: 5px;
-      animation: fadeInSuave 0.3s ease forwards;
-    }
-    
-    button.btn-principal { 
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: auto;
-      min-width: 140px;
-      padding: 16px 24px; 
       font-size: 16px; 
-      color: white; 
-      background-color: var(--primary); 
-      border: none; 
-      border-radius: 30px; 
-      cursor: pointer; 
-      font-weight: 600; 
-      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
-      transition: background-color 0.25s, transform 0.25s, box-shadow 0.25s;
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      font-weight: 600;
+      color: var(--warning); 
+      margin-bottom: 16px; 
+      background: var(--warning-bg); 
+      padding: 12px 16px; 
+      border-radius: 10px; 
+      border-left: 5px solid #ffb300; 
+    }
+  </style>
+</head>
+<style>
+    /* ==========================================================================
+       4. SISTEMA DE ADICIONAR CASAS (TECLADO NUMÉRICO + BALÕES)
+       ========================================================================== */
+    .DIGITACAO-CONTAINER {
+      DISPLAY: flex;
+      GAP: 10px;
+      MARGIN-TOP: 12px;
     }
 
-    button.btn-principal:active { transform: scale(0.96); }
-    button:disabled { background-color: #dadce0 !important; color: #9aa0a6 !important; box-shadow: none !important; cursor: not-allowed; transform: none !important; }
+    INPUT[TYPE="TEL"] { 
+      FLEX: 1;
+      PADDING: 16px; 
+      FONT-SIZE: 18px; 
+      FONT-WEIGHT: 600;
+      BORDER: 2px SOLID var(--border); 
+      BORDER-RADIUS: 14px; 
+      BACKGROUND-COLOR: var(--card-bg);
+      COLOR: var(--text);
+      BOX-SIZING: border-box;
+    }
+
+    INPUT[TYPE="TEL"]:FOCUS {
+      OUTLINE: none;
+      BORDER-COLOR: var(--primary);
+    }
+
+    .BTN-ADICIONAR {
+      BACKGROUND-COLOR: var(--primary);
+      COLOR: white;
+      BORDER: none;
+      PADDING: 0 24px;
+      FONT-SIZE: 16px;
+      FONT-WEIGHT: 700;
+      BORDER-RADIUS: 14px;
+      CURSOR: pointer;
+    }
+
+    /* Área onde os balões das casas adicionadas vão se acumular */
+    .LISTA-CASAS-PROVISORIAS {
+      DISPLAY: flex;
+      FLEX-WRAP: wrap;
+      GAP: 8px;
+      MARGIN-TOP: 12px;
+      MIN-HEIGHT: 30px;
+    }
+
+    /* Balões grandes das casas com o "X" para apagar se errar */
+    .BALAO-CASA {
+      BACKGROUND-COLOR: #e8f0fe;
+      COLOR: var(--primary-dark);
+      PADDING: 10px 16px;
+      BORDER-RADIUS: 20px;
+      FONT-SIZE: 16px;
+      FONT-WEIGHT: 700;
+      DISPLAY: inline-flex;
+      ALIGN-ITEMS: center;
+      GAP: 8px;
+      BORDER: 1px SOLID #aecbfa;
+    }
+
+    .BALAO-CASA .BTN-APAGAR-CASA {
+      COLOR: #c5221f;
+      FONT-WEIGHT: 800;
+      CURSOR: pointer;
+      FONT-SIZE: 16px;
+      PADDING: 0 4px;
+    }
+
+    .AVISO-CARTAS-TEXTO {
+      COLOR: var(--success);
+      FONT-WEIGHT: 700;
+      FONT-SIZE: 15px;
+      MARGIN-TOP: 10px;
+      DISPLAY: flex;
+      ALIGN-ITEMS: center;
+      GAP: 6px;
+    }
+
+    /* ==========================================================================
+       5. BOTÕES FIXOS E AVISOS FLUTUANTES (TOAST / LOADER)
+       ========================================================================== */
+    BUTTON.BTN-PRINCIPAL { 
+      POSITION: fixed;
+      BOTTOM: 0;
+      LEFT: 0;
+      WIDTH: 100%;
+      PADDING: 20px; 
+      FONT-SIZE: 18px; 
+      COLOR: white; 
+      BACKGROUND-COLOR: var(--primary); 
+      BORDER: none; 
+      CURSOR: pointer; 
+      FONT-WEIGHT: 700; 
+      BOX-SHADOW: 0 -4px 12px RGBA(0,0,0,0.1);
+      Z-INDEX: 999;
+      TEXT-ALIGN: center;
+    }
+
+    BUTTON.BTN-PRINCIPAL:DISABLED { 
+      BACKGROUND-COLOR: #dadce0 !IMPORTANT; 
+      COLOR: #9aa0a6 !IMPORTANT; 
+      BOX-SHADOW: none !IMPORTANT; 
+      CURSOR: not-allowed; 
+    }
     
-    /* 🚨 NOTIFICAÇÃO TOAST FLUTUANTE ESTILO ANDROID/INSTAGRAM */
-    .toast-aviso {
-      position: fixed;
-      bottom: 100px; /* Fica acima do botão flutuante */
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background-color: #323232;
-      color: #ffffff;
-      padding: 14px 24px;
-      border-radius: 25px;
-      font-size: 15px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
+    .TOAST-AVISO {
+      POSITION: fixed;
+      BOTTOM: 90px;
+      LEFT: 50%;
+      TRANSFORM: translateX(-50%) translateY(20px);
+      BACKGROUND-COLOR: #323232;
+      COLOR: #ffffff;
+      PADDING: 16px 28px;
+      BORDER-RADIUS: 30px;
+      FONT-SIZE: 16px;
+      FONT-WEIGHT: 600;
+      BOX-SHADOW: 0 4px 16px RGBA(0,0,0,0.3);
+      Z-INDEX: 1000;
+      OPACITY: 0;
+      POINTER-EVENTS: none;
+      TRANSITION: opacity 0.3s ease, transform 0.3s ease;
+      DISPLAY: flex;
+      ALIGN-ITEMS: center;
+      GAP: 10px;
+      WHITE-SPACE: nowrap;
     }
 
-    .toast-aviso.visivel {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(-50%) translateY(0);
+    .TOAST-AVISO.VISIVEL {
+      OPACITY: 1;
+      POINTER-EVENTS: auto;
+      TRANSFORM: translateX(-50%) translateY(0);
     }
 
-    .loader-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: white; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; z-index: 9999;
-      transition: opacity 0.3s;
+    /* Loader simplificado: Conectando... Conectado! */
+    .LOADER-OVERLAY {
+      POSITION: fixed; TOP: 0; LEFT: 0; WIDTH: 100%; HEIGHT: 100%;
+      BACKGROUND: white; DISPLAY: flex; FLEX-DIRECTION: column;
+      JUSTIFY-CONTENT: center; ALIGN-ITEMS: center; Z-INDEX: 9999;
+      TRANSITION: opacity 0.3s;
     }
-    .spinner {
-      width: 40px; height: 40px; border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    .SPINNER {
+      WIDTH: 45px; HEIGHT: 45px; BORDER: 5px SOLID #f3f3f3;
+      BORDER-TOP: 5px SOLID var(--primary); BORDER-RADIUS: 50%;
+      ANIMATION: spin 0.8s linear infinite; MARGIN-BOTTOM: 20px;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @KEYFRAMES spin { 0% { TRANSFORM: rotate(0deg); } 100% { TRANSFORM: rotate(360deg); } }
 
-    .btn-instalar {
-      display: none; width: 100%; background-color: var(--success);
-      color: white; border: none; padding: 14px; font-size: 15px;
-      font-weight: 600; border-radius: 12px; margin-bottom: 20px;
-      cursor: pointer; text-align: center; box-shadow: 0 4px 6px rgba(30, 142, 62, 0.15);
+    .BTN-INSTALAR {
+      DISPLAY: none; WIDTH: 100%; BACKGROUND-COLOR: var(--success);
+      COLOR: white; BORDER: none; PADDING: 16px; FONT-SIZE: 16px;
+      FONT-WEIGHT: 700; BORDER-RADIUS: 14px; MARGIN-BOTTOM: 22px;
+      CURSOR: pointer; TEXT-ALIGN: center;
     }
   </style>
 </head>
 <body>
 
-  <div id="loader" class="loader-overlay">
-    <div class="spinner"></div>
-    <div style="color: var(--text-secondary); font-weight: 500;">Sincronizando dados...</div>
+  <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
+  <div ID="loader" CLASS="loader-overlay">
+    <div CLASS="spinner" ID="loaderSpinner"></div>
+    <div ID="loaderTexto" STYLE="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
   </div>
 
-<div style="background: var(--card-bg); padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-  <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: var(--text); text-align: left;">Territórios</h2>
-</div>
+  <!-- CABEÇALHO DO APLICATIVO -->
+  <div STYLE="background: var(--card-bg); padding: 18px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
+    <svg WIDTH="26" HEIGHT="26" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+    <h2 STYLE="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
+  </div>
 
-  <div class="container">
-    <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo de Territórios</button>
+  <div CLASS="container">
+    <button ID="btnInstalarApp" CLASS="btn-instalar">📥 Instalar no meu Celular</button>
     
-    <!-- Incorporado os novos ícones nas labels das caixas -->
-    <div class="form-group">
-      <label for="territorio">
-        <!-- Ícone public em SVG -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary); vertical-align: middle;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+    <!-- SELEÇÃO DE TERRITÓRIO -->
+    <div CLASS="form-group">
+      <label FOR="territorio">
+        <svg WIDTH="20" HEIGHT="20" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
         1. Escolha o Território:
       </label>
-      <select id="territorio" onchange="filtrarQuadrasLocalmente()">
-        <option value="">Carregando...</option>
+      <select ID="territorio" ONCHANGE="filtrarQuadrasLocalmente()">
+        <option VALUE="">Carregando...</option>
       </select>
     </div>
 
-    <div class="form-group">
-      <label for="quadra">
-        <!-- Ícone map em SVG -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary); vertical-align: middle;"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+    <!-- SELEÇÃO DE QUADRA -->
+    <div CLASS="form-group">
+      <label FOR="quadra">
+        <svg WIDTH="20" HEIGHT="20" VIEWBOX="0 0 24 24" FILL="currentColor" STYLE="color: var(--primary);"><path D="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
         2. Escolha a Quadra:
       </label>
-      <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
-        <option value="">Selecione um território primeiro</option>
+      <select ID="quadra" ONCHANGE="carregarRuasDoCacheLocal()" DISABLED>
+        <option VALUE="">Selecione um território primeiro</option>
       </select>
     </div>
 
-    <div id="area-ruas"></div>
+    <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
+    <div ID="area-ruas"></div>
 
-    <button id="btnSalvar" class="btn-principal" onclick="enviarDados()" disabled>
-      <!-- Ícone save em SVG -->
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-      Gravar
+    <!-- BOTÃO FIXADO DE ENVIAR -->
+    <button ID="btnSalvar" CLASS="btn-principal" ONCLICK="confirmarEEnviar()" DISABLED>
+      Enviar para o Dirigente
     </button>
     
-    <!-- Nova div estrutural do Toast Flutuante -->
-    <div id="toast" class="toast-aviso"></div>
+    <!-- NOTIFICAÇÃO FLUTUANTE -->
+    <div ID="toast" CLASS="toast-aviso"></div>
   </div>
-
-
-  <script>
-    // SEU LINK DEFINIDO DIRETAMENTE AQUI
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+<script>
+    /* ==========================================================================
+       6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
+       ========================================================================== */
+    // Seu link do Apps Script associado ao Google Planilhas
+    var URL_GOOGLE_SCRIPT = "https://google.com";
     var BD_GLOBAL = null; 
     var deferredPrompt;
+    
+    // Objeto global para guardar na memória as casas digitadas temporariamente por rua
+    // Exemplo: { "Rua A": ["10", "12"], "Rua B": ["54"] }
+    var CASAS_TEMPORARIAS_POR_RUA = {};
+    
+    // Objeto global para guardar quais ruas receberam cartas nesta sessão
+    var CARTAS_POR_RUA = {};
 
-        window.onload = function() {
-      // 🚀 SE JÁ ESTIVER INSTALADO: Garante que o botão de instalação suma de vez
+    /* ==========================================================================
+       7. FLUXO DE ENTRADA DO APLICATIVO (LOADAER AMIGÁVEL E PWA)
+       ========================================================================== */
+    window.onload = function() {
+      // Se o app já estiver instalado e rodando fora do navegador, esconde o botão de instalar
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
         document.getElementById('btnInstalarApp').style.display = 'none';
       }
 
+      // Altera o texto para a frase simples que você pediu
+      var txtLoader = document.getElementById("loaderTexto");
+      txtLoader.innerText = "Conectando...";
+
+      // Busca os dados da sua planilha via Apps Script
       fetchData("obterBancoCompleto", null, function(banco) {
         BD_GLOBAL = banco;
         
-        var loader = document.getElementById("loader");
-        loader.style.opacity = 0;
-        setTimeout(function() { loader.classList.add("escondido"); }, 300);
+        // Sucesso na conexão: Muda o texto de forma amigável antes de fechar a tela branca
+        txtLoader.innerHTML = "<span style='color: var(--success);'>✓ Conectado!</span>";
+        document.getElementById("loaderSpinner").style.display = "none";
+        
+        setTimeout(function() {
+          var loader = document.getElementById("loader");
+          loader.style.opacity = 0;
+          setTimeout(function() { loader.classList.add("escondido"); }, 300);
+        }, 800);
 
+        // Preenche o menu de escolha de Território usando fragmentos para melhor performance
         var combo = document.getElementById("territorio");
-        combo.innerHTML = '<option value="">-- Selecione o Território --</option>';
+        var fragmento = document.createDocumentFragment();
+        
+        var optPadrao = document.createElement("option");
+        optPadrao.value = "";
+        optPadrao.innerText = "-- Selecione o Território --";
+        fragmento.appendChild(optPadrao);
+
         banco.territorios.forEach(function(t) {
-          combo.innerHTML += '<option value="'+t+'">'+t+'</option>';
+          var opt = document.createElement("option");
+          opt.value = t;
+          opt.innerText = t;
+          fragmento.appendChild(opt);
         });
+        
+        combo.innerHTML = "";
+        combo.appendChild(fragmento);
       });
     };
 
+    // Monitora o botão de instalação nativo do navegador
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
       deferredPrompt = e;
       document.getElementById('btnInstalarApp').style.display = 'block';
     });
 
+    // Ação do botão grande de instalação
     document.getElementById('btnInstalarApp').addEventListener('click', function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(function(choiceResult) {
           if (choiceResult.outcome === 'accepted') {
             document.getElementById('btnInstalarApp').style.display = 'none';
+            // 🚨 NOVO: Dispara um aviso bonito confirmando que instalou com sucesso!
+            exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>', '🎉 Aplicativo instalado com sucesso!');
           }
           deferredPrompt = null;
         });
       } else {
-        alert("Para instalar:\n1. Clique nos 3 pontinhos do Chrome.\n2. Escolha 'Instalar aplicativo' ou 'Adicionar à tela inicial'.");
+        alert("Para instalar:\n1. Clique nos 3 pontinhos do Chrome ou navegador.\n2. Escolha 'Instalar aplicativo' ou 'Adicionar à tela inicial'.");
       }
     });
 
-    // ⚡ INSTANTÂNEO: Filtra as quadras direto da memória local
+    /* ==========================================================================
+       8. LOGICA DE FILTRAGEM (TERRITÓRIOS -> QUADRAS)
+       ========================================================================== */
     function filtrarQuadrasLocalmente() {
       var territorio = document.getElementById("territorio").value;
       var comboQuadra = document.getElementById("quadra");
@@ -409,15 +470,26 @@
         return q.territorio === territorio;
       });
 
-      comboQuadra.innerHTML = '<option value="">-- Selecione a Quadra --</option>';
+      var fragmento = document.createDocumentFragment();
+      var optPadrao = document.createElement("option");
+      optPadrao.value = "";
+      optPadrao.innerText = "-- Selecione a Quadra --";
+      fragmento.appendChild(optPadrao);
+
       quadrasFiltradas.forEach(function(q) {
-        comboQuadra.innerHTML += '<option value="'+q.nome+'">'+q.nome+'</option>';
+        var opt = document.createElement("option");
+        opt.value = q.nome;
+        opt.innerText = q.nome;
+        fragmento.appendChild(opt);
       });
+
+      comboQuadra.innerHTML = "";
+      comboQuadra.appendChild(fragmento);
       comboQuadra.disabled = false;
     }
-
-       // ⚡ INSTANTÂNEO: Filtra as ruas e adiciona ícone de rua nativo
-      // ⚡ INSTANTÂNEO: Filtra as ruas e adiciona ícone de rua nativo (Versão Home City)
+    /* ==========================================================================
+       9. RENDERIZAÇÃO DAS RUAS E O NOVO SISTEMA DE CASAS E CARTAS
+       ========================================================================== */
     function carregarRuasDoCacheLocal() {
       var quadra = document.getElementById("quadra").value;
       var areaRuas = document.getElementById("area-ruas");
@@ -434,145 +506,209 @@
       });
 
       if (ruasFiltradas.length === 0) {
-        areaRuas.innerHTML = "<p style='color:red; text-align:center;'>Nenhuma rua encontrada.</p>";
+        areaRuas.innerHTML = "<p style='color:#c5221f; text-align:center; font-weight:700;'>Nenhuma rua encontrada nesta quadra.</p>";
         btn.disabled = true;
         return;
       }
       
       var htmlFinal = "";
       ruasFiltradas.forEach(function(item, index) {
+        // Inicializa a memória temporária dessa rua caso ela ainda não exista
+        if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
+          CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
+        }
+
+        // Verifica se a rua já foi marcada com cartas nesta sessão
+        var classCartas = CARTAS_POR_RUA[item.nome] ? "com-cartas" : "";
+        var classBotaoAtivo = CARTAS_POR_RUA[item.nome] ? "ativo" : "";
+        var txtBotaoCartas = CARTAS_POR_RUA[item.nome] ? "Deixou Cartas: Sim" : "Deixou Cartas?";
+        var avisoEscondido = CARTAS_POR_RUA[item.nome] ? "" : "style='display:none;'";
+
         htmlFinal += `
-          <div class="rua-container" id="container_${index}" style="animation-delay: ${index * 0.05}s;">
+          <div class="rua-container ${classCartas}" id="container_${index}">
             <div class="rua-header">
-              <!-- Ícone mdiHomeCityOutline convertido para SVG Puro -->
               <div class="rua-titulo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--text-secondary); vertical-align: middle; margin-right: 6px;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15Z"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--text-secondary); margin-right: 8px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15Z"/></svg>
                 ${item.nome}
               </div>
-              <button type="button" class="btn-concluido" id="btnConcluir_${index}" onclick="alternarConclusao(${index}, '${item.nome}')">Concluir</button>
+              <button type="button" class="btn-cartas ${classBotaoAtivo}" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome}')">${txtBotaoCartas}</button>
             </div>
-            <div id="conteudoRua_${index}" class="conteudo-rua-animado">
-              <div class="hist-box">Casas feitas: ${item.historico}</div>
-              <input type="hidden" id="ruaNome_${index}" value="${item.nome}">
-              <input type="text" id="ruaCasas_${index}" placeholder="Digite as casas (Ex: 10, 15, 22)">
+            
+            <div class="hist-box">Casas já faladas: ${item.historico}</div>
+            
+            <div id="avisoCartasContainer_${index}" ${avisoEscondido} class="aviso-cartas-texto">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Cartas deixadas nesta rua!
             </div>
-            <div id="avisoConcluido_${index}" class="rua-concluida-aviso escondido">✓ Rua Concluída</div>
+
+            <div class="digitacao-container">
+              <input type="tel" inputmode="numeric" id="inputCasa_${index}" placeholder="Número da casa">
+              <button type="button" class="btn-adicionar" onclick="adicionarCasaTemporaria(${index}, '${item.nome}')">Adicionar</button>
+            </div>
+
+            <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
           </div>
         `;
       });
       
       areaRuas.innerHTML = htmlFinal;
       btn.disabled = false;
+
+      ruasFiltradas.forEach(function(item, index) {
+        atualizarVisualCasasTemporarias(index, item.nome);
+      });
     }
 
-       function alternarConclusao(index, nomeRua) {
-      var botao = document.getElementById("btnConcluir_" + index);
-      var conteudo = document.getElementById("conteudoRua_" + index);
-      var aviso = document.getElementById("avisoConcluido_" + index);
-      
-      var dadosConclusao = {
-        territorio: document.getElementById("territorio").value,
-        quadra: document.getElementById("quadra").value,
-        rua: nomeRua,
-        status: ""
-      };
+    /* ==========================================================================
+       10. GERENCIAMENTO DAS CASAS DIGITADAS E DO BOTÃO DE CARTAS
+       ========================================================================== */
+    function adicionarCasaTemporaria(index, nomeRua) {
+      var input = document.getElementById("inputCasa_" + index);
+      var numero = input.value.trim();
 
-      if (!botao.classList.contains("ativo")) {
+      if (!numero) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+        return;
+      }
+
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+      input.value = ""; 
+      input.focus();    
+
+      atualizarVisualCasasTemporarias(index, nomeRua);
+    }
+    function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
+      atualizarVisualCasasTemporarias(index, nomeRua);
+    }
+
+    function atualizarVisualCasasTemporarias(index, nomeRua) {
+      var listaDiv = document.getElementById("listaProvisoria_" + index);
+      if (!listaDiv) return;
+
+      var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[nomeRua] || [];
+      var htmlBaloes = "";
+
+      listaDeNumeros.forEach(function(num, idx) {
+        htmlBaloes += `
+          <div class="balao-casa">
+            ${num}
+            <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
+          </div>
+        `;
+      });
+
+      listaDiv.innerHTML = htmlBaloes;
+    }
+
+    function alternarCartas(index, nomeRua) {
+      var botao = document.getElementById("btnCartas_" + index);
+      var container = document.getElementById("container_" + index);
+      var aviso = document.getElementById("avisoCartasContainer_" + index);
+
+      if (!CARTAS_POR_RUA[nomeRua]) {
+        CARTAS_POR_RUA[nomeRua] = true;
         botao.classList.add("ativo");
-        botao.innerText = "Desmarcar";
-        conteudo.classList.add("recolhido"); 
-        
-        setTimeout(function() {
-          aviso.classList.remove("escondido"); 
-        }, 150);
-        
-        dadosConclusao.status = "Concluída";
-        // Ícone check_circle em SVG
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>', 'Rua marcada como concluída');
+        botao.innerText = "Deixou Cartas: Sim";
+        container.classList.add("com-cartas");
+        aviso.style.display = "flex";
+        exibirToast('<path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>', 'Registro de cartas anotado');
       } else {
+        CARTAS_POR_RUA[nomeRua] = false;
         botao.classList.remove("ativo");
-        botao.innerText = "Concluir";
-        aviso.classList.add("escondido");
-        conteudo.classList.remove("recolhido"); 
-        dadosConclusao.status = "Reaberta";
-      }
-
-      fetchData("registrarConclusaoRua", dadosConclusao, function() {});
-    }
-
-function enviarDados() {
-  var btn = document.getElementById("btnSalvar");
-  var territorio = document.getElementById("territorio").value;
-  var quadra = document.getElementById("quadra").value;
-  
-  if (!territorio || !quadra) {
-    exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Preencha território e quadra!');
-    return;
-  }
-  
-  var containers = document.querySelectorAll(".rua-container");
-  var ruasDados = [];
-
-  containers.forEach(function(el, index) {
-    var conteudo = document.getElementById("conteudoRua_" + index);
-    if (conteudo && !conteudo.classList.contains("recolhido")) {
-      
-      // CORREÇÃO AQUI: Tenta pegar o .value (se for input), se não conseguir, pega o .innerText (se for texto comum)
-      var elNome = document.getElementById("ruaNome_" + index);
-      var nome = "";
-      if (elNome) {
-        nome = elNome.value !== undefined ? elNome.value : elNome.innerText;
-      }
-      
-      var elCasas = document.getElementById("ruaCasas_" + index);
-      var casas = elCasas ? elCasas.value.trim() : "";
-      
-      if (nome && casas) { 
-        ruasDados.push({ nome: nome.trim(), casas: casas }); 
+        botao.innerText = "Deixou Cartas?";
+        container.classList.remove("com-cartas");
+        aviso.style.display = "none";
       }
     }
-  });
-  
-  if (ruasDados.length === 0) {
-    exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhuma casa digitada!');
-    return;
-  }
-  
-  btn.disabled = true;
-  exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Salvando dados, aguarde...');
-  
-  var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
-  
-  fetchData("salvarDados", formCompleto, function(resposta) {
-    if (resposta === "Sucesso") {
-      exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Gravado com sucesso!');
+
+    /* ==========================================================================
+       11. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
+       ========================================================================== */
+    function confirmarEEnviar() {
+      var confirmar = confirm("Deseja mesmo enviar este relatório para o Dirigente?");
+      if (confirmar) {
+        enviarDados();
+      }
+    }
+
+    function enviarDados() {
+      var btn = document.getElementById("btnSalvar");
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
       
-      ruasDados.forEach(function(rd) {
-        var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
-        if (ruaNoBD) {
-          if (ruaNoBD.historico === "Nenhum registro recente") { ruaNoBD.historico = rd.casas; }
-          else { ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; }
+      if (!territorio || !quadra) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Escolha o território e a quadra!');
+        return;
+      }
+      
+      var ruasDados = [];
+      var chavesRuas = Object.keys(CASAS_TEMPORARIAS_POR_RUA);
+
+      chavesRuas.forEach(function(nomeRua) {
+        var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
+        var teveCartas = CARTAS_POR_RUA[nomeRua] ? "Sim" : "Não";
+
+        if (casasMarcadas.length > 0 || teveCartas === "Sim") {
+          var stringCasas = casasMarcadas.join(", ");
+          var informacaoFinal = stringCasas;
+          
+          if (teveCartas === "Sim") {
+            informacaoFinal = stringCasas ? stringCasas + " [Deixou Cartas]" : "[Deixou Cartas]";
+          }
+
+          ruasDados.push({ 
+            nome: nomeRua, 
+            casas: informacaoFinal 
+          });
         }
       });
       
-      setTimeout(function() {
-        carregarRuasDoCacheLocal();
-      }, 1500);
-    } else {
-      exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
-      btn.disabled = false;
+      if (ruasDados.length === 0) {
+        exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhum dado digitado ou marcado!');
+        return;
+      }
+      
+      btn.disabled = true;
+      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Enviando dados, aguarde...');
+      
+      var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
+      
+      fetchData("salvarDados", formCompleto, function(resposta) {
+        if (resposta === "Sucesso") {
+          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', '✓ Enviado com sucesso!');
+          
+          ruasDados.forEach(function(rd) {
+            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+            if (ruaNoBD) {
+              if (ruaNoBD.historico === "Nenhum registro recente") { 
+                ruaNoBD.historico = rd.casas; 
+              } else { 
+                ruaNoBD.historico = rd.casas + " | " + ruaNoBD.historico; 
+              }
+            }
+          });
+
+          CASAS_TEMPORARIAS_POR_RUA = {};
+          CARTAS_POR_RUA = {};
+          
+          setTimeout(function() {
+            carregarRuasDoCacheLocal();
+          }, 1500);
+        } else {
+          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
+          btn.disabled = false;
+        }
+      });
     }
-  });
-}
 
-
-    // ⚡ NOVA FUNÇÃO: Gerencia a exibição do Toast Flutuante em SVG na tela
+    /* ==========================================================================
+       12. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH)
+       ========================================================================== */
     function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
       toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
       toast.classList.add("visivel");
       
-      // Remove o aviso automaticamente após 3 segundos
       setTimeout(function() {
         toast.classList.remove("visivel");
       }, 3000);
@@ -589,7 +725,6 @@ function enviarDados() {
       .then(function(dados) { callback(dados); })
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
-        // Ícone cloud_off em SVG
         exibirToast('<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c2.76 0 5 2.24 5 5v1h1.5c1.38 0 2.5 1.12 2.5 2.5 0 .81-.39 1.54-1 2l1.42 1.42c1.01-.91 1.58-2.2 1.58-3.67 0-2.76-2.12-5.04-4.65-5.41zM3.55 3.57L2.28 4.84l2.12 2.12C2.42 8.08 1 10.37 1 13c0 3.87 3.13 7 7 7h10.73l2.43 2.43 1.27-1.27L3.55 3.57zM8 18c-2.76 0-5-2.24-5-5 0-2.05 1.23-3.81 3-4.58l5.83 5.83L11 15v1h1v-1l.73-.73 2.73 2.73H8z"/>', 'Erro na conexão.');
       });
     }
