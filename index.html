@@ -491,6 +491,9 @@
         txtLoader.innerHTML = "<span style='color: #007bff; font-weight: 700;'>Conectado</span>";
         document.getElementById("loaderSpinner").style.display = "none";
         
+        // --- ADICIONE ESTA LINHA AQUI ABAIXO: Liga o botão apenas após o banco carregar ---
+        document.getElementById("btnSalvar").style.display = "flex";
+        
         setTimeout(function() {
           var loader = document.getElementById("loader");
           loader.style.opacity = 0;
