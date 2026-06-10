@@ -1,4 +1,4 @@
-const CACHE_NAME = 'territorios-v6'; // Mudamos para v6 para limpar os erros travados
+const CACHE_NAME = 'territorios-v7'; // 
 const ASSETS = [
   './',
   './index.html',
