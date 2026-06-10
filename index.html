@@ -705,13 +705,35 @@
       
       var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
+            // Envia os dados e atualiza instantaneamente a tela do app sem o carimbo de data
       fetchData("salvarDados", formCompleto, function(resposta) {
         if (resposta === "Sucesso" || resposta === "OK") {
           exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', '✓ Enviado com sucesso!');
           
-          // Data atual formatada para atualizar o visual local instantaneamente
-          var d = new Date();
-          var dataFormatoLocal = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+          ruasDados.forEach(function(rd) {
+            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+            if (ruaNoBD) {
+              var textoParaAdicionar = rd.casas; // Salvando APENAS as casas, sem misturar data na tela!
+              if (!ruaNoBD.historico || ruaNoBD.historico === "Nenhum registro recente") { 
+                ruaNoBD.historico = textoParaAdicionar; 
+              } else { 
+                ruaNoBD.historico = textoParaAdicionar + " | " + ruaNoBD.historico; 
+              }
+            }
+          });
+
+          CASAS_TEMPORARIAS_POR_RUA = {};
+          CARTAS_POR_RUA = {};
+          
+          setTimeout(function() {
+            carregarRuasDoCacheLocal();
+          }, 1500);
+        } else {
+          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', JSON.stringify(resposta));
+          btn.disabled = false;
+        }
+      });
+
 
           ruasDados.forEach(function(rd) {
             var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
