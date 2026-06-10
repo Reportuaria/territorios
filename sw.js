@@ -1,4 +1,4 @@
-const CACHE_NAME = 'territorios-v5'; // Mudei para v4 para aplicar as correções agora
+const CACHE_NAME = 'territorios-v6'; // Mudamos para v6 para limpar os erros travados
 const ASSETS = [
   './',
   './index.html',
@@ -8,9 +8,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
-  // Força o novo Service Worker a se tornar ativo imediatamente
   self.skipWaiting();
-  
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS).catch(() => console.log("Aviso: Ícones locais ainda não enviados"));
@@ -18,7 +16,6 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// NOVO: Limpa os caches antigos (v1, v2, v3) automaticamente ao ativar
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -30,20 +27,25 @@ self.addEventListener('activate', (e) => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Assume o controle das páginas abertas na hora
+    }).then(() => self.clients.claim())
   );
 });
 
+// ==========================================================================
+// EVENTO FETCH CORRIGIDO E BLINDADO CONTRA LOOP
+// ==========================================================================
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('script.google.com')) {
-    return;
+  // CORREÇÃO CORS: Só intercepta arquivos do seu próprio site no GitHub Pages
+  if (!e.request.url.startsWith(self.location.origin)) {
+    return; // Deixa o navegador lidar normalmente com requisições externas (Google, Google Scripts, etc)
   }
   
   e.respondWith(
     caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
+      // CORREÇÃO MULTI-USE: Se o arquivo estiver no cache, devolve. Se não, clona o pedido para a rede
+      return response || fetch(e.request.clone());
     }).catch(() => {
-      return fetch(e.request);
+      return fetch(e.request.clone());
     })
   );
 });
