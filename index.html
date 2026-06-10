@@ -238,26 +238,49 @@
       min-height: 30px;
     }
 
-    .balao-casa {
-      background-color: #e8f0fe;
-      color: var(--primary-dark);
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 16px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #aecbfa;
-    }
+   /* Transforma os balões provisórios em quadradinhos idênticos aos do histórico */
+.balao-casa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Permite posicionar o botão de apagar no cantinho */
+  min-width: 36px; /* Um pouquinho maior para caber o botão de fechar */
+  height: 36px;
+  background: #ffffff; /* Mesmo fundo branco */
+  color: #212529;
+  padding: 0 14px 0 8px; /* Espaço extra na direita para o '✕' não cobrir o número */
+  border-radius: 6px; /* Mesmos cantos de bloco */
+  font-size: 14px;
+  font-weight: 700; /* Mesmo negrito */
+  margin: 6px 4px; /* Afasta um quadradinho do outro */
+  border: 1px solid #007bff; /* Borda azul sutil para diferenciar o que é provisório */
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.08); /* Sombra azulada leve */
+}
 
-    .balao-casa .btn-apagar-casa {
-      color: #c5221f;
-      font-weight: 800;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 0 4px;
-    }
+/* Botão de apagar (✕) embutido de forma limpa dentro do quadradinho */
+.btn-apagar-casa {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 10px;
+  color: #dc3545; /* Vermelho padrão de exclusão */
+  font-weight: 900;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.1s ease;
+}
+
+.btn-apagar-casa:hover {
+  transform: scale(1.2); /* Aumenta de leve ao passar o dedo */
+}
+
+/* Ajuste no container que segura a lista provisória para alinhar perfeitamente */
+.lista-casas-provisorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 8px;
+}
 
     .aviso-cartas-texto {
       color: var(--success);
@@ -325,15 +348,7 @@
   box-shadow: none !important;
   cursor: not-allowed;
   transform: translateX(-50%);
-}
-
-/* AJUSTE DE ESPAÇAMENTO DO CONTAINER DAS RUAS */
-/* Como o botão agora flutua por cima, precisamos dar um espaço no fundo da página */
-/* para a última rua não ficar escondida atrás do botão flutuante. */
-.container {
-  padding-bottom: 100px !important; /* Cria um respiro no final da rolagem da página */
-}
-    
+}    
     .toast-aviso {
       position: fixed;
       bottom: 90px;
