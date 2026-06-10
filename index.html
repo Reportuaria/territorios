@@ -748,12 +748,14 @@
       // Se for para buscar o banco, usamos 'cors' para o aplicativo conseguir ler a lista de ruas.
       var modoRequisicao = (funcao === "salvarDados" || funcao === "registrarConclusaoRua") ? "no-cors" : "cors";
 
-      fetch(URL_GOOGLE_SCRIPT, {
-        method: "POST",
-        mode: modoRequisicao,
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ executar: funcao, dados: parametro })
-      })
+    fetch(URL_GOOGLE_SCRIPT, {
+  method: "POST",
+  mode: "cors", // Defina explicitamente como "cors"
+  redirect: "follow", // ESSA LINHA CORRIGE O ERRO: força o fetch a seguir o redirecionamento do Google
+  headers: { "Content-Type": "text/plain;charset=utf-8" },
+  body: JSON.stringify({ executar: funcao, dados: parametro })
+})
+
       .then(function(res) { 
         // Se estiver gravando dados (no-cors), não tentamos ler o JSON para não quebrar o código
         if (modoRequisicao === "no-cors") {
