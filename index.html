@@ -297,7 +297,7 @@
 </head>
 <body>
 
-  <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
+    <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
   <div id="loader" class="loader-overlay">
     <div class="spinner" id="loaderSpinner"></div>
     <div id="loaderTexto" style="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
@@ -337,7 +337,7 @@
     <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
     <div id="area-ruas"></div>
 
-    <!-- BOTÃO FIXADO DE ENVIAR (Ajustado para abrir o modal de confirmação) -->
+    <!-- BOTÃO FIXADO DE ENVIAR -->
     <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" disabled>
       Enviar para o Dirigente
     </button>
@@ -349,7 +349,7 @@
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
        ========================================================================== */
-    var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    var URL_GOOGLE_SCRIPT = "https://google.com";
     var BD_GLOBAL = null; 
     var deferredPrompt;
     
@@ -371,6 +371,11 @@
       txtLoader.innerText = "Conectando...";
 
       fetchData("obterBancoCompleto", null, function(banco) {
+        if (!banco || !banco.territorios) {
+          txtLoader.innerHTML = "<span style='color: var(--danger);'>⚠️ Falha ao carregar banco de dados.</span>";
+          return;
+        }
+
         BD_GLOBAL = banco;
         
         txtLoader.innerHTML = "<span style='color: var(--success);'>✓ Conectado!</span>";
@@ -397,12 +402,11 @@
           opt.innerText = t;
           fragmento.appendChild(opt);
         });
-        
+
         combo.innerHTML = "";
         combo.appendChild(fragmento);
       });
     };
-
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js')
@@ -448,6 +452,7 @@
         alert("Para instalar:\n1. Clique nos 3 pontinhos do Chrome ou navegador.\n2. Escolha 'Instalar aplicativo' ou 'Adicionar à tela inicial'.");
       }
     });
+
     /* ==========================================================================
        8. LÓGICA DE FILTRAGEM (TERRITÓRIOS -> QUADRAS)
        ========================================================================== */
@@ -487,7 +492,7 @@
     }
 
     /* ==========================================================================
-       9. RENDERIZAÇÃO DAS RUAS E O SISTEMA DE CASAS E CARTAS (CORRIGIDO)
+       9. RENDERIZAÇÃO DAS RUAS E O SISTEMA DE CASAS E CARTAS
        ========================================================================== */
     function carregarRuasDoCacheLocal() {
       var quadra = document.getElementById("quadra").value;
@@ -553,7 +558,7 @@
           </div>
         `;
       });
-      
+
       areaRuas.innerHTML = htmlFinal;
 
       ruasFiltradas.forEach(function(item, index) {
@@ -562,7 +567,6 @@
 
       btn.disabled = true; 
     }
-    // Função auxiliar que gerencia se o botão "Enviar" fica azul ou cinza
     function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
       var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { return lista.length > 0; });
@@ -640,8 +644,9 @@
       }
       verificarSeTemDadosParaEnviar(); 
     }
+
     /* ==========================================================================
-       10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
+       10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS (CORRIGIDO)
        ========================================================================== */
     function abrirModalConfirmacao() {
       var territorio = document.getElementById("territorio").value;
@@ -696,14 +701,15 @@
         exibirToast('<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>', 'Nenhum dado digitado ou marcado!');
         return;
       }
-      
+
       btn.disabled = true;
       exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Enviando dados, aguarde...');
       
       var formCompleto = { territorio: territorio, quadra: quadra, ruas: ruasDados };
       
       fetchData("salvarDados", formCompleto, function(resposta) {
-        if (resposta === "Sucesso") {
+        // CORREÇÃO DEFINITIVA: Valida texto de sucesso limpo retornado pela nova API
+        if (resposta === "Sucesso" || resposta === "OK") {
           exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', '✓ Enviado com sucesso!');
           
           ruasDados.forEach(function(rd) {
@@ -724,17 +730,18 @@
             carregarRuasDoCacheLocal();
           }, 1500);
         } else {
-          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', resposta);
+          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', JSON.stringify(resposta));
           btn.disabled = false;
         }
       });
     }
 
     /* ==========================================================================
-       11. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH)
+       11. FUNÇÕES AUXILIARES DE SUPORTE (TOAST E FETCH UNIFICADOS COM CORS)
        ========================================================================== */
     function exibirToast(svgPath, texto) {
       var toast = document.getElementById("toast");
+      if (!toast) return;
       toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
       toast.classList.add("visivel");
       
@@ -743,26 +750,17 @@
       }, 3000);
     }
 
-            function fetchData(funcao, parametro, callback) {
-      // Se for para salvar dados, usamos 'no-cors' para o Google não bloquear o envio.
-      // Se for para buscar o banco, usamos 'cors' para o aplicativo conseguir ler a lista de ruas.
-      var modoRequisicao = (funcao === "salvarDados" || funcao === "registrarConclusaoRua") ? "no-cors" : "cors";
-
-    fetch(URL_GOOGLE_SCRIPT, {
-  method: "POST",
-  mode: "cors", // Defina explicitamente como "cors"
-  redirect: "follow", // ESSA LINHA CORRIGE O ERRO: força o fetch a seguir o redirecionamento do Google
-  headers: { "Content-Type": "text/plain;charset=utf-8" },
-  body: JSON.stringify({ executar: funcao, dados: parametro })
-})
-
+    function fetchData(funcao, parametro, callback) {
+      // Unificado para usar CORS puro e limpo, integrado ao novo padrão do Apps Script
+      fetch(URL_GOOGLE_SCRIPT, {
+        method: "POST",
+        mode: "cors", 
+        redirect: "follow", 
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ executar: funcao, dados: parametro })
+      })
       .then(function(res) { 
-        // Se estiver gravando dados (no-cors), não tentamos ler o JSON para não quebrar o código
-        if (modoRequisicao === "no-cors") {
-          return "Sucesso";
-        }
-        // Se estiver lendo a planilha, processa o JSON normalmente
-        if (!res.ok) throw new Error(); 
+        if (!res.ok) throw new Error("Falha de comunicação com o servidor."); 
         return res.json(); 
       })
       .then(function(dados) { 
@@ -771,9 +769,10 @@
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
         exibirToast('<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c2.76 0 5 2.24 5 5v1h1.5c1.38 0 2.5 1.12 2.5 2.5 0 .81-.39 1.54-1 2l1.42 1.42c1.01-.91 1.58-2.2 1.58-3.67 0-2.76-2.12-5.04-4.65-5.41zM3.55 3.57L2.28 4.84l2.12 2.12C2.42 8.08 1 10.37 1 13c0 3.87 3.13 7 7 7h10.73l2.43 2.43 1.27-1.27L3.55 3.57zM8 18c-2.76 0-5-2.24-5-5 0-2.05 1.23-3.81 3-4.58l5.83 5.83L11 15v1h1v-1l.73-.73 2.73 2.73H8z"/>', 'Erro na conexão.');
+        var btn = document.getElementById("btnSalvar");
+        if (btn) btn.disabled = false;
       });
     }
-
   </script>
 
   <!-- JANELA DE CONFIRMAÇÃO CUSTOMIZADA -->
