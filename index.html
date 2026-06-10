@@ -538,9 +538,12 @@
         btn.disabled = true;
         return;
       }
-      
-      var htmlFinal = "";
+            var htmlFinal = "";
       ruasFiltradas.forEach(function(item, index) {
+        // --- COLOQUE ESSAS DUAS LINHAS AQUI DENTRO (ELAS CORRIGEM O ERRO) ---
+        var campoBloqueado = CARTAS_POR_RUA[item.nome] ? "disabled" : "";
+        var textoPlaceholder = CARTAS_POR_RUA[item.nome] ? "Bloqueado: Cartas deixadas" : "Digite o número...";
+
         if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
           CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
         }
@@ -551,6 +554,7 @@
         var avisoEscondido = CARTAS_POR_RUA[item.nome] ? "" : "style='display:none;'";
 
         htmlFinal += `
+
           <div class="rua-container ${classCartas}" id="container_${index}">
             <div class="rua-header">
               <div class="rua-titulo">
