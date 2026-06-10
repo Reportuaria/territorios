@@ -659,12 +659,26 @@
     /* ==========================================================================
        10. CONFIRMAÇÃO DE SEGURANÇA E ENVIO FINAL DOS DADOS
        ========================================================================== */
-    function confirmarEEnviar() {
-      var confirmar = confirm("Deseja mesmo enviar este relatório para o Dirigente?");
-      if (confirmar) {
-        enviarDados();
-      }
-    }
+   // Exemplo de como deve ficar a sua função de envio:
+function enviarParaDirigente() {
+  // 1. Mostra a nossa janela bonita na tela
+  var modal = document.getElementById('modalConfirmacao');
+  modal.style.display = 'flex';
+
+  // 2. Se o usuário clicar em Cancelar, fecha a janela e não faz nada
+  document.getElementById('btnCancelarModal').onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  // 3. Se o usuário clicar em Confirmar, fecha a janela e executa o envio real
+  document.getElementById('btnConfirmarModal').onclick = function() {
+    modal.style.display = 'none';
+    
+    // >>> COLOQUE O SEU CÓDIGO REAL DE ENVIO AQUI <<<
+    // É o código que faz a requisição para o URL_GOOGLE_SCRIPT
+    executarEnvioParaPlanilha(); 
+  };
+}
 
     function enviarDados() {
       var btn = document.getElementById("btnSalvar");
@@ -764,6 +778,16 @@
       });
     }
   </script>
-
+<!-- Janela de Confirmação Customizada -->
+<div id="modalConfirmacao" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 20000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+  <div style="background: white; padding: 24px; border-radius: 16px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+    <h3 style="margin-top: 0; color: #333; font-size: 18px;">Confirmar Envio</h3>
+    <p style="color: #666; margin: 14px 0 24px 0; font-size: 15px;">Tem certeza que deseja enviar as marcações para o dirigente?</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button id="btnCancelarModal" style="flex: 1; padding: 12px; border: 1px solid #ccc; background: #f5f5f5; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+      <button id="btnConfirmarModal" style="flex: 1; padding: 12px; border: none; background: #007bff; color: white; border-radius: 8px; font-weight: 600; cursor: pointer;">Sim, Enviar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
