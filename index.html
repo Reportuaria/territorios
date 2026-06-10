@@ -277,44 +277,61 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
-  max-width: 500px;
-  margin: 32px auto 40px auto; /* Aumentamos a margem de baixo para dar respiro na rolagem */
+  
+  /* TRANSFORMA EM FLUTUANTE FIXO NO RODAPÉ */
+  position: fixed;
+  bottom: 20px; /* Distância da borda de baixo da tela do celular */
+  left: 50%;
+  transform: translateX(-50%); /* Centraliza o botão perfeitamente na horizontal */
+  z-index: 9999; /* Garante que fique por cima de todas as ruas e caixas */
+  
+  width: 90%; /* Ocupa quase toda a largura no celular */
+  max-width: 460px; /* Evita ficar gigante em tablets ou computadores */
   padding: 16px 24px;
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  border-radius: 14px; /* Cantos arredondados bem modernos */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Sombra projetada para parecer que está flutuando */
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
+/* Efeito quando o botão está ativado e pronto para enviar (Verde) */
+.btn-principal:not(:disabled) {
+  /* O JavaScript já altera o background para verde, mas mantemos as transições suaves */
+  transition: all 0.2s ease-in-out;
+}
 
-/* Quando o botão puder ser clicado (Ativo) e o usuário passar o mouse/dedo */
+/* Efeito ao passar o mouse/dedo */
 .btn-principal:not(:disabled):hover {
-  background: linear-gradient(135deg, #0069d9, #004085);
-  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
-  transform: translateY(-2px); /* Sobe de leve para dar efeito de botão 3D */
+  transform: translateX(-50%) translateY(-2px); /* Mantém centralizado e sobe de leve */
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
 }
 
-/* Quando o botão for clicado (Efeito de clique) */
+/* Efeito de clique */
 .btn-principal:not(:disabled):active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+  transform: translateX(-50%) translateY(1px);
 }
 
-/* Quando o botão estiver desativado (Cinza elegante, sem dados para enviar) */
+/* Quando estiver desativado (Cinza padrão) */
 .btn-principal:disabled {
-  background: #e0e0e0;
-  color: #a0a0a0;
-  box-shadow: none;
+  background: #e0e0e0 !important;
+  color: #a0a0a0 !important;
+  box-shadow: none !important;
   cursor: not-allowed;
-  transform: none;
+  transform: translateX(-50%);
+}
+
+/* AJUSTE DE ESPAÇAMENTO DO CONTAINER DAS RUAS */
+/* Como o botão agora flutua por cima, precisamos dar um espaço no fundo da página */
+/* para a última rua não ficar escondida atrás do botão flutuante. */
+.container {
+  padding-bottom: 100px !important; /* Cria um respiro no final da rolagem da página */
 }
     
     .toast-aviso {
