@@ -545,7 +545,8 @@
             </div>
 
             <div class="digitacao-container">
-              <input type="tel" inputmode="numeric" id="inputCasa_${index}" placeholder="Número da casa">
+            <input type="tel" inputmode="numeric" id="inputCasa_${index}" placeholder="Número da casa" onkeydown="if(event.key === 'Enter') { event.preventDefault(); adicionarCasaTemporaria(${index}, '${item.nome}'); }">
+
               <button type="button" class="btn-adicionar" onclick="adicionarCasaTemporaria(${index}, '${item.nome}')">Adicionar</button>
             </div>
 
