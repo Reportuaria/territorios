@@ -633,8 +633,14 @@
           CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
         }
 
-        // Verifica se a rua está concluída por cartas (seja localmente ou vinda da planilha)
-        var jaConcluida = CARTAS_POR_RUA[item.nome] === true || String(item.historico).includes("Cartas") || String(item.historico).includes("Concluída");
+              // Criamos uma identificação única para essa rua nesta quadra específica
+        var chaveIdentificadora = quadra + "_" + item.nome;
+
+        // CORREÇÃO: Verifica se essa rua específica desta quadra está concluída por cartas
+        var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
+                          String(item.historico).includes("Cartas") || 
+                          String(item.historico).includes("Concluída");
+
 
         htmlFinal += `
           <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
@@ -825,26 +831,44 @@
         exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Registrando conclusão...');
 
         fetchData("registrarConclusaoRua", dadosConclusao, function(resposta) {
-          if (resposta === "OK" || resposta === "Sucesso") {
+                    if (resposta === "OK" || resposta === "Sucesso") {
             exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
             
-            // Grava o estado local
-            CARTAS_POR_RUA[nomeRua] = true;
+            // CORREÇÃO: Grava o estado na memória vinculando o nome da rua à sua quadra atual
+            var chaveIdentificadora = quadra + "_" + nomeRua;
+            CARTAS_POR_RUA[chaveIdentificadora] = true;
             
-            // Atualiza os elementos na tela
+            // Atualiza os elementos visuais na tela normalmente
             var corpo = document.getElementById("corpoRua_" + index);
-            var wrapperBotao = document.getElementById("wrapperBotao_" + index);
             var faixa = document.getElementById("faixaConcluida_" + index);
-            var header = btnCartas ? btnCartas.closest(".rua-header") : null;
+            var seta = document.getElementById("setaRua_" + index);
+            var container = document.getElementById("container_" + index);
+            var headerClicavel = container ? container.querySelector(".rua-header-clicavel") : null;
+            var tituloRua = container ? container.querySelector(".rua-titulo") : null;
+            var svgTitulo = tituloRua ? tituloRua.querySelector("svg") : null;
             
             if (corpo) corpo.style.display = "none";
-            if (wrapperBotao) wrapperBotao.style.display = "none";
+            if (seta) seta.style.display = "none";
             if (faixa) faixa.style.display = "flex";
-            if (header) header.style.marginBottom = "0px";
+            
+            if (container) {
+              container.style.background = "#e8f5e9";
+              container.style.borderColor = "#c8e6c9";
+            }
+            if (headerClicavel) {
+              headerClicavel.style.background = "#e8f5e9";
+              headerClicavel.style.cursor = "default";
+              headerClicavel.onclick = null;
+            }
+            if (tituloRua) tituloRua.style.color = "#1b5e20";
+            if (svgTitulo) svgTitulo.style.color = "#2e7d32";
             
             CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
             verificarSeTemDadosParaEnviar();
-          } else {
+          }
+
+          
+          else {
             alert("Erro ao concluir: " + JSON.stringify(resposta));
             if (btnCartas) {
               btnCartas.disabled = false;
