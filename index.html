@@ -743,17 +743,28 @@
       }, 3000);
     }
 
-        function fetchData(funcao, parametro, callback) {
+            function fetchData(funcao, parametro, callback) {
+      // Se for para salvar dados, usamos 'no-cors' para o Google não bloquear o envio.
+      // Se for para buscar o banco, usamos 'cors' para o aplicativo conseguir ler a lista de ruas.
+      var modoRequisicao = (funcao === "salvarDados" || funcao === "registrarConclusaoRua") ? "no-cors" : "cors";
+
       fetch(URL_GOOGLE_SCRIPT, {
         method: "POST",
-        mode: "no-cors", // MUDADO PARA no-cors: Evita que o Google bloqueie o envio de dados
+        mode: modoRequisicao,
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ executar: funcao, dados: parametro })
       })
-      .then(function() { 
-        // Como o modo 'no-cors' não traz uma resposta aberta por segurança, 
-        // nós assumimos o sucesso se o fetch não disparar o catch.
-        callback("Sucesso"); 
+      .then(function(res) { 
+        // Se estiver gravando dados (no-cors), não tentamos ler o JSON para não quebrar o código
+        if (modoRequisicao === "no-cors") {
+          return "Sucesso";
+        }
+        // Se estiver lendo a planilha, processa o JSON normalmente
+        if (!res.ok) throw new Error(); 
+        return res.json(); 
+      })
+      .then(function(dados) { 
+        callback(dados); 
       })
       .catch(function(err) { 
         console.error("Erro na comunicação:", err);
