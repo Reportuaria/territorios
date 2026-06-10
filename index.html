@@ -567,7 +567,7 @@
       atualizarVisualCasasTemporarias(index, nomeRua);
     }
 
-    function atualizarVisualCasasTemporarias(index, nomeRua) {
+      function atualizarVisualCasasTemporarias(index, nomeRua) {
       var listaDiv = document.getElementById("listaProvisoria_" + index);
       if (!listaDiv) return;
 
@@ -575,10 +575,11 @@
       var htmlBaloes = "";
 
       listaDeNumeros.forEach(function(num, idx) {
+        // CORRIGIDO: Agora a classe bate perfeitamente com o CSS (btn-apagar-casa)
         htmlBaloes += `
           <div class="balao-casa">
             ${num}
-            <span class="btn-pagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
+            <span class="btn-apagar-casa" style="color: #c5221f; font-weight: 800; cursor: pointer; font-size: 16px; padding: 0 4px;" onclick="removerCasaTemporaria(${index}, '${nomeRua}', ${idx})">✕</span>
           </div>
         `;
       });
