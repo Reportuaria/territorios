@@ -443,14 +443,13 @@
     <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
     <div id="area-ruas"></div>
 
-    <!-- BOTÃO FIXADO DE ENVIAR -->
-    <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" disabled>
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-  </svg>
-  <span>Enviar para o Dirigente</span>
-</button>
-
+       <!-- BOTÃO FIXADO DE ENVIAR -->
+    <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" style="display: none;" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
+      <span>Enviar para o Dirigente</span>
+    </button>
     
     <!-- NOTIFICAÇÃO FLUTUANTE -->
     <div id="toast" class="toast-aviso"></div>
