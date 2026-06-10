@@ -670,15 +670,41 @@ function enviarParaDirigente() {
     modal.style.display = 'none';
   };
 
-  // 3. Se o usuário clicar em Confirmar, fecha a janela e executa o envio real
+   // 3. Se o usuário clicar em Confirmar, fecha a janela e executa o envio real
   document.getElementById('btnConfirmarModal').onclick = function() {
     modal.style.display = 'none';
     
-    // >>> COLOQUE O SEU CÓDIGO REAL DE ENVIO AQUI <<<
-    // É o código que faz a requisição para o URL_GOOGLE_SCRIPT
-    executarEnvioParaPlanilha(); 
+    // Criamos a caixinha de aviso que o envio começou
+    exibirToast("Enviando dados para o dirigente...", "carregando");
+
+    // Aqui fica o código real que conversa com a sua URL do Google
+    fetch("https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec", {
+      method: "POST",
+      mode: "no-cors", // Evita erros de segurança do navegador
+      headers: {
+        "Content-Type": "application/json"
+      },
+      // Transforma as suas marcações guardadas em texto para o Google ler
+      body: JSON.stringify({
+        casas: CASAS_TEMPORARIAS_POR_RUA 
+      })
+    })
+    .then(function() {
+      // Quando o Google recebe com sucesso:
+      exibirToast("Enviado com sucesso para a planilha!", "sucesso");
+      
+      // Limpa os balõezinhos da tela já que salvou na planilha
+      CASAS_TEMPORARIAS_POR_RUA = {}; 
+      if (typeof atualizarVisualTodasAsRuas === "function") {
+         atualizarVisualTodasAsRuas();
+      }
+    })
+    .catch(function(erro) {
+      console.error("Erro ao enviar:", erro);
+      exibirToast("Erro ao enviar. Tente novamente!", "erro");
+    });
   };
-}
+
 
     function enviarDados() {
       var btn = document.getElementById("btnSalvar");
