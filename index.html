@@ -998,30 +998,27 @@
     }
 
     function alternarExpansaoRua(index) {
-      var corpo = document.getElementById("corpoRua_" + index);
-      var seta = document.getElementById("setaRua_" + index);
-      var container = document.getElementById("container_" + index);
-      
-      if (!corpo) return;
+  var corpo = document.getElementById("corpoRua_" + index);
+  var seta = document.getElementById("setaRua_" + index);
+  var container = document.getElementById("container_" + index);
+  
+  if (!corpo) return;
 
-      // Se estiver aberto, fecha
-      if (corpo.style.display === "block") {
-        corpo.style.display = "none";
-        if (seta) seta.style.transform = "rotate(0deg)";
-        if (container) container.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
-      } else {
-        // Se estiver fechado, abre
-        corpo.style.display = "block";
-        if (seta) seta.style.transform = "rotate(180deg)"; // Gira a setinha para cima
-        if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; // Destaca a rua aberta
-        
-        // Põe o cursor direto no campo de texto ao abrir para facilitar
-        setTimeout(function() {
-          var input = document.getElementById("inputCasa_" + index);
-          if (input && !input.disabled) input.focus();
-        }, 100);
-      }
-    }
+  // Se estiver aberto, fecha
+  if (corpo.style.display === "block") {
+    corpo.style.display = "none";
+    if (seta) seta.style.transform = "rotate(0deg)";
+    if (container) container.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
+  } else {
+    // Se estiver fechado, abre
+    corpo.style.display = "block";
+    if (seta) seta.style.transform = "rotate(180deg)"; // Gira a setinha para cima
+    if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; // Destaca a rua aberta
+    
+    // CORREÇÃO: O setTimeout com .focus() foi removido daqui para o teclado NÃO abrir sozinho no celular!
+  }
+}
+
 
     // Gerencia o contador azul na rua fechada se o irmão já tiver digitado casas ali
     function atualizarBadgeCasasTemporarias(index, nomeRua) {
