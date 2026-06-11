@@ -768,7 +768,7 @@
       verificarSeTemDadosParaEnviar(); 
     }
     
-   function adicionarCasaTemporaria(event, index, nomeRua) {
+ function adicionarCasaTemporaria(event, index, nomeRua) {
   if (event) event.preventDefault();
 
   var input = document.getElementById("inputCasa_" + index);
@@ -787,26 +787,26 @@
   atualizarBadgeCasasTemporarias(index, nomeRua);
   verificarSeTemDadosParaEnviar(); 
 
-  // 👇 CORREÇÃO: Força a rua a continuar aberta e expandida após adicionar a casa!
-  var corpo = document.getElementById("corpoRua_" + index);
-  if (corpo) {
-    corpo.style.display = "block"; // Mantém o painel visível
-  }
-  
-  var seta = document.getElementById("setaRua_" + index);
-  if (seta) {
-    seta.style.transform = "rotate(180deg)"; // Mantém a setinha apontada para cima
-  }
+  // 🛠️ AJUSTE DE SEGURANÇA: Usa um setTimeout bem rápido (50 milissegundos)
+  // Isso dá tempo para o celular fechar o teclado e rodar as funções sem fechar a rua!
+  setTimeout(function() {
+    var corpo = document.getElementById("corpoRua_" + index);
+    if (corpo) {
+      corpo.style.display = "block"; // Garante o painel visível após qualquer atualização
+    }
+    
+    var seta = document.getElementById("setaRua_" + index);
+    if (seta) {
+      seta.style.transform = "rotate(180deg)"; // Garante a setinha apontada para cima
+    }
 
-  var container = document.getElementById("container_" + index);
-  if (container) {
-    container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; // Mantém o destaque visual da rua aberta
-  }
-
-  // Opcional: Se quiser que o teclado abra automaticamente APENAS após ele já ter digitado o primeiro número
-  // (para agilizar a digitação de várias casas seguidas), descomente a linha abaixo:
-  // if (input) input.focus();
+    var container = document.getElementById("container_" + index);
+    if (container) {
+      container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; // Garante o destaque visual da rua aberta
+    }
+  }, 50); 
 }
+
 function atualizarVisualCasasTemporarias(index, nomeRua) {
   var listaDiv = document.getElementById("listaProvisoria_" + index);
   if (!listaDiv) return;
