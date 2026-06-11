@@ -367,6 +367,10 @@
   <div id="tela-painel-inicial" style="display: none;">
     <div class="container" style="padding-bottom: 20px;">
       <h2 style="text-align: center; margin-top: 10px; font-weight: 800; color: var(--text);">Escala do Dia</h2>
+       
+      <!-- 👇 O BOTÃO AGORA FICA AQUI (Único e no início de tudo) -->
+      <button id="btnInstalarApp" class="btn-instalar" style="margin-bottom: 20px;">📥 Instalar Aplicativo no Celular</button>
+      
       <div id="container-programacao" style="margin-bottom: 24px;">
         <p style="text-align: center; color: #4b5563;">Buscando escala do dia...</p>
       </div>
@@ -388,11 +392,8 @@
       <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
       <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
     </div>
-
-    <div class="container">
-      <!-- Botão para acionar a instalação nativa do PWA -->
-      <button id="btnInstalarApp" class="btn-instalar">📥 Instalar no meu Celular</button>
-      
+ <div class="container">
+   
       <!-- SELEÇÃO DE TERRITÓRIO -->
       <div class="form-group">
         <label for="territorio">
@@ -638,12 +639,13 @@
         }
       });
     }
-    // Ponto de entrada do PWA ao carregar a página
+       // Entrada principal do PWA ao carregar a página
     window.onload = function() {
-      // Oculta o botão de instalação nativo caso o app já esteja rodando como PWA autônomo
+      // CORREÇÃO: Esconde o botão único se o app já estiver instalado e rodando em modo tela cheia (standalone)
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-        if (document.getElementById('btnInstalarApp')) {
-          document.getElementById('btnInstalarApp').style.display = 'none';
+        var btnInstalar = document.getElementById('btnInstalarApp');
+        if (btnInstalar) {
+          btnInstalar.style.display = 'none';
         }
       }
       
