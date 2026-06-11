@@ -403,58 +403,164 @@
 </head>
 <body>
 
-    <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
+  <!-- TELA DE CARREGAMENTO AMIGÁVEL (Mantida intacta) -->
   <div id="loader" class="loader-overlay">
     <div class="spinner" id="loaderSpinner"></div>
     <div id="loaderTexto" style="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
   </div>
 
-  <!-- CABEÇALHO DO APLICATIVO -->
-  <div style="background: var(--card-bg); padding: 18px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-    <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
+  <!-- ======================================================== -->
+  <!-- 1. BLOCO DO NOVO PAINEL (Aparece primeiro após o loader) -->
+  <!-- ======================================================== -->
+  <div id="tela-painel-inicial" style="display: none; padding: 20px; font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 20px; color: var(--text, #333);">Designação do Dia</h2>
+    
+    <div id="card-programacao" style="border: 1px solid #ddd; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #fff;">
+      <p style="margin: 10px 0; font-size: 16px;"><strong>Território:</strong> <span id="prog-territorio" style="color: #666;">Buscando escala do dia...</span></p>
+      <p style="margin: 10px 0; font-size: 16px;"><strong>Dirigente:</strong> <span id="prog-dirigente" style="color: #666;">---</span></p>
+      <p style="margin: 10px 0; font-size: 16px;"><strong>Visita:</strong> <span id="prog-visita" style="color: #666;">---</span></p>
+      
+      <!-- Botão que faz a transição e aplica o filtro -->
+      <button id="btn-iniciar-trabalho" style="display: none; width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px;">
+        Iniciar Trabalho
+      </button>
+    </div>
   </div>
 
-  <div class="container">
-    <button id="btnInstalarApp" class="btn-instalar">📥 Instalar no meu Celular</button>
+  <!-- ======================================================== -->
+  <!-- 2. BLOCO DO SEU APP ANTIGO (Começa trancado e escondido) -->
+  <!-- ======================================================== -->
+  <div id="tela-seu-app-antigo" style="display: none;">
     
-    <!-- SELEÇÃO DE TERRITÓRIO -->
-    <div class="form-group">
-      <label for="territorio">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
-        1. Escolha o Território:
-      </label>
-      <select id="territorio" onchange="filtrarQuadrasLocalmente()">
-        <option value="">Carregando...</option>
-      </select>
+    <!-- CABEÇALHO DO APLICATIVO -->
+    <div style="background: var(--card-bg); padding: 18px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+      <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--text);">Territórios</h2>
     </div>
 
-    <!-- SELEÇÃO DE QUADRA -->
-    <div class="form-group">
-      <label for="quadra">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-        2. Escolha a Quadra:
-      </label>
-      <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
-        <option value="">Selecione um território primeiro</option>
-      </select>
+    <div class="container">
+      <button id="btnInstalarApp" class="btn-instalar">📥 Instalar no meu Celular</button>
+      
+      <!-- SELEÇÃO DE TERRITÓRIO -->
+      <div class="form-group">
+        <label for="territorio">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+          1. Escolha o Território:
+        </label>
+        <select id="territorio" onchange="filtrarQuadrasLocalmente()">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+
+      <!-- SELEÇÃO DE QUADRA -->
+      <div class="form-group">
+        <label for="quadra">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+          2. Escolha a Quadra:
+        </label>
+        <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
+          <option value="">Selecione um território primeiro</option>
+        </select>
+      </div>
+
+      <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
+      <div id="area-ruas"></div>
+
+      <!-- BOTÃO FIXADO DE ENVIAR -->
+      <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" style="display: none;" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+        <span>Enviar para o Dirigente</span>
+      </button>
+      
+      <!-- NOTIFICAÇÃO FLUTUANTE -->
+      <div id="toast" class="toast-aviso"></div>
     </div>
 
-    <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
-    <div id="area-ruas"></div>
+  </div> <!-- FECHAMENTO SEGURO DA TELA DO SEU APP ANTIGO -->
 
-       <!-- BOTÃO FIXADO DE ENVIAR -->
-    <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" style="display: none;" disabled>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-      </svg>
-      <span>Enviar para o Dirigente</span>
-    </button>
-    
-    <!-- NOTIFICAÇÃO FLUTUANTE -->
-    <div id="toast" class="toast-aviso"></div>
-  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. LÓGICA EM JAVASCRIPT DO NOVO PAINEL                   -->
+  <!-- ======================================================== -->
   <script>
+    window.addEventListener('load', function() {
+      
+      // >>> IMPORTANTE: Troque o link abaixo pela URL exata do seu Google Apps Script <<<
+      const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+
+      // Busca automaticamente a escala cadastrada para o dia de hoje
+      fetch(URL_SCRIPT, {
+        method: "POST",
+        body: JSON.stringify({ executar: "obterProgramacaoDia" })
+      })
+      .then(res => res.json())
+      .then(prog => {
+        
+        // 1. Desliga o seu Loader original ("Conectando...")
+        var loaderOriginal = document.getElementById("loader");
+        if (loaderOriginal) loaderOriginal.style.display = "none";
+
+        // 2. Torna visível a tela do Novo Painel
+        document.getElementById("tela-painel-inicial").style.display = "block";
+
+        const btn = document.getElementById("btn-iniciar-trabalho");
+
+        if (prog.temProgramacao) {
+          // Preenche os dados automáticos recebidos da planilha
+          document.getElementById("prog-territorio").innerText = prog.territorio;
+          document.getElementById("prog-dirigente").innerText = prog.dirigente;
+          document.getElementById("prog-visita").innerText = prog.visita;
+          
+          btn.innerText = "Iniciar Trabalho";
+          btn.style.backgroundColor = "#28a745";
+          btn.style.display = "block";
+          
+          // Configura o clique do botão com filtro automático
+          btn.onclick = function() {
+            // Esconde o painel do dia e revela o seu app antigo
+            document.getElementById("tela-painel-inicial").style.display = "none";
+            document.getElementById("tela-seu-app-antigo").style.display = "block";
+            
+            // Injeta o território do dia de forma 100% automatizada
+            var campoTerritorio = document.getElementById("territorio");
+            if (campoTerritorio) {
+              campoTerritorio.value = prog.territorio;
+              
+              // Executa a sua função nativa de busca para listar as quadras
+              filtrarQuadrasLocalmente(); 
+            }
+          };
+        } else {
+          // Se for um dia que não foi cadastrado na planilha
+          document.getElementById("prog-territorio").innerText = "Nenhuma escala para hoje.";
+          document.getElementById("prog-dirigente").innerText = "---";
+          document.getElementById("prog-visita").innerText = "---";
+          
+          // Transforma o botão no Modo Livre para não travar os usuários
+          btn.innerText = "Abrir Busca Livre";
+          btn.style.backgroundColor = "#6c757d";
+          btn.style.display = "block";
+          
+          btn.onclick = function() {
+            document.getElementById("tela-painel-inicial").style.display = "none";
+            document.getElementById("tela-seu-app-antigo").style.display = "block";
+          };
+        }
+      })
+      .catch(err => {
+        console.error("Erro na integração do painel:", err);
+        // Garante que se houver falha de rede o usuário abra o app antigo direto
+        var loaderOriginal = document.getElementById("loader");
+        if (loaderOriginal) loaderOriginal.style.display = "none";
+        document.getElementById("tela-seu-app-antigo").style.display = "block";
+      });
+    });
+  </script>
+
+  <!-- Se o seu arquivo original tiver mais tags <script> com lógicas do PWA abaixo, mantenha-as -->
+
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
        ========================================================================== */
