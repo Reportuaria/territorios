@@ -412,50 +412,86 @@
   <!-- ======================================================== -->
   <!-- 1. BLOCO DO NOVO PAINEL (Aparece primeiro após o loader) -->
   <!-- ======================================================== -->
-  <div id="tela-painel-inicial" style="display: none; padding: 16px; font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto;">
-  
-  <h2 style="text-align: center; margin-bottom: 24px; color: #0f2c59; font-size: 26px; font-weight: 800;">
-    Designação do Dia
-  </h2>
-  
-  <div id="card-programacao" style="border: 2px solid #dbe2ef; padding: 24px; border-radius: 16px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); background: #ffffff;">
- <!-- Campo Território -->
-<div style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed #e5e7eb;">
-  <p style="margin: 0 0 6px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">
-    🗺️ Local
-  </p>
-  <span id="prog-territorio" style="font-size: 18px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">
-    Buscando escala do dia...
-  </span>
+<!-- Container onde os blocos de horários serão gerados automaticamente -->
+<div id="container-programacao" style="margin-bottom: 24px;">
+  <p style="text-align: center; color: #4b5563;">Buscando escala do dia...</p>
 </div>
 
-<!-- Campo Dirigente -->
-<div style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed #e5e7eb;">
-  <p style="margin: 0 0 6px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">
-    👔 Dirigente
-  </p>
-  <span id="prog-dirigente" style="font-size: 18px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">
-    ---
-  </span>
-</div>
+<!-- Script que controla a exibição e o efeito de expandir -->
+<script>
+  // Função que você já deve ter no seu código que chama o Google Apps Script
+  // Substitua a parte onde você preenchia os campos de texto por essa lógica:
+  function renderizarProgramacao(resultado) {
+    var container = document.getElementById("container-programacao");
+    container.innerHTML = ""; // Limpa o texto de "Buscando..."
 
-<!-- Campo Fase/Andamento -->
-<div style="margin-bottom: 26px;">
-  <p style="margin: 0 0 6px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">
-    📋 Fase do Trabalho
-  </p>
-  <span id="prog-visita" style="font-size: 18px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">
-    ---
-  </span>
-</div>
+    if (!resultado.temProgramacao) {
+      container.innerHTML = `<p style="text-align: center; color: #4b5563; font-weight: 500;">${resultado.mensagem || 'Nenhuma programação para hoje.'}</p>`;
+      return;
+    }
 
-<button id="btn-iniciar-trabalho" style="display: none; width: 100%; padding: 16px; background: #000000; color: #ffffff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); transition: background 0.2s;">
-  Começar a Pregação ➜
-</button>
+    // Percorre cada agendamento retornado da planilha e cria o bloco expansível
+    resultado.agendamentos.forEach(function(item, index) {
+      var htmlBloco = `
+        <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff;">
+          
+          <!-- Cabeçalho do Bloco (Onde a pessoa clica) -->
+          <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+            <span style="font-size: 16px; font-weight: 700; color: #000000;">
+              📢 Campo - ${item.horario}
+            </span>
+            <span class="seta-aba" style="font-size: 14px; color: #4b5563; transition: transform 0.2s;">▼</span>
+          </div>
 
-</div>
-</div>
+          <!-- Conteúdo Oculto (Expande ao clicar) -->
+          <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
+            
+            <div style="margin-bottom: 14px;">
+              <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">🗺️ Território</p>
+              <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.territorio}</span>
+            </div>
 
+            <div style="margin-bottom: 14px;">
+              <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">👔 Dirigente</p>
+              <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.dirigente}</span>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">📋 Fase do Trabalho</p>
+              <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.visita}</span>
+            </div>
+
+            <button onclick="iniciarTrabalho('${item.territorio}')" style="width: 100%; padding: 14px; background: #000000; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+              Começar a Pregação ➜
+            </button>
+
+          </div>
+        </div>
+      `;
+      container.innerHTML += htmlBloco;
+    });
+  }
+
+  // Função lógica que faz abrir e fechar a aba
+  function alternarAbas(elementoCabecalho) {
+    var conteudo = elementoCabecalho.nextElementSibling;
+    var seta = elementoCabecalho.querySelector('.seta-aba');
+    
+    if (conteudo.style.display === "none") {
+      conteudo.style.display = "block";
+      seta.style.transform = "rotate(180deg)";
+    } else {
+      conteudo.style.display = "none";
+      seta.style.transform = "rotate(0deg)";
+    }
+  }
+
+  // Função exemplo para o clique do botão
+  function iniciarTrabalho(nomeTerritorio) {
+    alert("Iniciando trabalho no: " + nomeTerritorio);
+    // Insira aqui a sua lógica antiga do botão 'btn-iniciar-trabalho'
+  }
+</script>
  
   <!-- ======================================================== -->
   <!-- 2. BLOCO DO SEU APP ANTIGO (Começa trancado e escondido) -->
