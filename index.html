@@ -866,18 +866,50 @@
             CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
             verificarSeTemDadosParaEnviar();
           }
-
-          
           else {
             alert("Erro ao concluir: " + JSON.stringify(resposta));
             if (btnCartas) {
               btnCartas.disabled = false;
               btnCartas.innerText = "Deixou Cartas?";
             }
+            // Se deu erro, força a tela a voltar ao normal buscando do cache
+            carregarRuasDoCacheLocal();
           }
         });
-      };
-    }
+
+        // 👇 A MÁGICA ACONTECE AQUI: Pinta a rua de verde IMEDIATAMENTE após o clique de sucesso
+        var container = document.getElementById("container_" + index);
+        if (container) {
+          container.style.background = "#e8f5e9";
+          container.style.borderColor = "#c8e6c9";
+          
+          var header = container.querySelector(".rua-header-clicavel");
+          if (header) {
+            header.style.background = "#e8f5e9";
+            header.style.cursor = "default";
+            header.onclick = null; // Remove o clique para expandir/fechar
+          }
+          
+          var titulo = container.querySelector(".rua-titulo");
+          if (titulo) {
+            titulo.style.color = "#1b5e20";
+            var svg = titulo.querySelector("svg");
+            if (svg) svg.style.color = "#2e7d32";
+          }
+          
+          var seta = document.getElementById("setaRua_" + index);
+          if (seta) seta.style.display = "none";
+          
+          var faixa = document.getElementById("faixaConcluida_" + index);
+          if (faixa) faixa.style.display = "flex";
+          
+          var corpo = document.getElementById("corpoRua_" + index);
+          if (corpo) corpo.style.display = "none"; // Fecha a área de digitação
+        }
+        // 👆 FIM DA CORREÇÃO VISUAL
+
+      }; // Fecha a função interna/callback
+    } // Fecha a função alternarCartas
 
 
     function abrirModalConfirmacao() {
