@@ -410,87 +410,105 @@
   </div>
 
 <!-- ======================================================== -->
-  <!-- 1. BLOCO DO NOVO PAINEL (Aparece primeiro após o loader) -->
+  <!-- 1. BLOCO DO NOVO PAINEL SANFONA (O que o usuário vê)     -->
   <!-- ======================================================== -->
 <!-- Container onde os blocos de horários serão gerados automaticamente -->
 <div id="container-programacao" style="margin-bottom: 24px;">
   <p style="text-align: center; color: #4b5563;">Buscando escala do dia...</p>
 </div>
 
-<!-- Script que controla a exibição e o efeito de expandir -->
+<!-- 
+  ======================================================== 
+  2. CAMPOS INVISÍVEIS DE SEGURANÇA 
+  Eles ficam ocultos (display:none) apenas para o seu 
+  aplicativo não dar erro ao tentar procurá-los.
+  ======================================================== 
+-->
+<div style="display: none !important;">
+  <span id="prog-territorio"></span>
+  <span id="prog-dirigente"></span>
+  <span id="prog-visita"></span>
+  <button id="btn-iniciar-trabalho"></button>
+</div>
+
+<!-- ======================================================== -->
+  <!-- 3. SCRIPT DE CONTROLE DA SANFONA E INTEGRAÇÃO            -->
+  <!-- ======================================================== -->
 <script>
-  // Função mestre que renderiza o painel e aceita os novos dados múltiplos
-  function renderizarProgramacao(resultado) {
-    try {
-      // 1. Busca o container na tela
+  // Criamos um observador inteligente. Assim que o seu sistema antigo 
+  // preencher os campos invisíveis com os dados da planilha, 
+  // este script entra em ação e desenha a sanfona na tela automaticamente!
+  (function() {
+    var alvo = document.getElementById('prog-territorio');
+    if (!alvo) return;
+
+    var observador = new MutationObserver(function(mutations) {
+      // Captura o texto que chegou da planilha
+      var txtTerritorio = document.getElementById('prog-territorio').innerHTML;
+      var txtDirigente = document.getElementById('prog-dirigente').innerHTML;
+      var txtVisita = document.getElementById('prog-visita').innerHTML;
+
+      // Se ainda estiver carregando ou vazio, não faz nada
+      if (!txtTerritorio || txtTerritorio.includes("Buscando")) return;
+
       var container = document.getElementById("container-programacao");
-      
-      // Se o container sumiu ou mudou de nome, cria um substituto no topo para não travar o app
-      if (!container) {
-        container = document.createElement("div");
-        container.id = "container-programacao";
-        container.style.marginBottom = "24px";
-        document.body.prepend(container);
-      }
-      
-      container.innerHTML = ""; // Limpa mensagens de carregamento
+      if (!container) return;
+      container.innerHTML = ""; // Limpa o "Buscando..."
 
-      // 2. Valida se existem dados válidos de programação
-      if (!resultado || !resultado.temProgramacao) {
-        var msg = (resultado && resultado.mensagem) ? resultado.mensagem : "Nenhuma programação para hoje.";
-        container.innerHTML = `<p style="text-align: center; color: #4b5563; font-weight: 500; padding: 10px;">${msg}</p>`;
-        return;
-      }
+      // Separa as linhas enviadas pela planilha (uma para cada horário)
+      var listaTerritorios = txtTerritorio.split("<br>");
+      var listaDirigentes = txtDirigente.split("<br>");
+      var listaVisitas = txtVisita.split("<br>");
 
-      // 3. Garante compatibilidade caso o formato venha antigo ou novo
-      var agendamentos = resultado.agendamentos || [];
-      if (agendamentos.length === 0 && resultado.territorio) {
-        agendamentos.push({
-          horario: "Horário",
-          territorio: resultado.territorio,
-          dirigente: resultado.dirigente,
-          visita: resultado.visita
-        });
-      }
+      // Monta as abas baseadas na quantidade de territórios do dia
+      listaTerritorios.forEach(function(territorio, index) {
+        if (!territorio.trim()) return;
 
-      // 4. Monta as abas expansíveis para cada horário encontrado
-      agendamentos.forEach(function(item) {
-        // Fallback para evitar exibir a palavra 'undefined' caso alguma coluna esteja vazia
-        var hor = item.horario || "Horário";
-        var terr = item.territorio || "Não informado";
-        var dir = item.dirigente || "Não informado";
-        var vis = item.visita || "Não informado";
+        // Pega o dirigente e visita correspondentes (ou usa um padrão se não houver)
+        var dirigente = listaDirigentes[index] || "Não informado";
+        var visita = listaVisitas[index] || "Não informado";
+
+        // Tenta descobrir o horário (ex: "9h", "16h00") que está no texto do território
+        var horario = "Horário";
+        var match = territorio.match(/^(\d{1,2}h\d{0,2})/);
+        if (match) {
+          horario = match[1];
+        }
+
+        // Remove os prefixos de horário repetidos das outras colunas se o Apps Script antigo os colocou
+        dirigente = dirigente.replace(/^\[.*?\]\s*/, "");
+        visita = visita.replace(/^\[.*?\]\s*/, "");
 
         var htmlBloco = `
           <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             
-            <!-- Cabeçalho da Sanfona -->
+            <!-- Cabeçalho do Bloco (Onde clica para abrir/fechar) -->
             <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-              <span style="font-size: 15px; font-weight: 700; color: #000000;">
-                📢 Campo - ${hor}
+              <span style="font-size: 16px; font-weight: 700; color: #000000;">
+                📢 Campo - ${horario}
               </span>
-              <span class="seta-aba" style="font-size: 14px; color: #4b5563; display: inline-block; transition: transform 0.2s;">▼</span>
+              <span class="seta-aba" style="font-size: 14px; color: #4b5563; transition: transform 0.2s;">▼</span>
             </div>
 
-            <!-- Conteúdo Oculto -->
+            <!-- Conteúdo que expande -->
             <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
               
               <div style="margin-bottom: 14px;">
                 <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">🗺️ Território</p>
-                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${terr}</span>
+                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${territorio}</span>
               </div>
 
               <div style="margin-bottom: 14px;">
                 <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">👔 Dirigente</p>
-                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${dir}</span>
+                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${dirigente}</span>
               </div>
 
               <div style="margin-bottom: 16px;">
                 <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">📋 Fase do Trabalho</p>
-                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${vis}</span>
+                <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${visita}</span>
               </div>
 
-              <button onclick="configurarBotaoTrabalho('${terr.replace(/'/g, "\\'")}')" style="width: 100%; padding: 14px; background: #000000; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+              <button onclick="dispararBotaoOriginal()" style="width: 100%; padding: 14px; background: #000000; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
                 Começar a Pregação ➜
               </button>
 
@@ -499,18 +517,12 @@
         `;
         container.innerHTML += htmlBloco;
       });
+    });
 
-    } catch (err) {
-      // Este bloco impede que o aplicativo trave caso falte alguma variável interna
-      console.warn("Aviso na renderização do painel controlado:", err);
-    }
-  }
+    observador.observe(alvo, { childList: true, characterData: true, subtree: true });
+  })();
 
-  // Se o seu sistema tentar chamar a função com o nome antigo 'atualizarPainelProgramacao'
-  // criamos um atalho aqui para ela redirecionar para a nova sem dar erro
-  var atualizarPainelProgramacao = renderizarProgramacao;
-
-  // Lógica de abrir/fechar a aba
+  // Função para abrir e fechar as abas
   function alternarAbas(elementoCabecalho) {
     var conteudo = elementoCabecalho.nextElementSibling;
     var seta = elementoCabecalho.querySelector('.seta-aba');
@@ -524,22 +536,17 @@
     }
   }
 
-  // Ação de clique do botão
-  function configurarBotaoTrabalho(nomeTerritorio) {
-    console.log("Iniciando trabalho para o território: " + nomeTerritorio);
-    
-    // Dispara o clique do botão oculto antigo caso ele ainda seja necessário no seu app
-    var btnAntigo = document.getElementById("btn-iniciar-trabalho");
-    if (btnAntigo) {
-      btnAntigo.click();
-    } else if (typeof iniciarTrabalho === "function") {
-      iniciarTrabalho(nomeTerritorio);
+  // Aciona a ação do botão original do seu app com total segurança
+  function dispararBotaoOriginal() {
+    var btnOriginal = document.getElementById("btn-iniciar-trabalho");
+    if (btnOriginal) {
+      btnOriginal.click();
     } else {
-      alert("Iniciando trabalho no território: " + nomeTerritorio);
+      alert("Iniciando o trabalho da pregação!");
     }
   }
 </script>
- 
+
   <!-- ======================================================== -->
   <!-- 2. BLOCO DO SEU APP ANTIGO (Começa trancado e escondido) -->
   <!-- ======================================================== -->
