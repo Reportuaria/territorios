@@ -561,6 +561,9 @@
               textoCabecalho = item.horario.trim();
             }
 
+            // Remove aspas duplas do nome do território para evitar quebras visuais na propriedade HTML
+            var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
+
             var htmlBloco = `
               <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
@@ -582,16 +585,17 @@
                     <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">📋 Fase do Trabalho</p>
                     <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${item.visita || '---'}</span>
                   </div>
-                  <button onclick="acionarPregaçãoDoBloco('${(item.territorio || "").replace(/'/g, "\\'")}')" style="width: 100%; padding: 14px; background: #28a745; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer;">
+                  
+                  <!-- BOTÃO CORRIGIDO: Passa o texto sem conflito de aspas simples ou duplas -->
+                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 14px; background: #28a745; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer;">
                     Iniciar Trabalho
                   </button>
                 </div>
               </div>`;
             container.innerHTML += htmlBloco;
-          });
-        }
-
+          }); // Fecha o loop forEach
         } else {
+          // Bloco quando não há escalas agendadas na planilha
           container.innerHTML = `
             <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #ffffff; text-align: center;">
               <p style="margin: 0 0 14px 0; font-size: 15px; color: #4b5563; font-weight: 500;">Nenhuma escala para hoje.</p>
@@ -600,7 +604,8 @@
               </button>
             </div>`;
         }
-      })
+      }) // Fecha o segundo .then
+
       .catch(function(err) {
         console.error("Erro na integração do painel:", err);
         var loaderOriginal = document.getElementById("loader");
