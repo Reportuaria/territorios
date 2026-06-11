@@ -716,12 +716,29 @@
 
       </div>
     `;
-  }); // 👈 FECHA O FOREACH CORRETAMENTE
+}); // 👈 FECHA O FOREACH CORRETAMENTE
+  
+  // 1. Injeta todo o HTML gerado dentro do contêiner da página
+  if (areaRuas) {
+    areaRuas.innerHTML = htmlFinal;
+  }
 
-  // 👇 INJECTA O MAPA DE HTML GERADO DENTRO DO ELEMENTO DA TELA
-  if (areaRuas) areaRuas.innerHTML = htmlFinal;
-  if (btn) btn.disabled = false;
-} // 👈 FECHA A FUNÇÃO PRINCIPAL CORRETAMENTE
+  // 2. Renderiza os quadradinhos amarelos e contadores de cada rua na tela
+  ruasFiltradas.forEach(function(item, index) {
+    if (typeof atualizarVisualCasasTemporarias === "function") {
+      atualizarVisualCasasTemporarias(index, item.nome);
+    }
+    if (typeof atualizarBadgeCasasTemporarias === "function") {
+      atualizarBadgeCasasTemporarias(index, item.nome);
+    }
+  });
+
+  // 3. Garante que o botão principal de salvar continue ativo para o envio final
+  if (btn) {
+    btn.disabled = false;
+  }
+} // 👈 FIM REAL DA FUNÇÃO (Não coloque mais nada abaixo desta linha!)
+
 
        function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
