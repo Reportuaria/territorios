@@ -480,31 +480,29 @@
 
   </div> <!-- FECHAMENTO SEGURO DA TELA DO SEU APP ANTIGO -->
 
-
   <!-- ======================================================== -->
-  <!-- 3. LÓGICA EM JAVASCRIPT DO NOVO PAINEL                   -->
+  <!-- 3. LÓGICA EM JAVASCRIPT DO NOVO PAINEL INTEGRADO        -->
   <!-- ======================================================== -->
   <script>
-    window.addEventListener('load', function() {
-      
-      // >>> IMPORTANTE: Troque o link abaixo pela URL exata do seu Google Apps Script <<<
-      const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    // Esta função busca a programação do dia somente após o banco carregar com sucesso
+    function inicializarPainelComDados() {
+      const URL_SCRIPT = "https://google.com";
 
-      // Busca automaticamente a escala cadastrada para o dia de hoje
       fetch(URL_SCRIPT, {
         method: "POST",
         body: JSON.stringify({ executar: "obterProgramacaoDia" })
       })
       .then(res => res.json())
       .then(prog => {
-        
         // 1. Desliga o seu Loader original ("Conectando...")
         var loaderOriginal = document.getElementById("loader");
-        if (loaderOriginal) loaderOriginal.style.display = "none";
+        if (loaderOriginal) {
+          loaderOriginal.style.opacity = 0;
+          setTimeout(function() { loaderOriginal.classList.add("escondido"); }, 300);
+        }
 
         // 2. Torna visível a tela do Novo Painel
         document.getElementById("tela-painel-inicial").style.display = "block";
-
         const btn = document.getElementById("btn-iniciar-trabalho");
 
         if (prog.temProgramacao) {
@@ -523,11 +521,10 @@
             document.getElementById("tela-painel-inicial").style.display = "none";
             document.getElementById("tela-seu-app-antigo").style.display = "block";
             
-            // Injeta o território do dia de forma 100% automatizada
+            // Injeta o território do dia de forma automatizada no seu select original
             var campoTerritorio = document.getElementById("territorio");
             if (campoTerritorio) {
               campoTerritorio.value = prog.territorio;
-              
               // Executa a sua função nativa de busca para listar as quadras
               filtrarQuadrasLocalmente(); 
             }
@@ -556,10 +553,51 @@
         if (loaderOriginal) loaderOriginal.style.display = "none";
         document.getElementById("tela-seu-app-antigo").style.display = "block";
       });
-    });
-  </script>
+    }
 
-  <!-- Se o seu arquivo original tiver mais tags <script> com lógicas do PWA abaixo, mantenha-as -->
+    /* Fluxo de entrada principal (Substitui completamente o seu antigo window.onload) */
+    window.onload = function() {
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        document.getElementById('btnInstalarApp').style.display = 'none';
+      }
+      
+      var txtLoader = document.getElementById("loaderTexto");
+      txtLoader.innerText = "Conectando...";
+      
+      // Usa a sua função fetchData original que já funciona perfeitamente
+      fetchData("obterBancoCompleto", null, function(banco) {
+        if (!banco || !banco.territorios) {
+          txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
+          return;
+        }
+        
+        BD_GLOBAL = banco;
+        txtLoader.innerHTML = "Conectado";
+        document.getElementById("loaderSpinner").style.display = "none";
+        document.getElementById("btnSalvar").style.display = "flex";
+        
+        // Preenche o menu de Territórios original de forma limpa
+        var combo = document.getElementById("territorio");
+        var fragmento = document.createDocumentFragment();
+        var optPadrao = document.createElement("option");
+        optPadrao.value = "";
+        optPadrao.innerText = "-- Selecione o Território --";
+        fragmento.appendChild(optPadrao);
+        
+        banco.territorios.forEach(function(t) {
+          var opt = document.createElement("option");
+          opt.value = t;
+          opt.innerText = t;
+          fragmento.appendChild(opt);
+        });
+        combo.innerHTML = "";
+        combo.appendChild(fragmento);
+        
+        // AGORA SIM: Dispara o painel de programação de forma encadeada e segura
+        inicializarPainelComDados();
+      });
+    };
+  </script>
 
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
