@@ -547,12 +547,26 @@
         if (!container) return;
         container.innerHTML = ""; 
 
-        if (prog && prog.temProgramacao && prog.agendamentos && prog.agendamentos.length > 0) {
+             if (prog && prog.temProgramacao && prog.agendamentos && prog.agendamentos.length > 0) {
           prog.agendamentos.forEach(function(item) {
+            
+            // UNIFICAÇÃO: Junta o NomeDia e o Horário (ex: "Segunda às 16h00")
+            var textoCabecalho = 'Horário';
+            
+            if (item.nomeDia && item.horario) {
+              textoCabecalho = item.nomeDia.trim() + " às " + item.horario.trim();
+            } else if (item.nomeDia) {
+              textoCabecalho = item.nomeDia.trim();
+            } else if (item.horario) {
+              textoCabecalho = item.horario.trim();
+            }
+
             var htmlBloco = `
               <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                  <span style="font-size: 16px; font-weight: 700; color: #000000;">📢 Campo - ${item.horario || 'Horário'}</span>
+                  <span style="font-size: 16px; font-weight: 700; color: #000000;">
+                    📢 Campo - ${textoCabecalho}
+                  </span>
                   <span class="seta-aba" style="font-size: 14px; color: #4b5563; transition: transform 0.2s;">▼</span>
                 </div>
                 <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
@@ -575,6 +589,8 @@
               </div>`;
             container.innerHTML += htmlBloco;
           });
+        }
+
         } else {
           container.innerHTML = `
             <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #ffffff; text-align: center;">
