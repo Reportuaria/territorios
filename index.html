@@ -746,7 +746,7 @@
 <script>
   // Função que busca a escala do dia e configura o Painel Novo
   function inicializarPainelComDados() {
-    var URL_PAINEL = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    var URL_PAINEL = "https://google.com";
     
     fetch(URL_PAINEL, {
       method: "POST",
@@ -755,58 +755,123 @@
     .then(res => res.json())
     .then(prog => {
       // Torna visível a tela do Novo Painel
-      document.getElementById("tela-painel-inicial").style.display = "block";
-      const btn = document.getElementById("btn-iniciar-trabalho");
+      if (document.getElementById("tela-painel-inicial")) {
+        document.getElementById("tela-painel-inicial").style.display = "block";
+      }
+      
+      var container = document.getElementById("container-programacao");
+      if (!container) return;
+      container.innerHTML = ""; // Limpa a mensagem "Buscando..."
 
-      if (prog.temProgramacao) {
-        // Preenche os dados visíveis no card do painel
-        document.getElementById("prog-territorio").innerText = prog.territorio;
-        document.getElementById("prog-dirigente").innerText = prog.dirigente;
-        document.getElementById("prog-visita").innerText = prog.visita;
+      if (prog && prog.temProgramacao && prog.agendamentos && prog.agendamentos.length > 0) {
         
-        btn.innerText = "Iniciar Trabalho";
-        btn.style.backgroundColor = "#28a745";
-        btn.style.display = "block";
-        
-        btn.onclick = function() {
-          // Oculta o painel e revela o aplicativo antigo
-          document.getElementById("tela-painel-inicial").style.display = "none";
-          document.getElementById("tela-seu-app-antigo").style.display = "block";
-          
-          // Aplica o filtro automático injetando o território programado
-          var campoTerritorio = document.getElementById("territorio");
-          if (campoTerritorio) {
-            campoTerritorio.value = prog.territorio;
-            filtrarQuadrasLocalmente(); 
-          }
-        };
+        // Percorre cada agendamento retornado da planilha e cria o bloco expansível (Sanfona)
+        prog.agendamentos.forEach(function(item) {
+          var htmlBloco = `
+            <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              
+              <!-- Cabeçalho do Bloco (Onde a pessoa clica) -->
+              <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                <span style="font-size: 16px; font-weight: 700; color: #000000;">
+                  📢 Campo - ${item.horario || 'Horário'}
+                </span>
+                <span class="seta-aba" style="font-size: 14px; color: #4b5563; transition: transform 0.2s;">▼</span>
+              </div>
+
+              <!-- Conteúdo Oculto (Expande ao clicar) -->
+              <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
+                
+                <div style="margin-bottom: 14px;">
+                  <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">🗺️ Território</p>
+                  <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${item.territorio || '---'}</span>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">👔 Dirigente</p>
+                  <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${item.dirigente || '---'}</span>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                  <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #4b5563; font-weight: bold;">📋 Fase do Trabalho</p>
+                  <span style="font-size: 16px; font-weight: 600; color: #000000; display: block; line-height: 1.4;">${item.visita || '---'}</span>
+                </div>
+
+                <!-- Botão customizado individual para cada território -->
+                <button onclick="acionarPregaçãoDoBloco('${(item.territorio || "").replace(/'/g, "\\'")}')" style="width: 100%; padding: 14px; background: #28a745; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                  Iniciar Trabalho
+                </button>
+
+              </div>
+            </div>
+          `;
+          container.innerHTML += htmlBloco;
+        });
+
       } else {
         // Escala em branco na planilha para o dia de hoje
-        document.getElementById("prog-territorio").innerText = "Nenhuma escala para hoje.";
-        document.getElementById("prog-dirigente").innerText = "---";
-        document.getElementById("prog-visita").innerText = "---";
-        
-        btn.innerText = "Abrir Busca Livre";
-        btn.style.backgroundColor = "#6c757d";
-        btn.style.display = "block";
-        
-        btn.onclick = function() {
-          document.getElementById("tela-painel-inicial").style.display = "none";
-          document.getElementById("tela-seu-app-antigo").style.display = "block";
-        };
+        container.innerHTML = `
+          <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #ffffff; text-align: center;">
+            <p style="margin: 0 0 14px 0; font-size: 15px; color: #4b5563; font-weight: 500;">Nenhuma escala para hoje.</p>
+            <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 14px; background: #6c757d; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer;">
+              Abrir Busca Livre
+            </button>
+          </div>
+        `;
       }
     })
     .catch(err => {
       console.error("Erro na integração do painel:", err);
-      // Evita travamentos: abre o app livre se houver erro de rede
-      document.getElementById("tela-seu-app-antigo").style.display = "block";
+      if (document.getElementById("tela-seu-app-antigo")) {
+        document.getElementById("tela-seu-app-antigo").style.display = "block";
+      }
     });
   }
 
+  // Função lógica do efeito sanfona (abrir e fechar)
+  function alternarAbas(elementoCabecalho) {
+    var conteudo = elementoCabecalho.nextElementSibling;
+    var seta = elementoCabecalho.querySelector('.seta-aba');
+    
+    if (conteudo.style.display === "none" || conteudo.style.display === "") {
+      conteudo.style.display = "block";
+      seta.style.transform = "rotate(180deg)";
+    } else {
+      conteudo.style.display = "none";
+      seta.style.transform = "rotate(0deg)";
+    }
+  }
+
+  // Ação de clique do botão "Iniciar Trabalho" de dentro de um horário específico
+  function acionarPregaçãoDoBloco(nomeTerritorio) {
+    if (document.getElementById("tela-painel-inicial")) {
+      document.getElementById("tela-painel-inicial").style.display = "none";
+    }
+    if (document.getElementById("tela-seu-app-antigo")) {
+      document.getElementById("tela-seu-app-antigo").style.display = "block";
+    }
+    
+    var campoTerritorio = document.getElementById("territorio");
+    if (campoTerritorio) {
+      campoTerritorio.value = nomeTerritorio;
+      if (typeof filtrarQuadrasLocalmente === "function") {
+        filtrarQuadrasLocalmente(); 
+      }
+    }
+  }
+
+  // Ação do botão quando não há escalas cadastradas
+  function abrirBuscaLivre() {
+    if (document.getElementById("tela-painel-inicial")) {
+      document.getElementById("tela-painel-inicial").style.display = "none";
+    }
+    if (document.getElementById("tela-seu-app-antigo")) {
+      document.getElementById("tela-seu-app-antigo").style.display = "block";
+    }
+  }
   /* ==========================================================================
      6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
      ========================================================================== */
-  var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+  var URL_GOOGLE_SCRIPT = "https://google.com";
   var BD_GLOBAL = null; 
   var deferredPrompt;
   var CASAS_TEMPORARIAS_POR_RUA = {};
@@ -901,6 +966,7 @@
       document.getElementById('btnInstalarApp').style.display = 'block';
     }
   });
+</script>
 
   if (document.getElementById('btnInstalarApp')) {
     document.getElementById('btnInstalarApp').addEventListener('click', function() {
