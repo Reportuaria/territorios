@@ -616,8 +616,12 @@
         inicializarPainelComDados();
       });
     };
-  </script>
+  </div> <!-- FECHAMENTO SEGURO DA TELA DO SEU APP ANTIGO -->
 
+  <!-- ======================================================== -->
+  <!-- 3. LÓGICA EM JAVASCRIPT DO NOVO PAINEL INTEGRADO        -->
+  <!-- ======================================================== -->
+  <script> /* <<< A TAG CORRETA DEVE INICIAR EXATAMENTE AQUI! */
 
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
@@ -625,13 +629,8 @@
     var URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
     var BD_GLOBAL = null; 
     var deferredPrompt;
-    
-    // Guarda os números das casas digitadas na memória por rua
     var CASAS_TEMPORARIAS_POR_RUA = {};
-    
-    // Guarda quais ruas receberam cartas nesta sessão
     var CARTAS_POR_RUA = {};
-
     /* ==========================================================================
        7. FLUXO DE ENTRADA DO APLICATIVO (LOADER AMIGÁVEL E PWA)
        ========================================================================== */
