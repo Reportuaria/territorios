@@ -625,10 +625,10 @@
                   <div><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">📋 Fase do Trabalho</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.visita || '---'}</span></div>
                 </div>
               </div>`;
-            containerFuturo.innerHTML += htmlBlocoFuturo;
+          containerFuturo.innerHTML += htmlBlocoFuturo;
           });
         }
-      })
+      }) // Fecha o segundo .then
       .catch(function(err) {
         console.error("Erro na integração do painel:", err);
         var loaderOriginal = document.getElementById("loader");
@@ -637,7 +637,7 @@
           document.getElementById("tela-seu-app-antigo").style.display = "block";
         }
       });
-
+    }
     // Ponto de entrada do PWA ao carregar a página
     window.onload = function() {
       // Oculta o botão de instalação nativo caso o app já esteja rodando como PWA autônomo
