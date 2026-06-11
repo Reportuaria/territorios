@@ -480,14 +480,29 @@
 
   </div> <!-- FECHAMENTO SEGURO DA TELA DO SEU APP ANTIGO -->
 
-  <!-- ======================================================== -->
+   <!-- ======================================================== -->
   <!-- 3. LÓGICA EM JAVASCRIPT DO NOVO PAINEL INTEGRADO        -->
   <!-- ======================================================== -->
   <script>
+    // A URL oficial do seu Google Apps Script
+    const URL_SCRIPT = "https://google.com";
+
+    // FUNÇÃO PARA FAZER REQUISIÇÕES AO GOOGLE (Trazida de volta para corrigir o erro)
+    function fetchData(acao, dados, callback) {
+      fetch(URL_SCRIPT, {
+        method: "POST",
+        body: JSON.stringify({ executar: acao, dados: dados })
+      })
+      .then(res => res.json())
+      .then(resultado => callback(resultado))
+      .catch(err => {
+        console.error("Erro na função fetchData:", err);
+        callback(null);
+      });
+    }
+
     // Esta função busca a programação do dia somente após o banco carregar com sucesso
     function inicializarPainelComDados() {
-      const URL_SCRIPT = "https://google.com";
-
       fetch(URL_SCRIPT, {
         method: "POST",
         body: JSON.stringify({ executar: "obterProgramacaoDia" })
@@ -555,49 +570,54 @@
       });
     }
 
-    /* Fluxo de entrada principal (Substitui completamente o seu antigo window.onload) */
+    /* Fluxo de entrada principal unificado */
     window.onload = function() {
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-        document.getElementById('btnInstalarApp').style.display = 'none';
+        if (document.getElementById('btnInstalarApp')) {
+          document.getElementById('btnInstalarApp').style.display = 'none';
+        }
       }
       
       var txtLoader = document.getElementById("loaderTexto");
-      txtLoader.innerText = "Conectando...";
+      if (txtLoader) txtLoader.innerText = "Conectando...";
       
-      // Usa a sua função fetchData original que já funciona perfeitamente
+      // Agora a função fetchData existe logo ali em cima!
       fetchData("obterBancoCompleto", null, function(banco) {
         if (!banco || !banco.territorios) {
-          txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
+          if (txtLoader) txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
           return;
         }
         
         BD_GLOBAL = banco;
-        txtLoader.innerHTML = "Conectado";
-        document.getElementById("loaderSpinner").style.display = "none";
-        document.getElementById("btnSalvar").style.display = "flex";
+        if (txtLoader) txtLoader.innerHTML = "Conectado";
+        if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
+        if (document.getElementById("btnSalvar")) document.getElementById("btnSalvar").style.display = "flex";
         
         // Preenche o menu de Territórios original de forma limpa
         var combo = document.getElementById("territorio");
-        var fragmento = document.createDocumentFragment();
-        var optPadrao = document.createElement("option");
-        optPadrao.value = "";
-        optPadrao.innerText = "-- Selecione o Território --";
-        fragmento.appendChild(optPadrao);
+        if (combo) {
+          var fragmento = document.createDocumentFragment();
+          var optPadrao = document.createElement("option");
+          optPadrao.value = "";
+          optPadrao.innerText = "-- Selecione o Território --";
+          fragmento.appendChild(optPadrao);
+          
+          banco.territorios.forEach(function(t) {
+            var opt = document.createElement("option");
+            opt.value = t;
+            opt.innerText = t;
+            fragmento.appendChild(opt);
+          });
+          combo.innerHTML = "";
+          combo.appendChild(fragmento);
+        }
         
-        banco.territorios.forEach(function(t) {
-          var opt = document.createElement("option");
-          opt.value = t;
-          opt.innerText = t;
-          fragmento.appendChild(opt);
-        });
-        combo.innerHTML = "";
-        combo.appendChild(fragmento);
-        
-        // AGORA SIM: Dispara o painel de programação de forma encadeada e segura
+        // Dispara o painel somente depois que o banco antigo já está carregado
         inicializarPainelComDados();
       });
     };
   </script>
+
 
     /* ==========================================================================
        6. CONFIGURAÇÕES INICIAIS E LINK DO GOOGLE APPS SCRIPT
