@@ -1098,18 +1098,49 @@
     <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
   </div>
 
+  <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+    
+    <!-- 👇 ATUALIZADO: Aceita letras (ex: 243c1) e abre o teclado inteligente -->
+    <input 
+      type="text" 
+      inputmode="text" 
+      enterkeyhint="done" 
+      id="inputCasa_${index}" 
+      placeholder="Número da casa (ex: 243c1)..." 
+      required
+      style="flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: #ffffff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s;"
+      onfocus="this.style.borderColor='var(--primary)'"
+      onblur="this.style.borderColor='var(--border)'"
+    >
+    
+    <!-- 👇 ATUALIZADO: Botão de + com a mesma altura interna e feedback de clique -->
+    <button 
+      type="submit" 
+      style="background: var(--primary); color: white; border: none; padding: 18px 20px; border-radius: var(--radius-md); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;"
+      ontouchstart="this.style.transform='scale(0.95)'"
+      ontouchend="this.style.transform='scale(1)'"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
 
-              <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')">
-                <input type="tel" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="inputCasa_${index}" placeholder="Digite o número..." required>
-                <button type="submit" style="background: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                </button>
-              </form>
+  </form>
+           
               
-              <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; text-align: right;">
-                <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')">Deixou Cartas?</button>
-              </div>
-            </div>
+   <!-- 👇 ÁREA ATUALIZADA: BOTÃO GRANDE E CONFORTÁVEL PARA OS IDOSOS -->
+  <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
+    
+    <!-- Botão Deixou Cartas (Ocupa a largura total da caixinha de forma elegante) -->
+    <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+      <span>✉️ Deixou Cartas?</span>
+    </button>
+
+  </div>
+</div>
+
+
+  </div>
+</div>
+
 
           </div>`;
       });
