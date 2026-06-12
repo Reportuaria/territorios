@@ -141,14 +141,14 @@
     color: var(--primary);
   }
   
-  /* Histórico CASAS FALADAS */
+   /* Histórico CASAS FALADAS (Contêiner com fundo azul suave) */
   .hist-box {
-    background: #f8fafc;
-    border-left: 4px solid #94a3b8;
+    background: #f0f6ff; /* ✨ ATUALIZADO: Fundo azul bem clarinho, moderno e acolhedor */
+    border-left: 4px solid var(--primary); /* Mantém a barra lateral com o azul forte do app */
     padding: 16px;
     border-radius: var(--radius-md);
     font-size: 14px;
-    color: #475569;
+    color: #1e3a8a; /* Texto interno em azul escuro para combinar */
     margin: 12px 0 18px 0;
     line-height: 1.6;
     display: flex;
@@ -160,22 +160,22 @@
     box-shadow: var(--shadow-sm);
   }
 
-  /* Quadradinho individual dos números antigos */
+  /* Quadradinho individual dos números antigos (Fundo Branco sobre o fundo Azul) */
   .quadradinho-casa {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 42px; 
     height: 42px;    
-    background: #eff6ff; 
-    color: var(--primary);    
+    background: #ffffff; /* ✨ Fundo totalmente branco */
+    color: var(--primary); /* Texto com o azul forte principal */   
     padding: 0 10px;
     border-radius: var(--radius-sm); 
     font-size: 18px;    
     font-weight: 700;
     margin: 2px;        
-    border: 1px solid #bfdbfe; 
-    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.05);
+    border: 1px solid #bfdbfe; /* Borda azul clara para casar com o fundo da caixa */
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.06); /* Sombra sutil que faz o quadradinho flutuar */
     transition: transform 0.2s;
   }
 
@@ -267,7 +267,7 @@
   }
 
   /* ==========================================================================
-     4. SISTEMA DE ADICIONAR CASAS (BALÕES PROVISÓRIOS)
+     4. SISTEMA DE ADICIONAR CASAS (COM DIVISÃO EXCLUSIVA)
      ========================================================================== */
   .digitacao-container {
     display: flex;
@@ -295,24 +295,45 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
   }
 
+  /* 👇 ISSO É NOVO: Cria a caixinha de fundo para separar do histórico */
+  .secao-provisorias-container {
+    margin-top: 16px;
+    padding: 14px;
+    background: #f8fafc; /* Fundo cinza bem sutil */
+    border-radius: var(--radius-md);
+    border: 1px dashed #cbd5e1; /* Borda tracejada que indica "rascunho" */
+  }
+
+  /* 👇 ISSO É NOVO: Estiliza o título "Casas anotadas agora" */
+  .titulo-provisorias {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
   .lista-casas-provisorias {
     display: inline-flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
+    width: 100%;
   }
 
   .balao-casa {
-    background: #f8fafc;
+    background: #ffffff; /* Fundo branco para destacar do fundo cinza */
     color: #334155;
     border: 1px solid #cbd5e1;
-    padding: 6px 12px;
+    padding: 6px 14px; /* Mais larguinho para o toque dos idosos */
     border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px; 
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     user-select: none;
     margin: 4px 0;
     box-shadow: var(--shadow-sm);
@@ -326,8 +347,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 22px; /* Ligeiramente maior para facilitar o clique */
+    height: 22px;
     background: #fee2e2;
     border-radius: 50%;
     transition: all 0.2s ease;
@@ -578,7 +599,7 @@
   <!-- ======================================================== -->
   <div id="tela-painel-inicial" style="display: none;">
     <div class="container page-spacing">
-      <h2 class="titulo-principal">Escala do Dia</h2>
+      <h2 class="titulo-principal">Território do Dia</h2>
        
       <!-- 👇 O BOTÃO AGORA FICA AQUI -->
       <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
@@ -819,28 +840,46 @@
 
             var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
 
-            var htmlBloco = `
-              <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div onclick="alternarAbas(this)" style="padding: 16px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                  <span style="font-size: 16px; font-weight: 700; color: #000000;">📢 Campo - ${textoCabecalho}</span>
-                  <span class="seta-aba" style="font-size: 14px; color: #4b5563; transition: transform 0.2s;">▼</span>
+       var htmlBloco = `
+              <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
+                <!-- Cabeçalho da Sanfona Modernizado -->
+                <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
+                  <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
+                  <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
                 </div>
-                <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
-                  <div style="margin-bottom: 14px;"><p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; color: #4b5563; font-weight: bold;">🗺️ Território</p><span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.territorio || '---'}</span></div>
-                  <div style="margin-bottom: 14px;"><p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; color: #4b5563; font-weight: bold;">👔 Dirigente</p><span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.dirigente || '---'}</span></div>
-                  <div style="margin-bottom: 16px;"><p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; color: #4b5563; font-weight: bold;">📋 Fase do Trabalho</p><span style="font-size: 16px; font-weight: 600; color: #000000; display: block;">${item.visita || '---'}</span></div>
-                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 14px; background: #28a745; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer;">Iniciar Trabalho</button>
+                
+                <!-- Conteúdo Interno com Tipografia Premium -->
+                <div class="conteudo-aba" style="display: none; padding: 20px; background: var(--card-bg);">
+                  <div style="margin-bottom: 16px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">🗺️ Território</p>
+                    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
+                  </div>
+                  
+                  <div style="margin-bottom: 16px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">👔 Dirigente</p>
+                    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
+                  </div>
+                  
+                  <div style="margin-bottom: 22px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">📋 Fase do Trabalho</p>
+                    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
+                  </div>
+                  
+                  <!-- ✨ BOTÃO INICIAR TRABALHO: Agora em Azul Premium e com feedback tátil -->
+                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Iniciar Trabalho</button>
                 </div>
               </div>`;
             containerHoje.innerHTML += htmlBloco;
           });
         } else if (containerHoje) {
           containerHoje.innerHTML = `
-            <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #ffffff; text-align: center;">
-              <p style="margin: 0 0 14px 0; font-size: 15px; color: #4b5563; font-weight: 500;">Nenhuma escala para hoje.</p>
-              <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 14px; background: #6c757d; color: #ffffff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer;">Abrir Busca Livre</button>
+            <!-- CARD DE NENHUMA ESCALA MODERNIZADO -->
+            <div class="card-inicial" style="text-align: center; padding: 24px;">
+              <p style="margin: 0 0 18px 0; font-size: 16px; color: var(--text-secondary); font-weight: 600;">Nenhuma escala para hoje.</p>
+              <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 16px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Abrir Busca Livre</button>
             </div>`;
         }
+
 
         // 2. RENDERIZA AS ESCALAS DOS PRÓXIMOS DIAS (NOVO)
         if (prog && prog.proximosDias && prog.proximosDias.length > 0 && containerFuturo && secaoFuturo) {
@@ -1040,12 +1079,20 @@
               </div>
             </div>
             
-            <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid #f1f3f4; background: #fafafa;">
-              <div class="hist-box" style="margin-top: 12px;">
-                <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
-                ${htmlQuadradinhos}
-                <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
-              </div>
+           <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--card-bg);">
+  
+  <!-- 1. CAIXA DO HISTÓRICO (Fundo azul suave que combinamos) -->
+  <div class="hist-box">
+    <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
+    ${htmlQuadradinhos}
+  </div>
+
+  <!-- 2. 👇 NOVA CAIXA DE DIVISÃO EXCLUSIVA PARA AS ANOTAÇÕES DO DIA -->
+  <div class="secao-provisorias-container">
+    <span class="titulo-provisorias">📍 Casas anotadas agora:</span>
+    <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
+  </div>
+
 
               <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')">
                 <input type="tel" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="inputCasa_${index}" placeholder="Digite o número..." required>
