@@ -966,8 +966,9 @@ var htmlBloco = `
         
         // Ativa a verificação da escala do dia corrente
         inicializarPainelComDados();
-      });
-    };
+      }); // <-- CORRIGIDO: Fechava o .then() ou callback anterior
+    }
+            
     // Filtra e lista as quadras baseadas no território selecionado
     function filtrarQuadrasLocalmente() {
       var territorio = document.getElementById("territorio").value;
