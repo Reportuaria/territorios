@@ -839,7 +839,6 @@
             }
 
             var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
-
 var htmlBloco = `
 <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px;">
   <!-- Cabeçalho da Sanfona -->
@@ -848,7 +847,7 @@ var htmlBloco = `
     <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
   </div>
   
-  <!-- CONTEÚNER DO CONTEÚDO (Inicia fechado com display: none e padding interno) -->
+  <!-- Conteúdo Interno Envelopado (Inicia Fechado) -->
   <div class="conteudo-sanfona" style="display: none; padding: 20px;">
     
     <div style="margin-bottom: 16px;">
@@ -875,8 +874,6 @@ var htmlBloco = `
   </div>
 </div>
 `;
-
-
 
         // 2. RENDERIZA AS ESCALAS DOS PRÓXIMOS DIAS (NOVO)
         if (prog && prog.proximosDias && prog.proximosDias.length > 0 && containerFuturo && secaoFuturo) {
