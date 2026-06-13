@@ -1203,20 +1203,10 @@ function carregarRuasDoCacheLocal() {
       onblur="this.style.borderColor='var(--border)'"
     >
     
- <!-- 👇 1º BOTÃO: "Adicionar Registro" reposicionado e corrigido para quebrar linha -->
-    <button 
-      type="submit" 
-      style="width: 100%; display: flex; clear: both; box-sizing: border-box; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px;"
-      ontouchstart="this.style.transform='scale(0.98)'"
-      ontouchend="this.style.transform='scale(1)'"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-      <span>🏠 Adicionar Registro</span>
-    </button>
-
-  </form> <!-- Fecha o formulário aqui -->
+</form>
+   </form> <!-- Fecha o formulário (o botão "Adicionar Registro" saiu daqui de dentro) -->
            
-  <!-- 👇 2º BOTÃO: O botão de cartas fica logo embaixo do formulário -->
+  <!-- 👇 1º BOTÃO (Antigo 2º): O botão de cartas agora vem primeiro, logo embaixo do formulário -->
   <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
     
     <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
@@ -1224,6 +1214,19 @@ function carregarRuasDoCacheLocal() {
     </button>
 
   </div> <!-- Fecha o wrapper do botão de cartas -->
+
+  <!-- 👇 2º BOTÃO (Antigo 1º): "Adicionar Registro" reposicionado FORA do formulário e no final de tudo -->
+  <!-- Mantemos o atributo form="id_do_seu_formulario" caso precise submeter o formulário de fora dele -->
+  <button 
+    type="submit" 
+    style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
+    ontouchstart="this.style.transform='scale(0.98)'"
+    ontouchend="this.style.transform='scale(1)'"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    <span>🏠 Adicionar Registro</span>
+  </button>
+
 </div> <!-- Mantido: Fechamento estrutural original 1 -->
 
           </div>`; // Mantido: Fechamento estrutural original 2 e fim da string template
