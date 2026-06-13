@@ -1203,10 +1203,10 @@ function carregarRuasDoCacheLocal() {
       onblur="this.style.borderColor='var(--border)'"
     >
     
-    <!-- 👇 1º BOTÃO: "Adicionar Registro" posicionado logo abaixo do contêiner de escrita -->
+ <!-- 👇 1º BOTÃO: "Adicionar Registro" reposicionado e corrigido para quebrar linha -->
     <button 
       type="submit" 
-      style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px;"
+      style="width: 100%; display: flex; clear: both; box-sizing: border-box; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px;"
       ontouchstart="this.style.transform='scale(0.98)'"
       ontouchend="this.style.transform='scale(1)'"
     >
@@ -1230,12 +1230,13 @@ function carregarRuasDoCacheLocal() {
       });
 
       areaRuas.innerHTML = htmlFinal;
-    } // 🌟 SÍMBOLO ADICIONADO AQUI: Fecha a função onde o HTML foi montado
+    } 
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
     function verificarSeTemDadosParaEnviar() {
       var btn = document.getElementById("btnSalvar");
       if (!btn) return;
+
 
       var textoBotao = btn.querySelector("span") || btn;
       var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { 
