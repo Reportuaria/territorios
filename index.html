@@ -839,41 +839,52 @@
             }
 
             var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
-var htmlBloco = `
-<div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px;">
-  <!-- Cabeçalho da Sanfona -->
-  <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
-    <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
-    <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
+
+       var htmlBloco = `
+              <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
+                <!-- Cabeçalho da Sanfona Modernizado -->
+                <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
+                  <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
+                  <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
+                </div>
+                
+                <!-- Conteúdo Interno com Tipografia Premium -->
+                  <div style="margin-bottom: 16px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
   </div>
   
-  <!-- Conteúdo Interno Envelopado (Inicia Fechado) -->
-  <div class="conteudo-sanfona" style="display: none; padding: 20px;">
-    
-    <div style="margin-bottom: 16px;">
-      <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-        <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
-      </p>
-      <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
-    </div>
-    
-    <div style="margin-bottom: 16px;">
-      <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-        <span style="opacity: 0.7; margin-right: 4px;">👔</span> Dirigente
-      </p>
-      <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
-    </div>
-    
-    <div style="margin-bottom: 22px;">
-      <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-        <span style="opacity: 0.7; margin-right: 4px;">📋</span> Status
-      </p>
-      <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.status || '---'}</span>
-    </div>
-
+  <div style="margin-bottom: 16px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">👔</span> Dirigente
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
   </div>
-</div>
-`;
+  
+  <div style="margin-bottom: 22px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">📋</span> Fase do Trabalho
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
+  </div>
+
+                  <!-- ✨ BOTÃO INICIAR TRABALHO: Agora em Azul Premium e com feedback tátil -->
+                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Iniciar Trabalho</button>
+                </div>
+              </div>`;
+            containerHoje.innerHTML += htmlBloco;
+          });
+        } else if (containerHoje) {
+          containerHoje.innerHTML = `
+            <!-- CARD DE NENHUMA ESCALA MODERNIZADO -->
+            <div class="card-inicial" style="text-align: center; padding: 24px;">
+              <p style="margin: 0 0 18px 0; font-size: 16px; color: var(--text-secondary); font-weight: 600;">Nenhuma escala para hoje.</p>
+              <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 16px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Abrir Busca Livre</button>
+            </div>`;
+        }
+
 
         // 2. RENDERIZA AS ESCALAS DOS PRÓXIMOS DIAS (NOVO)
         if (prog && prog.proximosDias && prog.proximosDias.length > 0 && containerFuturo && secaoFuturo) {
@@ -929,8 +940,7 @@ var htmlBloco = `
           btnInstalar.style.display = 'none';
         }
       }
-    };
-        
+      
       var txtLoader = document.getElementById("loaderTexto");
       if (txtLoader) txtLoader.innerText = "Conectando...";
       
@@ -966,9 +976,8 @@ var htmlBloco = `
         
         // Ativa a verificação da escala do dia corrente
         inicializarPainelComDados();
-      }); // <-- CORRIGIDO: Fechava o .then() ou callback anterior
-    }
-            
+      });
+    };
     // Filtra e lista as quadras baseadas no território selecionado
     function filtrarQuadrasLocalmente() {
       var territorio = document.getElementById("territorio").value;
