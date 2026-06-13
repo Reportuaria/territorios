@@ -597,24 +597,25 @@
     <!-- ======================================================== -->
   <!-- 1. NOVO PAINEL INICIAL (Escala de Trabalho - Sanfona)    -->
   <!-- ======================================================== -->
-  <div id="tela-painel-inicial" style="display: none;">
+<!-- ⚡ MUDANÇA: Removemos o style="display: none;" daqui -->
+<div id="tela-painel-inicial">
     <div class="container page-spacing">
       <h2 class="titulo-principal">Território do Dia</h2>
        
-      <!-- 👇 O BOTÃO AGORA FICA AQUI -->
+      <!-- O BOTÃO AGORA CARREGA IMEDIATAMENTE -->
       <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
       
       <div id="container-programacao" class="card-inicial">
         <p class="txt-loading">Buscando escala do dia...</p>
       </div>
 
-       <!-- 👇 NOVO: Linha divisória e contêiner para os próximos dias -->
+       <!-- Linha divisória e contêiner para os próximos dias -->
       <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
         <h3 class="subtitulo-secao">📅 Próximas Escalas</h3>
         <div id="container-proximos-dias"></div>
       </div>
     </div>
-  </div>
+</div>
 
   <!-- ======================================================== -->
   <!-- 2. PAGINA 2 - BUSCAR TERRITORIOS (Digitação e Ruas)          -->
@@ -931,64 +932,81 @@
         }
       });
     }
-      // VEJA QUE O SEU WINDOW.ONLOAD FOI SUBSTITUÍDO POR ESTE ABAIXO:
+    // NOVO WINDOW.ONLOAD OTIMIZADO PARA PWA
 window.onload = function() {
   // CORREÇÃO PWA: Esconde o botão se rodar instalado (standalone)
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     var btnInstalar = document.getElementById('btnInstalarApp');
-    if (btnInstalar) {
-      btnInstalar.style.display = 'none';
-    }
+    if (btnInstalar) btnInstalar.style.display = 'none';
   }
   
-  // 1. Otimização LCP: Garante que o botão salvar apareça rápido, mas desativado até os dados chegarem
   var btnSalvar = document.getElementById("btnSalvar");
   if (btnSalvar) {
     btnSalvar.style.display = "flex";
     btnSalvar.disabled = true; 
   }
 
-  // 2. Coloca o status de carregamento direto na caixinha de Territórios
   var combo = document.getElementById("territorio");
-  if (combo) {
-    combo.innerHTML = '<option value="">⏳ Carregando territórios...</option>';
+  
+  // ⚡ MUDANÇA CRÍTICA: Tenta carregar os dados salvos do cache local imediatamente
+  var cacheSalvo = localStorage.getItem("BD_GLOBAL_CACHE");
+  if (cacheSalvo) {
+    try {
+      BD_GLOBAL = JSON.parse(cacheSalvo);
+      // Desenha a tela instantaneamente com os dados antigos
+      renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
+    } catch(e) {
+      console.error("Erro ao ler cache local", e);
+    }
+  } else {
+    // Se não tem cache, mostra o carregando normal
+    if (combo) combo.innerHTML = '<option value="">⏳ Carregando territórios...</option>';
   }
   
-  // Carrega territórios, quadras e ruas salvos na planilha
+  // Busca os dados atualizados da planilha em segundo plano
   fetchData("obterBancoCompleto", null, function(banco) {
     if (!banco || !banco.territorios) {
-      if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
-      var txtLoader = document.getElementById("loaderTexto");
-      if (txtLoader) txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
+      // Se a internet falhar mas temos o cache, não quebra a tela do usuário
+      if (!BD_GLOBAL) {
+        if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
+        if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").innerHTML = "⚠️ Falha ao carregar.";
+      }
       return;
     }
     
+    // ⚡ MUDANÇA CRÍTICA: Salva a versão mais nova no cache para a próxima abertura
+    localStorage.setItem("BD_GLOBAL_CACHE", JSON.stringify(banco));
     BD_GLOBAL = banco;
     
-    // Some com os elementos antigos de tela cheia se eles existirem no HTML
-    if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
-    if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").style.display = "none";
+    // Atualiza a tela com os dados novinhos do Google
+    renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
+  });
+};
+
+// Nova função auxiliar para desenhar os territórios na tela sem repetir código
+function renderizarTerritorios(banco, combo, btnSalvar) {
+  if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
+  if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").style.display = "none";
+  
+  if (btnSalvar) btnSalvar.disabled = false;
+  
+  if (combo) {
+    var fragmento = document.createDocumentFragment();
+    var optPadrao = document.createElement("option");
+    optPadrao.value = "";
+    optPadrao.innerText = "-- Selecione o Território --";
+    fragmento.appendChild(optPadrao);
     
-    // Ativa o botão de salvar após os dados chegarem da planilha
-    if (btnSalvar) btnSalvar.disabled = false;
-    
-    // Preenche a caixinha com os territórios reais recebidos
-    if (combo) {
-      var fragmento = document.createDocumentFragment();
-      var optPadrao = document.createElement("option");
-      optPadrao.value = "";
-      optPadrao.innerText = "-- Selecione o Território --";
-      fragmento.appendChild(optPadrao);
-      
-      banco.territorios.forEach(function(t) {
-        var opt = document.createElement("option");
-        opt.value = t;
-        opt.innerText = t;
-        fragmento.appendChild(opt);
-      });
-      combo.innerHTML = "";
-      combo.appendChild(fragmento);
-    }
+    banco.territorios.forEach(function(t) {
+      var opt = document.createElement("option");
+      opt.value = t;
+      opt.innerText = t;
+      fragmento.appendChild(opt);
+    });
+    combo.innerHTML = "";
+    combo.appendChild(fragmento);
+  }
+}
     
     // Ativa a verificação da escala do dia corrente
     inicializarPainelComDados();
