@@ -1,962 +1,1468 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gerenciador de Territórios</title>
+  <meta charset="UTF-8">
+  <title>Sistema de Territórios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  
+  <!-- CONFIGURAÇÃO PWA -->
+  <link rel="manifest" href="./manifest.json">
+  
+  <style>
+     /* ==========================================================================
+     1. VARIÁVEIS DE CORES E ESTILO GLOBAL (Premium & Acessível)
+     ========================================================================== */
+  :root {
+    --primary: #2563eb;          /* Azul mais vivo, moderno e com alto contraste */
+    --primary-dark: #1d4ed8;
+    --bg: #f4f6f9;               /* Fundo suave e tecnológico */
+    --card-bg: #ffffff;
+    --text: #1e293b;             /* Texto escuro confortável para leitura */
+    --text-secondary: #64748b;   /* Cinza elegante para subtítulos */
+    --border: #e2e8f0;           /* Bordas limpas */
+    --success: #10b981;          /* Verde moderno */
+    --success-bg: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
     
-    <!-- Metadados PWA e iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
-    <style>
-        /* ==========================================================================
-           VARIÁVEIS DE TEMA E CONFIGURAÇÕES GLOBAIS
-           ========================================================================== */
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #dbeafe;
-            --success: #059669;
-            --success-light: #d1fae5;
-            --warning: #d97706;
-            --warning-light: #fef3c7;
-            --danger: #dc2626;
-            --danger-light: #fee2e2;
-            --neutral-dark: #1e293b;
-            --neutral-light: #f8fafc;
-            --neutral-muted: #64748b;
-            --border-color: #e2e8f0;
-            --bg-app: #f1f5f9;
-            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-            --modal-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    /* Configurações de layout */
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.12);
+  }
 
-        /* Reset e Base */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            font-family: var(--font-main);
-        }
+  html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    letter-spacing: -0.01em;
+  }
+  
+  .container {
+    padding: 0 20px 140px 20px; 
+    max-width: 500px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
 
-        body {
-            background-color: var(--bg-app);
-            color: var(--neutral-dark);
-            line-height: 1.5;
-            -webkit-user-select: none;
-            user-select: none;
-            overflow-x: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+  .page-spacing {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 
-        /* Animações de Transição */
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
+  .titulo-principal {
+    text-align: center; 
+    margin: 10px 0 20px 0; 
+    font-weight: 800; 
+    color: var(--text);
+    font-size: 26px;
+  }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  .card-inicial {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
 
-        /* ==========================================================================
-           COMPONENTES E INTERFACE DO USUÁRIO (CSS CENTRALIZADO)
-           ========================================================================== */
-        
-        /* Layout do Aplicativo */
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background: var(--neutral-light);
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-        }
+  .txt-loading {
+    text-align: center; 
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+  }
 
-        /* Cabeçalho */
-        .app-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1.25rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+  .proximos-dias-secao {
+    margin-top: 32px;
+  }
 
-        .header-title-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+  .subtitulo-secao {
+    text-align: center; 
+    margin-bottom: 16px; 
+    color: var(--text-secondary); 
+    font-size: 14px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.8px;
+    font-weight: 700;
+  }
+  
+  /* Cabeçalho do App */
+  .header-app {
+    background: var(--card-bg); 
+    padding: 14px 20px; 
+    box-shadow: var(--shadow-sm); 
+    border-bottom: 1px solid var(--border); 
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start; 
+    gap: 12px; 
+    margin-bottom: 24px;
+  }
 
-        .header-icon {
-            font-size: 1.5rem;
-            background: rgba(255,255,255,0.15);
-            padding: 0.5rem;
-            border-radius: var(--radius-sm);
-        }
+  .btn-voltar {
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    background: #f1f5f9; 
+    color: var(--text-secondary); 
+    border: none; 
+    padding: 10px 16px; 
+    border-radius: 20px; 
+    font-weight: 700; 
+    font-size: 14px; 
+    cursor: pointer; 
+    transition: all 0.2s;
+  }
 
-        .app-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.025em;
-        }
+  .btn-voltar:active {
+    background: #e2e8f0;
+    transform: scale(0.97);
+  }
 
-        .sync-badge {
-            font-size: 0.75rem;
-            background: rgba(255,255,255,0.2);
-            padding: 0.25rem 0.6rem;
-            border-radius: 20px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-        /* Conteúdo Principal */
-        .main-content {
-            flex: 1;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
+  .header-icon {
+    margin-left: auto; 
+    color: var(--primary); 
+    display: flex; 
+    align-items: center;
+  }
 
-        /* Botões de Ação Gerais */
-        .btn-principal {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.85rem 1.2rem;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            width: 100%;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-        }
+  .icon-primary {
+    color: var(--primary);
+  }
+  
+   /* Histórico CASAS FALADAS (Contêiner com fundo azul suave) */
+  .hist-box {
+    background: #f0f6ff; /* ✨ ATUALIZADO: Fundo azul bem clarinho, moderno e acolhedor */
+    border-left: 4px solid var(--primary); /* Mantém a barra lateral com o azul forte do app */
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: #1e3a8a; /* Texto interno em azul escuro para combinar */
+    margin: 12px 0 18px 0;
+    line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: var(--shadow-sm);
+  }
 
-        .btn-principal:active {
-            transform: scale(0.98);
-            background: var(--primary-dark);
-        }
+  /* Quadradinho individual dos números antigos (Fundo Branco sobre o fundo Azul) */
+  .quadradinho-casa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px; 
+    height: 42px;    
+    background: #ffffff; /* ✨ Fundo totalmente branco */
+    color: var(--primary); /* Texto com o azul forte principal */   
+    padding: 0 10px;
+    border-radius: var(--radius-sm); 
+    font-size: 18px;    
+    font-weight: 700;
+    margin: 2px;        
+    border: 1px solid #bfdbfe; /* Borda azul clara para casar com o fundo da caixa */
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.06); /* Sombra sutil que faz o quadradinho flutuar */
+    transition: transform 0.2s;
+  }
 
-        .btn-principal:disabled {
-            background: var(--neutral-muted);
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+  .quadradinho-casa:active {
+    transform: scale(0.95);
+  }
 
-        /* Banner de Instalação PWA */
-        #pwa-install-banner {
-            background: linear-gradient(135deg, var(--neutral-dark), #0f172a);
-            color: white;
-            padding: 1rem 1.25rem;
-            border-radius: var(--radius-md);
-            margin-bottom: 0.5rem;
-            box-shadow: var(--card-shadow);
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
+  /* ==========================================================================
+     2. BOTÕES E SELETORES GIGANTES PARA IDOSOS
+     ========================================================================== */
+  .form-group {
+    margin-bottom: 24px;
+  }
 
-        .pwa-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+  label { 
+    font-weight: 600; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px; 
+    font-size: 16px; 
+    color: var(--text);
+  }
+  
+  select { 
+    width: 100%; 
+    padding: 18px 16px; 
+    font-size: 18px; 
+    font-weight: 600;
+    border: 2px solid var(--border); 
+    border-radius: var(--radius-lg); 
+    background-color: var(--card-bg);
+    color: var(--text);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    background-size: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
 
-        .pwa-info i {
-            font-size: 1.5rem;
-            color: #60a5fa;
-        }
+  select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
 
-        .pwa-text h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
+  select:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+  }
 
-        .pwa-text p {
-            font-size: 0.8rem;
-            color: #94a3b8;
-        }
+  /* ==========================================================================
+     3. CAIXA DA RUA E FLUXO DE COMPONENTES
+     ========================================================================= */
+  .rua-container { 
+    background: var(--card-bg); 
+    border-radius: var(--radius-lg); 
+    margin-bottom: 16px; 
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
 
-        .pwa-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
+  .btn-cartas {
+    background-color: #f1f5f9;
+    color: var(--text-secondary);
+    border: 1px solid #e2e8f0;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
 
-        .btn-install {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 0.85rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
+  .btn-cartas.ativo {
+    background-color: var(--success);
+    color: white;
+    border-color: var(--success);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
 
-        .btn-close-banner {
-            background: transparent;
-            color: #94a3b8;
-            border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+  /* ==========================================================================
+     4. SISTEMA DE ADICIONAR CASAS (COM DIVISÃO EXCLUSIVA)
+     ========================================================================== */
+  .digitacao-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 16px;
+  }
 
-        /* Painel e Cards Iniciais */
-        .card-inicial {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: 1.25rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+  input[type="tel"] { 
+    flex: 1;
+    padding: 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    background: #ffffff;
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
 
-        .painel-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
-        }
+  input[type="tel"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
 
-        .painel-header i {
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
+  /* 👇 ISSO É NOVO: Cria a caixinha de fundo para separar do histórico */
+  .secao-provisorias-container {
+    margin-top: 16px;
+    padding: 14px;
+    background: #f8fafc; /* Fundo cinza bem sutil */
+    border-radius: var(--radius-md);
+    border: 1px dashed #cbd5e1; /* Borda tracejada que indica "rascunho" */
+  }
 
-        .painel-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--neutral-dark);
-        }
+  /* 👇 ISSO É NOVO: Estiliza o título "Casas anotadas agora" */
+  .titulo-provisorias {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-        }
+  .lista-casas-provisorias {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
 
-        .info-item {
-            background: var(--neutral-light);
-            padding: 0.75rem;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-        }
+  .balao-casa {
+    background: #ffffff; /* Fundo branco para destacar do fundo cinza */
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 6px 14px; /* Mais larguinho para o toque dos idosos */
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 16px; 
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    margin: 4px 0;
+    box-shadow: var(--shadow-sm);
+  }
 
-        .info-label {
-            font-size: 0.75rem;
-            color: var(--neutral-muted);
-            display: block;
-            margin-bottom: 0.15rem;
-        }
+  .btn-apagar-casa {
+    cursor: pointer;
+    color: #ef4444;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; /* Ligeiramente maior para facilitar o clique */
+    height: 22px;
+    background: #fee2e2;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
 
-        .info-value {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--neutral-dark);
-        }
-        /* Lista de Ruas e Sanfonas (Accordions) */
-        .rua-item {
-            background: white;
-            border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            transition: var(--transition-smooth);
-        }
+  .btn-apagar-casa:hover, .btn-apagar-casa:active {
+    background: #fca5a5;
+    transform: scale(1.1);
+  }
 
-        .rua-header {
-            padding: 1rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            background: white;
-        }
+  /* ==========================================================================
+     5. BOTÕES FIXOS E AVISOS FLUTUANTES (TOAST / LOADER)
+     ========================================================================== */
+  .btn-principal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: 460px;
+    padding: 18px 24px;
+    background: #cbd5e1 !important; /* Cinza moderno desativado */
+    color: #64748b !important;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: var(--radius-lg); 
+    box-shadow: none;
+    cursor: not-allowed;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+  }
 
-        .rua-header:active {
-            background: var(--neutral-light);
-        }
+  /* Quando o botão estiver ativo (remover atributo disabled via JS) */
+  .btn-principal:not(:disabled) {
+    background: var(--primary) !important;
+    color: white !important;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  }
 
-        .rua-info-esquerda {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+  .btn-principal:not(:disabled):active {
+    transform: translateX(-50%) scale(0.98);
+  }
+      
+  .toast-aviso {
+    position: fixed;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: #1e293b;
+    color: #ffffff;
+    padding: 16px 28px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
 
-        .rua-nome {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--neutral-dark);
-        }
+  .toast-aviso.visivel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
 
-        .rua-badge-status {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-weight: 500;
-        }
+  .loader-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--card-bg); display: flex; flex-direction: column;
+    justify-content: center; align-items: center; z-index: 9999;
+    transition: opacity 0.3s;
+  }
 
-        .status-completo { background: var(--success-light); color: var(--success); }
-        .status-pendente { background: var(--warning-light); color: var(--warning); }
+  .spinner {
+    width: 48px; height: 48px; border: 4px solid #e2e8f0;
+    border-top: 4px solid var(--primary); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin-bottom: 20px;
+  }
 
-        .rua-conteudo {
-            display: none;
-            padding: 0 1.25rem 1.25rem 1.25rem;
-            border-top: 1px solid var(--border-color);
-            background: var(--neutral-light);
-        }
+  .escondido { display: none !important; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Seção de Digitação e Números */
-        .digitacao-container {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+  .btn-instalar {
+    width: 100%; background-color: var(--success);
+    color: white; border: none; padding: 18px; font-size: 17px;
+    font-weight: 700; border-radius: var(--radius-lg); margin-bottom: 22px;
+    cursor: pointer; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    transition: all 0.2s;
+  }
 
-        .input-casas {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            background: white;
-            outline: none;
-            transition: var(--transition-smooth);
-        }
+  .btn-instalar:active {
+    transform: scale(0.98);
+  }
+     /* ==========================================================================
+     5.2. DESIGN DOS MODAIS (CORRIGIDO E UNIFICADO)
+     ========================================================================== */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(15, 23, 42, 0.4); z-index: 20000; 
+    display: flex; justify-content: center; align-items: center; 
+    padding: 20px; box-sizing: border-box;
+  }
 
-        .input-casas:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
+  .backdrop-blur {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 
-        /* Modais Globais */
-        .modal-sobreposicao {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1.25rem;
-        }
+  .modal-content {
+    background: var(--card-bg); padding: 28px; border-radius: var(--radius-lg); 
+    max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow-lg);
+    box-sizing: border-box;
+  }
 
-        .modal-caixa {
-            background: white;
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 480px;
-            box-shadow: var(--modal-shadow);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
+  .anim-surgir {
+    animation: surgirModal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
-        /* Rodapé de Carregamento */
-        .carregamento-rodape {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--neutral-dark);
-            color: white;
-            padding: 0.75rem 1.25rem;
-            font-size: 0.85rem;
-            text-align: center;
-            z-index: 300;
-            display: none;
-        }
-    </style>
+  .modal-titulo {
+    margin-top: 0; color: var(--text); font-size: 20px; font-weight: 700;
+  }
+
+  .modal-texto {
+    color: var(--text-secondary); margin: 12px 0 24px 0; font-size: 15px; line-height: 1.5;
+  }
+
+  .modal-icon-wrapper {
+    width: 60px; height: 60px; border-radius: 50%; display: flex; 
+    align-items: center; justify-content: center; margin: 0 auto 18px auto;
+  }
+
+  .modal-icon-wrapper.success-theme {
+    background: var(--success-bg); color: var(--success);
+  }
+
+  .success-text {
+    color: #065f46 !important;
+  }
+
+  .modal-acoes {
+    display: flex; gap: 12px; justify-content: center;
+  }
+
+  .btn-modal-primario, .btn-modal-secundario, .btn-modal-success {
+    flex: 1; padding: 14px; font-size: 15px; font-weight: 700; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;
+  }
+
+  .btn-modal-primario {
+    border: none; background: var(--primary); color: white;
+  }
+
+  .btn-modal-secundario {
+    border: 1px solid var(--border); background: #f8fafc; color: var(--text-secondary);
+  }
+
+  .btn-modal-success {
+    border: none; background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .btn-modal-primario:active, .btn-modal-secundario:active, .btn-modal-success:active {
+    transform: scale(0.97);
+  }
+
+  @keyframes surgirModal {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+    /* ==========================================================================
+       6. SISTEMA DE ALERTA DE INSTALAÇÃO REAL DO PWA (NOVO)
+       ========================================================================== */
+    .toast-instalacao {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120px);
+      background-color: #1e8e3e;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      z-index: 20005;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 85%;
+      max-width: 380px;
+      box-sizing: border-box;
+    }
+
+    .toast-instalacao.ativo {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .progresso-instalacao {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progresso-barra {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Banner PWA -->
-        <div id="pwa-install-banner">
-            <div class="pwa-info">
-                <i class="fas fa-mobile-alt"></i>
-                <div class="pwa-text">
-                    <h4>Instalar Aplicativo</h4>
-                    <p id="pwa-install-text">Tenha acesso rápido e offline</p>
-                </div>
-            </div>
-            <div class="pwa-buttons">
-                <button class="btn-install" id="btn-pwa-instalar" onclick="dispararInstalacaoPWA()">Instalar</button>
-                <button class="btn-close-banner" onclick="fecharBannerPWA()"><i class="fas fa-times"></i></button>
-            </div>
-        </div>
+  <!-- TELA DE CARREGAMENTO AMIGÁVEL -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner" id="loaderSpinner"></div>
+    <div id="loaderTexto" style="color: var(--text); font-weight: 700; font-size: 20px;">Conectando...</div>
+  </div>
 
-        <!-- Cabeçalho -->
-        <header class="app-header">
-            <div class="header-title-container">
-                <i class="fas fa-map-marked-alt header-icon"></i>
-                <div>
-                    <h1 class="app-title">Meus Territórios</h1>
-                </div>
-            </div>
-            <div class="sync-badge" id="status-sincronismo">
-                <i class="fas fa-check-circle"></i> Sincronizado
-            </div>
-        </header>
-
-        <!-- Conteúdo do App -->
-        <main class="main-content" id="conteudo-principal">
-            <!-- Os blocos dinâmicos injetados por JavaScript entrarão aqui -->
-        </main>
+  <!-- POPUP DE AVISO DE INSTALAÇÃO REAL COM BARRA DE PROGRESSO -->
+  <div id="toastInstalacao" class="toast-instalacao">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      <span>Aplicativo instalado com sucesso!</span>
     </div>
-    <!-- Rodapé de Carregamento Fixo -->
-    <div id="status-carregamento-rodape" class="carregamento-rodape">
-        <i class="fas fa-spinner fa-spin"></i> <span id="texto-carregamento-rodape">Processando...</span>
+    <div class="progresso-instalacao">
+      <div id="barraProgresso" class="progresso-barra"></div>
     </div>
+  </div>
 
-    <!-- Modais do Sistema -->
-    <div id="modal-alerta" class="modal-sobreposicao">
-        <div class="modal-caixa">
-            <h3 style="font-weight:700; font-size:1.1rem;" id="modal-titulo">Aviso</h3>
-            <p style="color:var(--neutral-muted); font-size:0.95rem;" id="modal-mensagem"></p>
-            <button class="btn-principal" onclick="fecharModalAlerta()">Entendi</button>
-        </div>
+    <!-- ======================================================== -->
+  <!-- 1. NOVO PAINEL INICIAL (Escala de Trabalho - Sanfona)    -->
+  <!-- ======================================================== -->
+  <div id="tela-painel-inicial" style="display: none;">
+    <div class="container page-spacing">
+      <h2 class="titulo-principal">Território do Dia</h2>
+       
+      <!-- 👇 O BOTÃO AGORA FICA AQUI -->
+      <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
+      
+      <div id="container-programacao" class="card-inicial">
+        <p class="txt-loading">Buscando escala do dia...</p>
+      </div>
+
+       <!-- 👇 NOVO: Linha divisória e contêiner para os próximos dias -->
+      <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
+        <h3 class="subtitulo-secao">📅 Próximas Escalas</h3>
+        <div id="container-proximos-dias"></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Script de Lógica do Sistema -->
-    <script>
-        /* ==========================================================================
-           CONFIGURAÇÕES E ESTADO GLOBAL DO APLICATIVO
-           ========================================================================== */
-        const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+  <!-- ======================================================== -->
+  <!-- 2. PAGINA 2 - BUSCAR TERRITORIOS (Digitação e Ruas)          -->
+  <!-- ======================================================== -->
+  <div id="tela-seu-app-antigo" style="display: none;">
+    
+     <!-- CABEÇALHO LIMPO E MODERNO -->
+    <div class="header-app">
+      <!-- Botão Voltar Amigável -->
+      <button onclick="voltarParaOPainel()" class="btn-voltar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <span>Voltar para a Escala</span>
+      </button>
+
+      <!-- Ícone sutil do mapa -->
+      <div class="header-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+      </div>
+    </div>
+   
+    <div class="container">
+      <!-- SELEÇÃO DE TERRITÓRIO -->
+      <div class="form-group">
+        <label for="territorio">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon-primary"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+          1. Escolha o Território:
+        </label>
+        <select id="territorio" onchange="filtrarQuadrasLocalmente()">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+
+      <!-- SELEÇÃO DE QUADRA -->
+      <div class="form-group">
+        <label for="quadra">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon-primary"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+          2. Escolha a Quadra:
+        </label>
+        <select id="quadra" onchange="carregarRuasDoCacheLocal()" disabled>
+          <option value="">Selecione um território primeiro</option>
+        </select>
+      </div>
+
+      <!-- ÁREA ONDE AS RUAS VÃO APARECER -->
+      <div id="area-ruas"></div>
+
+      <!-- BOTÃO FIXADO DE ENVIAR RELATÓRIO GERAL -->
+      <button id="btnSalvar" class="btn-principal" onclick="abrirModalConfirmacao()" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+        <span>Enviar para o Dirigente</span>
+      </button>
+      
+      <!-- NOTIFICAÇÃO FLUTUANTE DE RASCUNHOS -->
+      <div id="toast" class="toast-aviso"></div>
+    </div>
+  </div>
+
+  <!-- CAMPOS INVISÍVEIS DE COMPATIBILIDADE -->
+  <div style="display: none !important;">
+    <span id="prog-territorio"></span>
+    <span id="prog-dirigente"></span>
+    <span id="prog-visita"></span>
+    <button id="btn-iniciar-trabalho"></button>
+  </div>
+
+  <!-- JANELA DE CONFIRMAÇÃO DE ENVIO GERAL (Casas) -->
+  <div id="modalConfirmacao" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3 class="modal-titulo">Confirmar Envio</h3>
+      <p class="modal-texto">Tem certeza que deseja enviar as marcações para o dirigente?</p>
+      <div class="modal-acoes">
+        <button id="btnCancelarModal" class="btn-modal-secundario">Cancelar</button>
+        <button id="btnConfirmarModal" class="btn-modal-primario">Sim, Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JANELA DE CONFIRMAÇÃO DE CONCLUSÃO INDIVIDUAL (Cartas) -->
+  <div id="modalCartas" class="modal-overlay backdrop-blur" style="display: none;">
+    <div class="modal-content anim-surgir">
+      <div class="modal-icon-wrapper success-theme">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <h3 class="modal-titulo success-text">Marcar como Concluída?</h3>
+      <p id="textoModalCartas" class="modal-texto">Deseja registrar que deixou cartas na rua?</p>
+      <div class="modal-acoes">
+        <button id="btnCancelarCartas" class="btn-modal-secundario">Voltar</button>
+        <button id="btnConfirmarCartas" class="btn-modal-success">Sim, Concluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. MOTORES EM JAVASCRIPT UNIFICADOS E CORRIGIDOS          -->
+  <!-- ======================================================== -->
+  <script>
+    // Link oficial da API do seu Google Apps Script (Unificado)
+    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxjXYU9r2z5NwmiQeOk39drsrZEeJaLV9UoZ8MZLPToBNoqK5QLyJ3Q1GB39qQ8yzI/exec";
+    
+    // Variáveis globais de controle de dados
+    var BD_GLOBAL = null; 
+    var deferredPrompt = null;
+    var CASAS_TEMPORARIAS_POR_RUA = {};
+    var CARTAS_POR_RUA = {};
+
+    // Função limpa e estável para chamadas ao Apps Script (Correção de CORS)
+    function fetchData(funcao, parametro, callback) {
+      fetch(URL_GOOGLE_SCRIPT, {
+        method: "POST",
+        body: JSON.stringify({ executar: funcao, dados: parametro })
+      })
+      .then(function(res) { 
+        if (!res.ok) throw new Error("Falha na resposta do servidor."); 
+        return res.json(); 
+      })
+      .then(function(dados) { 
+        callback(dados); 
+      })
+      .catch(function(err) { 
+        console.error("Erro na comunicação com o Google:", err);
+        exibirToast('<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c2.76 0 5 2.24 5 5v1h1.5c1.38 0 2.5 1.12 2.5 2.5 0 .81-.39 1.54-1 2l1.42 1.42c1.01-.91 1.58-2.2 1.58-3.67 0-2.76-2.12-5.04-4.65-5.41zM3.55 3.57L2.28 4.84l2.12 2.12C2.42 8.08 1 10.37 1 13c0 3.87 3.13 7 7 7h10.73l2.43 2.43 1.27-1.27L3.55 3.57zM8 18c-2.76 0-5-2.24-5-5 0-2.05 1.23-3.81 3-4.58l5.83 5.83L11 15v1h1v-1l.73-.73 2.73 2.73H8z"/>', 'Erro na conexão.');
         
-        // Estados da aplicação
-        let DADOS_TERRITORIO_ATUAL = null;
-        let MAPA_CASAS_TEMPORARIAS = {}; // Estrutura: { indexRua: "12, 14, 25" }
-        let CARTAS_POR_RUA = {};         // Estrutura: { indexRua: true/false }
-        let RUA_ABERTA_ATUAL = null;     // Guarda qual quadra/rua estava aberta
-        let DEFER_PROMPT_PWA = null;
+        var btn = document.getElementById("btnSalvar");
+        if (btn) btn.disabled = false;
+      });
+    }
 
-        // Recupera dados salvos temporariamente para prevenir perdas ao fechar o app
-        function carregarCacheLocalTemporario() {
-            try {
-                const casasSalvas = localStorage.getItem("APP_TERRITORIO_CASAS_TEMP");
-                const cartasSalvas = localStorage.getItem("APP_TERRITORIO_CARTAS_TEMP");
-                const ruaSalva = localStorage.getItem("APP_TERRITORIO_RUA_ABERTA");
-                
-                if (casasSalvas) MAPA_CASAS_TEMPORARIAS = JSON.parse(casasSalvas);
-                if (cartasSalvas) CARTAS_POR_RUA = JSON.parse(cartasSalvas);
-                if (ruaSalva) RUA_ABERTA_ATUAL = ruaSalva;
-            } catch (e) {
-                console.error("Erro ao ler cache local:", e);
-            }
+    // Gerencia o recolhimento visual das abas (Efeito Sanfona)
+    function alternarAbas(elementoCabecalho) {
+      var conteudo = elementoCabecalho.nextElementSibling;
+      var seta = elementoCabecalho.querySelector('.seta-aba');
+      if (conteudo.style.display === "none" || conteudo.style.display === "") {
+        conteudo.style.display = "block";
+        seta.style.transform = "rotate(180deg)";
+      } else {
+        conteudo.style.display = "none";
+        seta.style.transform = "rotate(0deg)";
+      }
+    }
+
+    // Ação do botão quando não há escalas cadastradas
+    function abrirBuscaLivre() {
+      if (document.getElementById("tela-painel-inicial")) document.getElementById("tela-painel-inicial").style.display = "none";
+      if (document.getElementById("tela-seu-app-antigo")) document.getElementById("tela-seu-app-antigo").style.display = "block";
+    }
+      // Função para retornar ao painel inicial de escalas
+  function voltarParaOPainel() {
+    // 1. Oculta a tela do app antigo e revela o painel inicial
+    if (document.getElementById("tela-seu-app-antigo")) {
+      document.getElementById("tela-seu-app-antigo").style.display = "none";
+    }
+    if (document.getElementById("tela-painel-inicial")) {
+      document.getElementById("tela-painel-inicial").style.display = "block";
+    }
+
+    // 2. Limpa os campos de seleção para que o usuário possa escolher outro território sem misturar dados
+    var campoTerritorio = document.getElementById("territorio");
+    var comboQuadra = document.getElementById("quadra");
+    var areaRuas = document.getElementById("area-ruas");
+    var btnSalvar = document.getElementById("btnSalvar");
+
+    if (campoTerritorio) campoTerritorio.value = "";
+    if (areaRuas) areaRuas.innerHTML = "";
+    if (btnSalvar) btnSalvar.disabled = true;
+    
+    if (comboQuadra) {
+      comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+      comboQuadra.disabled = true;
+    }
+  }
+
+
+    // Vincula a escolha do painel com a listagem antiga de quadras
+    function acionarPregaçãoDoBloco(nomeTerritorio) {
+      if (document.getElementById("tela-painel-inicial")) document.getElementById("tela-painel-inicial").style.display = "none";
+      if (document.getElementById("tela-seu-app-antigo")) document.getElementById("tela-seu-app-antigo").style.display = "block";
+      
+      var campoTerritorio = document.getElementById("territorio");
+      if (campoTerritorio) {
+        campoTerritorio.value = nomeTerritorio;
+        filtrarQuadrasLocalmente(); 
+      }
+    }
+    // Busca a escala agendada para hoje e monta as abas dinâmicas
+    function inicializarPainelComDados() {
+      fetch(URL_GOOGLE_SCRIPT, {
+        method: "POST",
+        body: JSON.stringify({ executar: "obterProgramacaoDia" })
+      })
+           .then(function(res) { return res.json(); })
+      .then(function(prog) {
+        var loaderOriginal = document.getElementById("loader");
+        if (loaderOriginal) {
+          loaderOriginal.style.opacity = 0;
+          setTimeout(function() { loaderOriginal.classList.add("escondido"); }, 300);
         }
 
-        // Salva as alterações em tempo real no dispositivo
-        function atualizarCacheLocalTemporario() {
-            try {
-                localStorage.setItem("APP_TERRITORIO_CASAS_TEMP", JSON.stringify(MAPA_CASAS_TEMPORARIAS));
-                localStorage.setItem("APP_TERRITORIO_CARTAS_TEMP", JSON.stringify(CARTAS_POR_RUA));
-                if (RUA_ABERTA_ATUAL !== null) {
-                    localStorage.setItem("APP_TERRITORIO_RUA_ABERTA", RUA_ABERTA_ATUAL);
-                } else {
-                    localStorage.removeItem("APP_TERRITORIO_RUA_ABERTA");
-                }
-            } catch (e) {
-                console.error("Erro ao salvar cache local:", e);
-            }
+        if (document.getElementById("tela-painel-inicial")) {
+          document.getElementById("tela-painel-inicial").style.display = "block";
         }
+        
+        var containerHoje = document.getElementById("container-programacao");
+        var containerFuturo = document.getElementById("container-proximos-dias");
+        var secaoFuturo = document.getElementById("secao-proximos-dias");
+        
+        if (containerHoje) containerHoje.innerHTML = ""; 
+        if (containerFuturo) containerFuturo.innerHTML = "";
+        if (secaoFuturo) secaoFuturo.style.display = "none";
 
-        // Limpa o cache após um envio bem-sucedido
-        function limparCacheLocalTemporario() {
-            MAPA_CASAS_TEMPORARIAS = {};
-            CARTAS_POR_RUA = {};
-            RUA_ABERTA_ATUAL = null;
-            localStorage.removeItem("APP_TERRITORIO_CASAS_TEMP");
-            localStorage.removeItem("APP_TERRITORIO_CARTAS_TEMP");
-            localStorage.removeItem("APP_TERRITORIO_RUA_ABERTA");
-        }
-
-        // Bloqueio de saída acidental se houver dados digitados
-        window.addEventListener("beforeunload", function (e) {
-            let temDados = false;
-            for (let chave in MAPA_CASAS_TEMPORARIAS) {
-                if (MAPA_CASAS_TEMPORARIAS[chave] && MAPA_CASAS_TEMPORARIAS[chave].trim() !== "") {
-                    temDados = true;
-                    break;
-                }
-            }
-            if (temDados) {
-                const mensagem = "As casas marcadas serão apagadas. Lembre-se de enviar ao dirigente antes de sair.";
-                e.preventDefault();
-                e.returnValue = mensagem;
-                return mensagem;
-            }
-        });
-        /* ==========================================================================
-           COMUNICAÇÃO COM O SERVIDOR (API)
-           ========================================================================== */
-        function fetchData(funcao, parametro, callback) {
-            exibirCarregamentoRodape("Sincronizando dados...");
-            
-            const payload = { executar: funcao };
-            if (parametro !== null) {
-                payload.parametro = parametro;
+        // 1. RENDERIZA AS ESCALAS DE HOJE
+        if (prog && prog.temProgramacao && prog.agendamentos && prog.agendamentos.length > 0) {
+          prog.agendamentos.forEach(function(item) {
+            var textoCabecalho = 'Horário';
+            if (item.nomeDia && item.horario) {
+              textoCabecalho = item.nomeDia.trim() + " às " + item.horario.trim();
+            } else if (item.nomeDia) {
+              textoCabecalho = item.nomeDia.trim();
+            } else if (item.horario) {
+              textoCabecalho = item.horario.trim();
             }
 
-            fetch(URL_GOOGLE_SCRIPT, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(dados => {
-                ocultarCarregamentoRodape();
-                if (dados && dados.status === "sucesso") {
-                    callback(dados.resultado);
-                } else {
-                    exibirAlerta("Erro no Servidor", (dados && dados.mensagem) || "Não foi possível processar a operação.");
-                }
-            })
-            .catch(erro => {
-                console.error("Erro na requisição:", erro);
-                ocultarCarregamentoRodape();
-                exibirAlerta("Erro de Conexão", "Verifique sua internet e tente novamente.");
-            });
-        }
+            var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
 
-        /* ==========================================================================
-           RENDERIZAÇÃO DO PAINEL INICIAL
-           ========================================================================== */
-        function inicializarPainelComDados() {
-            // Ajustado para usar a função padronizada fetchData eliminando o fetch manual redundante
-            fetchData("obterProgramacaoDia", null, function(prog) {
-                const container = document.getElementById("conteudo-principal");
-                
-                if (!prog || !prog.territorio) {
-                    container.innerHTML = `
-                        <div class="card-inicial">
-                            <div class="painel-header">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="painel-title">Programação do Dia</span>
-                            </div>
-                            <p style="color:var(--neutral-muted); text-align:center; padding:1rem 0;">
-                                Nenhuma atividade agendada para hoje.
-                            </p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Armazena as informações básicas no escopo global
-                const nomeTerritorioLimpo = prog.territorio.replace(/'/g, "\\'");
-                
-                container.innerHTML = `
-                    <div class="card-inicial">
-                        <div class="painel-header">
-                            <i class="fas fa-calendar-day"></i>
-                            <span class="painel-title">Painel de Trabalho</span>
-                        </div>
-                        
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <span class="info-label">Território</span>
-                                <span class="info-value">${prog.territorio}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Dirigente</span>
-                                <span class="info-value">${prog.dirigente || "Não informado"}</span>
-                            </div>
-                        </div>
-
-                        <div class="info-item" style="width:100%;">
-                            <span class="info-label">Visita Marcada</span>
-                            <span class="info-value">${prog.visita || "Sem observações adicionais"}</span>
-                        </div>
-
-                        <button class="btn-principal" 
-                                data-territorio="${prog.territorio}" 
-                                onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))">
-                            <i class="fas fa-play"></i> Iniciar Trabalho
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        function acionarPregaçãoDoBloco(nomeTerritorio) {
-            fetchData("buscarDadosDoTerritorio", nomeTerritorio, function(dados) {
-                DADOS_TERRITORIO_ATUAL = dados;
-                
-                // Carrega o progresso existente se houver o mesmo território salvo em cache
-                carregarCacheLocalTemporario();
-                
-                // Desenha a tela de ruas
-                renderizarListaDeRuas();
-            });
-        }
-        /* ==========================================================================
-           TELA DO TERRITÓRIO: LISTA DE RUAS E QUADRAS
-           ========================================================================== */
-        function renderizarListaDeRuas() {
-            const container = document.getElementById("conteudo-principal");
-            if (!DADOS_TERRITORIO_ATUAL || !DADOS_TERRITORIO_ATUAL.ruas) {
-                container.innerHTML = `<p style="text-align:center; padding:2rem; color:var(--neutral-muted);">Nenhum dado encontrado.</p>`;
-                return;
-            }
-
-            let htmlAcumulado = `
-                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
-                    <button class="btn-principal" onclick="inicializarPainelComDados()" style="width:auto; padding:0.5rem 1rem; background:var(--neutral-muted);">
-                        <i class="fas fa-arrow-left"></i> Voltar
-                    </button>
-                    <h2 style="font-size:1.1rem; font-weight:700;">${DADOS_TERRITORIO_ATUAL.nome}</h2>
+       var htmlBloco = `
+              <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
+                <!-- Cabeçalho da Sanfona Modernizado -->
+                <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
+                  <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
+                  <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
                 </div>
-            `;
-
-            DADOS_TERRITORIO_ATUAL.ruas.forEach((item, index) => {
-                const casasDigitadas = MAPA_CASAS_TEMPORARIAS[index] || "";
-                const deixouCartas = CARTAS_POR_RUA[index] ? "status-completo" : "status-pendente";
-                const textoCartas = CARTAS_POR_RUA[index] ? "Com Cartas" : "Sem Cartas";
-
-                // Armazenamos o nome da rua de forma segura em data-attributes para evitar quebra de layout por aspas
-                htmlAcumulado += `
-                    <div class="rua-item fade-in">
-                        <div class="rua-header" onclick="alternarVisibilidadeDaRua(${index})">
-                            <div class="rua-info-esquerda">
-                                <span class="rua-nome">${item.nome}</span>
-                                <span class="rua-badge-status ${deixouCartas}" id="badge_cartas_${index}">${textoCartas}</span>
-                            </div>
-                            <i class="fas fa-chevron-down" id="seta_${index}" style="color:var(--neutral-muted); transition:var(--transition-smooth);"></i>
-                        </div>
-                        
-                        <div class="rua-conteudo" id="conteudo_rua_${index}">
-                            <div class="digitacao-container">
-                                <label style="font-size:0.8rem; font-weight:600; color:var(--neutral-muted);">Números visitados separados por vírgula:</label>
-                                <input type="text" 
-                                       class="input-casas" 
-                                       id="input_casas_${index}" 
-                                       placeholder="Ex: 12, 14, 25A" 
-                                       value="${casasDigitadas}" 
-                                       oninput="salvarProgressoInputFocado(${index}, this.value)">
-                                
-                                <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">
-                                    <!-- NOVO BOTÃO 'ADICIONAR CASA' UNIFICADO E ESTILIZADO -->
-                                    <button type="button" 
-                                            class="btn-principal" 
-                                            style="background:var(--success); box-shadow:0 2px 4px rgba(5,150,105,0.2);"
-                                            data-index="${index}"
-                                            data-rua="${item.nome}"
-                                            onclick="adicionarCasaTemporaria(event, this)">
-                                        <i class="fas fa-plus"></i> Adicionar Casa
-                                    </button>
-
-                                    <!-- BOTÃO ALTERNAR CARTAS -->
-                                    <button type="button" 
-                                            class="btn-principal" 
-                                            style="background:var(--warning); box-shadow:0 2px 4px rgba(217,119,6,0.2);"
-                                            id="btnCartas_${index}" 
-                                            data-index="${index}"
-                                            data-rua="${item.nome}"
-                                            onclick="alternarCartasDoPainel(this)">
-                                        <i class="fas fa-envelope"></i> Deixou Cartas?
-                                    </button>
-
-                                    <!-- BOTÃO ENVIAR DADOS -->
-                                    <button type="button" 
-                                            class="btn-principal" 
-                                            style="margin-top:0.25rem;"
-                                            data-index="${index}"
-                                            data-rua="${item.nome}"
-                                            onclick="enviarRelatorioFinalDoBloco(this)">
-                                        <i class="fas fa-paper-plane"></i> Enviar para Dirigente
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = htmlAcumulado;
-
-            // Mantém a quadra aberta após o re-desenho da tela (Melhoria 3)
-            if (RUA_ABERTA_ATUAL !== null) {
-                const indexParaReabrir = parseInt(RUA_ABERTA_ATUAL, 10);
-                if (!isNaN(indexParaReabrir)) {
-                    forçarAberturaDeRuaSemAnimacao(indexParaReabrir);
-                }
-            }
-        }
-        /* ==========================================================================
-           CONTROLE DE INTERAÇÃO E ESTADOS DAS RUAS
-           ========================================================================== */
-        function alternarVisibilidadeDaRua(index) {
-            const divConteudo = document.getElementById(`conteudo_rua_${index}`);
-            const iconeSeta = document.getElementById(`seta_${index}`);
-            
-            if (!divConteudo) return;
-
-            if (divConteudo.style.display === "block") {
-                divConteudo.style.display = "none";
-                iconeSeta.style.transform = "rotate(0deg)";
-                RUA_ABERTA_ATUAL = null;
-            } else {
-                // Fecha a rua anterior aberta, caso exista
-                if (RUA_ABERTA_ATUAL !== null) {
-                    const antigaRua = document.getElementById(`conteudo_rua_${RUA_ABERTA_ATUAL}`);
-                    const antigaSeta = document.getElementById(`seta_${RUA_ABERTA_ATUAL}`);
-                    if (antigaRua) antigaRua.style.display = "none";
-                    if (antigaSeta) antigaSeta.style.transform = "rotate(0deg)";
-                }
                 
-                divConteudo.style.display = "block";
-                iconeSeta.style.transform = "rotate(180deg)";
-                RUA_ABERTA_ATUAL = index;
+                <!-- Conteúdo Interno com Tipografia Premium -->
+                  <div style="margin-bottom: 16px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
+  </div>
+  
+  <div style="margin-bottom: 16px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">👔</span> Dirigente
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
+  </div>
+  
+  <div style="margin-bottom: 22px;">
+    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+      <span style="opacity: 0.7; margin-right: 4px;">📋</span> Fase do Trabalho
+    </p>
+    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
+  </div>
+
+                  <!-- ✨ BOTÃO INICIAR TRABALHO: Agora em Azul Premium e com feedback tátil -->
+                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Iniciar Trabalho</button>
+                </div>
+              </div>`;
+            containerHoje.innerHTML += htmlBloco;
+          });
+        } else if (containerHoje) {
+          containerHoje.innerHTML = `
+            <!-- CARD DE NENHUMA ESCALA MODERNIZADO -->
+            <div class="card-inicial" style="text-align: center; padding: 24px;">
+              <p style="margin: 0 0 18px 0; font-size: 16px; color: var(--text-secondary); font-weight: 600;">Nenhuma escala para hoje.</p>
+              <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 16px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Abrir Busca Livre</button>
+            </div>`;
+        }
+
+
+        // 2. RENDERIZA AS ESCALAS DOS PRÓXIMOS DIAS (NOVO)
+        if (prog && prog.proximosDias && prog.proximosDias.length > 0 && containerFuturo && secaoFuturo) {
+          secaoFuturo.style.display = "block"; // Revela a seção na tela
+          
+          prog.proximosDias.forEach(function(item) {
+            var textoCabecalho = 'Horário';
+            if (item.nomeDia && item.horario) {
+              textoCabecalho = item.nomeDia.trim() + " às " + item.horario.trim();
+            } else if (item.nomeDia) {
+              textoCabecalho = item.nomeDia.trim();
+            } else if (item.horario) {
+              textoCabecalho = item.horario.trim();
             }
-            atualizarCacheLocalTemporario();
-        }
 
-        function forçarAberturaDeRuaSemAnimacao(index) {
-            const divConteudo = document.getElementById(`conteudo_rua_${index}`);
-            const iconeSeta = document.getElementById(`seta_${index}`);
-            if (divConteudo && iconeSeta) {
-                divConteudo.style.display = "block";
-                iconeSeta.style.transform = "rotate(180deg)";
+            // Adiciona a data resumida no título do cabeçalho (ex: Terça (15/10) às 16h00)
+            if (item.dataExibicao) {
+              var dataCurta = item.dataExibicao.substring(0, 5); // Pega apenas DD/MM
+              textoCabecalho = textoCabecalho.replace(item.nomeDia.trim(), item.nomeDia.trim() + " (" + dataCurta + ")");
             }
+
+            var htmlBlocoFuturo = `
+              <div style="margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #ffffff; opacity: 0.9; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div onclick="alternarAbas(this)" style="padding: 14px 16px; background: #fdfdfd; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                  <span style="font-size: 15px; font-weight: 600; color: #374151;">📅 ${textoCabecalho}</span>
+                  <span class="seta-aba" style="font-size: 13px; color: #6b7280; transition: transform 0.2s;">▼</span>
+                </div>
+                <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
+                  <div style="margin-bottom: 12px;"><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">🗺️ Território</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.territorio || '---'}</span></div>
+                  <div style="margin-bottom: 12px;"><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">👔 Dirigente</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.dirigente || '---'}</span></div>
+                  <div><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">📋 Fase do Trabalho</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.visita || '---'}</span></div>
+                </div>
+              </div>`;
+          containerFuturo.innerHTML += htmlBlocoFuturo;
+          });
+        }
+      }) // Fecha o segundo .then
+      .catch(function(err) {
+        console.error("Erro na integração do painel:", err);
+        var loaderOriginal = document.getElementById("loader");
+        if (loaderOriginal) loaderOriginal.style.display = "none";
+        if (document.getElementById("tela-seu-app-antigo")) {
+          document.getElementById("tela-seu-app-antigo").style.display = "block";
+        }
+      });
+    }
+       // Entrada principal do PWA ao carregar a página
+    window.onload = function() {
+      // CORREÇÃO: Esconde o botão único se o app já estiver instalado e rodando em modo tela cheia (standalone)
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        var btnInstalar = document.getElementById('btnInstalarApp');
+        if (btnInstalar) {
+          btnInstalar.style.display = 'none';
+        }
+      }
+      
+      var txtLoader = document.getElementById("loaderTexto");
+      if (txtLoader) txtLoader.innerText = "Conectando...";
+      
+      // Carrega territórios, quadras e ruas salvos na planilha
+      fetchData("obterBancoCompleto", null, function(banco) {
+        if (!banco || !banco.territorios) {
+          if (txtLoader) txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
+          return;
+        }
+        
+        BD_GLOBAL = banco;
+        if (txtLoader) txtLoader.innerHTML = "Conectado";
+        if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
+        if (document.getElementById("btnSalvar")) document.getElementById("btnSalvar").style.display = "flex";
+        
+        var combo = document.getElementById("territorio");
+        if (combo) {
+          var fragmento = document.createDocumentFragment();
+          var optPadrao = document.createElement("option");
+          optPadrao.value = "";
+          optPadrao.innerText = "-- Selecione o Território --";
+          fragmento.appendChild(optPadrao);
+          
+          banco.territorios.forEach(function(t) {
+            var opt = document.createElement("option");
+            opt.value = t;
+            opt.innerText = t;
+            fragmento.appendChild(opt);
+          });
+          combo.innerHTML = "";
+          combo.appendChild(fragmento);
+        }
+        
+        // Ativa a verificação da escala do dia corrente
+        inicializarPainelComDados();
+      });
+    };
+    // Filtra e lista as quadras baseadas no território selecionado
+    function filtrarQuadrasLocalmente() {
+      var territorio = document.getElementById("territorio").value;
+      var comboQuadra = document.getElementById("quadra");
+      
+      document.getElementById("area-ruas").innerHTML = "";
+      var btnSalvar = document.getElementById("btnSalvar");
+      if (btnSalvar) btnSalvar.disabled = true;
+      
+      if (!territorio) {
+        comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+        comboQuadra.disabled = true;
+        return;
+      }
+      
+      var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
+        return q.territorio === territorio;
+      });
+
+      var fragmento = document.createDocumentFragment();
+      var optPadrao = document.createElement("option");
+      optPadrao.value = "";
+      optPadrao.innerText = "-- Selecione a Quadra --";
+      fragmento.appendChild(optPadrao);
+
+      quadrasFiltradas.forEach(function(q) {
+        var opt = document.createElement("option");
+        opt.value = q.nome;
+        opt.innerText = q.nome;
+        fragmento.appendChild(opt);
+      });
+
+      comboQuadra.innerHTML = "";
+      comboQuadra.appendChild(fragmento);
+      comboQuadra.disabled = false;
+    }
+
+    // Desenha as ruas e monta as caixas de rascunho de números
+    function carregarRuasDoCacheLocal() {
+      var quadra = document.getElementById("quadra").value;
+      var areaRuas = document.getElementById("area-ruas");
+      var btnSalvar = document.getElementById("btnSalvar");
+      
+      if (!quadra) {
+        areaRuas.innerHTML = "";
+        if (btnSalvar) btnSalvar.disabled = true;
+        return;
+      }
+      
+      var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
+        return r.quadra === quadra;
+      });
+
+      if (ruasFiltradas.length === 0) {
+        areaRuas.innerHTML = "<p style='color:#c5221f; text-align:center; font-weight:700;'>Nenhuma rua encontrada nesta quadra.</p>";
+        if (btnSalvar) btnSalvar.disabled = true;
+        return;
+      }
+      
+      var htmlFinal = "";
+      
+      ruasFiltradas.forEach(function(item, index) {
+        if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
+          CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
         }
 
-        // Salva o texto das casas enquanto o usuário digita na caixa de entrada
-        function salvarProgressoInputFocado(index, valor) {
-            MAPA_CASAS_TEMPORARIAS[index] = valor;
-            atualizarCacheLocalTemporario();
+        var chaveIdentificadora = quadra + "_" + item.nome;
+
+        // Valida se a rua já foi concluída por cartas localmente ou na planilha
+        var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
+                          String(item.historico).includes("Cartas") || 
+                          String(item.historico).includes("Concluída");
+
+        // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
+        var htmlQuadradinhos = "";
+        var h = String(item.historico || "").trim();
+        
+        if (!h || h === "undefined" || h === "Nenhum registro recente") {
+          htmlQuadradinhos = `<span id="avisoNenhum_${index}" style="color: #868e96; font-style: italic; margin-right: 4px;">Nenhum registro recente</span>`;
+        } else {
+          var numeros = h.split(/[\s,\|]+/);
+          numeros.forEach(function(num) {
+            var limpo = num.trim();
+            if (limpo) htmlQuadradinhos += `<span class="quadradinho-casa">${limpo}</span>`;
+          });
         }
 
-        // Modifica o estado do botão de cartas ("Com Cartas" / "Sem Cartas")
-        function alternarCartasDoPainel(botao) {
-            const index = botao.getAttribute("data-index");
+        htmlFinal += `
+          <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
             
-            if (CARTAS_POR_RUA[index]) {
-                CARTAS_POR_RUA[index] = false;
-            } else {
-                CARTAS_POR_RUA[index] = true;
-            }
-
-            const badge = document.getElementById(`badge_cartas_${index}`);
-            if (badge) {
-                if (CARTAS_POR_RUA[index]) {
-                    badge.className = "rua-badge-status status-completo";
-                    badge.innerText = "Com Cartas";
-                } else {
-                    badge.className = "rua-badge-status status-pendente";
-                    badge.innerText = "Sem Cartas";
-                }
-            }
-            atualizarCacheLocalTemporario();
-        }
-        /* ==========================================================================
-           AÇÕES: ADICIONAR CASA E ENVIAR RELATÓRIO
-           ========================================================================== */
-        // Nova função do botão que concatena o número na caixa de texto de forma limpa
-        function adicionarCasaTemporaria(event, botao) {
-            if (event) event.preventDefault();
+            <div class="rua-header-clicavel" onclick="${jaConcluida ? '' : `alternarExpansaoRua(${index})`}" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: ${jaConcluida ? 'default' : 'pointer'}; user-select: none; background: ${jaConcluida ? '#e8f5e9' : '#ffffff'};">
+              <div class="rua-titulo" style="font-weight: 700; color: ${jaConcluida ? '#1b5e20' : 'var(--text)'}; display: flex; align-items: center; font-size: 16px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: ${jaConcluida ? '#2e7d32' : 'var(--text-secondary)'}; margin-right: 10px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15z"/></svg>
+                <span>${item.nome}</span>
+              </div>
+              
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="badgeCasas_${index}" style="display: none; background: #007bff; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">0</span>
+                <svg id="setaRua_${index}" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #868e96; transition: transform 0.2s ease; display: ${jaConcluida ? 'none' : 'block'};"><path d="M7 10l5 5 5-5z"/></svg>
+                <div id="faixaConcluida_${index}" style="display: ${jaConcluida ? 'flex' : 'none'}; align-items: center; gap: 4px; color: #2e7d32; font-weight: 700; font-size: 13px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  <span>Concluída</span>
+                </div>
+              </div>
+            </div>
             
-            const index = botao.getAttribute("data-index");
-            const input = document.getElementById(`input_casas_${index}`);
-            
-            if (!input) return;
+           <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--card-bg);">
+  
+  <!-- 1. CAIXA DO HISTÓRICO (Fundo azul suave que combinamos) -->
+  <div class="hist-box">
+    <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
+    ${htmlQuadradinhos}
+  </div>
 
-            const numeroDigitado = input.value.trim();
-            if (numeroDigitado === "") {
-                exibirAlerta("Campo Vazio", "Por favor, digite o número da casa antes de adicionar.");
-                return;
+  <!-- 2. 👇 NOVA CAIXA DE DIVISÃO EXCLUSIVA PARA AS ANOTAÇÕES DO DIA -->
+  <div class="secao-provisorias-container">
+    <span class="titulo-provisorias">📍 Casas anotadas agora:</span>
+    <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
+  </div>
+
+  <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+    
+    <!-- 👇 ATUALIZADO: Aceita letras (ex: 243c1) e abre o teclado inteligente -->
+    <input 
+      type="text" 
+      inputmode="text" 
+      enterkeyhint="done" 
+      id="inputCasa_${index}" 
+      placeholder="Número da casa (ex: 243c1)..." 
+      required
+      style="flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: #ffffff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s;"
+      onfocus="this.style.borderColor='var(--primary)'"
+      onblur="this.style.borderColor='var(--border)'"
+    >
+    
+    <!-- 👇 ATUALIZADO: Botão de + com a mesma altura interna e feedback de clique -->
+    <button 
+      type="submit" 
+      style="background: var(--primary); color: white; border: none; padding: 18px 20px; border-radius: var(--radius-md); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;"
+      ontouchstart="this.style.transform='scale(0.95)'"
+      ontouchend="this.style.transform='scale(1)'"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+  </form>
+           
+              
+   <!-- 👇 ÁREA ATUALIZADA: BOTÃO GRANDE E CONFORTÁVEL PARA OS IDOSOS -->
+  <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
+    
+    <!-- Botão Deixou Cartas (Ocupa a largura total da caixinha de forma elegante) -->
+    <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+      <span>✉️ Deixou Cartas?</span>
+    </button>
+
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+
+          </div>`;
+      });
+
+      areaRuas.innerHTML = htmlFinal;
+      verificarSeTemDadosParaEnviar();
+    }
+        // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
+    function verificarSeTemDadosParaEnviar() {
+      var btn = document.getElementById("btnSalvar");
+      if (!btn) return;
+      
+      var textoBotao = btn.querySelector("span") || btn;
+      var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { 
+        return lista && lista.length > 0; 
+      });
+      
+      if (textoBotao) textoBotao.innerText = "Enviar para o Dirigente";
+
+      if (temCasas) {
+        btn.disabled = false;
+        
+        // NOVO VISUAL AZUL: Gradiente premium e moderno com sombra destacada
+        btn.style.background = "linear-gradient(135deg, #1a73e8, #0056b3)"; 
+        btn.style.color = "#ffffff";
+        btn.style.boxShadow = "0 8px 24px rgba(26, 115, 232, 0.35)";
+        btn.style.cursor = "pointer";
+      } else {
+        btn.disabled = true;
+        
+        // Restaura o cinza padrão do CSS quando a tela está limpa
+        btn.style.background = "#e8eaed"; 
+        btn.style.color = "#9aa0a6";
+        btn.style.boxShadow = "none";
+        btn.style.cursor = "not-allowed";
+      }
+    }
+
+    // Remove um número de rascunho individual clicado pelo usuário
+    function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
+      if (CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
+        CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
+        atualizarVisualCasasTemporarias(index, nomeRua);
+        atualizarBadgeCasasTemporarias(index, nomeRua);
+        verificarSeTemDadosParaEnviar(); 
+      }
+    }
+    
+    // Insere um novo número na lista provisória de rascunhos da rua
+    function adicionarCasaTemporaria(event, index, nomeRua) {
+      if (event) event.preventDefault();
+
+      var input = document.getElementById("inputCasa_" + index);
+      if (!input) return;
+      
+      var numero = input.value.trim();
+
+      if (!numero) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+        return;
+      }
+
+      if (!CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
+        CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+      }
+
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+      input.value = ""; 
+      input.blur(); // Recolhe o teclado no celular para dar conforto ao idoso
+
+      atualizarVisualCasasTemporarias(index, nomeRua);
+      atualizarBadgeCasasTemporarias(index, nomeRua);
+      verificarSeTemDadosParaEnviar(); 
+
+      // Timeout cirúrgico para travar o contêiner aberto enquanto a interface se reorganiza
+      setTimeout(function() {
+        var corpo = document.getElementById("corpoRua_" + index);
+        if (corpo) corpo.style.display = "block"; 
+        
+        var seta = document.getElementById("setaRua_" + index);
+        if (seta) seta.style.transform = "rotate(180deg)"; 
+
+        var container = document.getElementById("container_" + index);
+        if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; 
+      }, 50); 
+    }
+
+    // Monta os balões cinzas de rascunhos na tela
+    function atualizarVisualCasasTemporarias(index, nomeRua) {
+      var listaDiv = document.getElementById("listaProvisoria_" + index);
+      if (!listaDiv) return;
+
+      var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[nomeRua] || [];
+      var htmlBaloes = "";
+
+      var avisoNenhum = document.getElementById("avisoNenhum_" + index);
+      if (avisoNenhum) {
+        avisoNenhum.style.display = listaDeNumeros.length > 0 ? "none" : "inline-block";
+      }
+
+      listaDeNumeros.forEach(function(num, idx) {
+        htmlBaloes += `
+          <div class="balao-casa">
+            <span>${num}</span>
+            <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua.replace(/'/g, "\\'")}', ${idx})">✕</span>
+          </div>`;
+      });
+
+      listaDiv.innerHTML = htmlBaloes;
+    }
+
+    // Controla o contador azul de registros pendentes na rua recolhida
+    function atualizarBadgeCasasTemporarias(index, nomeRua) {
+      var badge = document.getElementById("badgeCasas_" + index);
+      if (!badge) return;
+      
+      var qtd = CASAS_TEMPORARIAS_POR_RUA[nomeRua] ? CASAS_TEMPORARIAS_POR_RUA[nomeRua].length : 0;
+      
+      if (qtd > 0) {
+        badge.innerText = qtd;
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+
+    // Expande ou recolhe o bloco principal das ruas
+    function alternarExpansaoRua(index) {
+      var corpo = document.getElementById("corpoRua_" + index);
+      var seta = document.getElementById("setaRua_" + index);
+      var container = document.getElementById("container_" + index);
+      
+      if (!corpo) return;
+
+      if (corpo.style.display === "block") {
+        corpo.style.display = "none";
+        if (seta) seta.style.transform = "rotate(0deg)";
+        if (container) container.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
+      } else {
+        corpo.style.display = "block";
+        if (seta) seta.style.transform = "rotate(180deg)"; 
+        if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; 
+      }
+    }
+    /* ==========================================================================
+       X. PROCESSAMENTO, MODAIS E ENVIO DE CARTAS INDIVIDUAIS
+       ========================================================================== */
+    function alternarCartas(index, nomeRua) {
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
+      
+      var modal = document.getElementById("modalCartas");
+      var textoP = document.getElementById("textoModalCartas");
+      var btnCancelar = document.getElementById("btnCancelarCartas");
+      var btnConfirmar = document.getElementById("btnConfirmarCartas");
+      
+      if (!modal || !textoP) {
+        var conf = confirm("Deseja marcar " + nomeRua + " como concluída por cartas?");
+        if (conf) executarEnvioCartas(index, territorio, quadra, nomeRua);
+        return;
+      }
+
+      textoP.innerHTML = "Tem certeza que deseja marcar a <strong>" + nomeRua + "</strong> como concluída por cartas? <br><span style='font-size:13px; color:#777; display:inline-block; margin-top:6px;'>O aviso será enviado ao dirigente.</span>";
+      modal.style.display = "flex";
+
+      btnCancelar.onclick = function() { modal.style.display = "none"; };
+      btnConfirmar.onclick = function() {
+        modal.style.display = "none";
+        executarEnvioCartas(index, territorio, quadra, nomeRua);
+      };
+    }
+
+    function executarEnvioCartas(index, territorio, quadra, nomeRua) {
+      var btnCartas = document.getElementById("btnCartas_" + index);
+      if (btnCartas) {
+        btnCartas.disabled = true;
+        btnCartas.innerText = "Enviando...";
+      }
+
+      var dadosConclusao = { territorio: territorio, quadra: quadra, rua: nomeRua, status: "Concluída" };
+      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Registrando conclusão...');
+
+      fetchData("registrarConclusaoRua", dadosConclusao, function(resposta) {
+        if (resposta === "OK" || resposta === "Sucesso" || (resposta && resposta.status === "Sucesso")) {
+          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
+          
+          var chaveIdentificadora = quadra + "_" + nomeRua;
+          CARTAS_POR_RUA[chaveIdentificadora] = true;
+          
+          var container = document.getElementById("container_" + index);
+          if (container) {
+            container.style.background = "#e8f5e9";
+            container.style.borderColor = "#c8e6c9";
+            var header = container.querySelector(".rua-header-clicavel");
+            if (header) { header.style.background = "#e8f5e9"; header.style.cursor = "default"; header.onclick = null; }
+            var titulo = container.querySelector(".rua-titulo");
+            if (titulo) { titulo.style.color = "#1b5e20"; var svg = titulo.querySelector("svg"); if (svg) svg.style.color = "#2e7d32"; }
+            var seta = document.getElementById("setaRua_" + index); if (seta) seta.style.display = "none";
+            var faixa = document.getElementById("faixaConcluida_" + index); if (faixa) faixa.style.display = "flex";
+            var corpo = document.getElementById("corpoRua_" + index); if (corpo) corpo.style.display = "none";
+          }
+          CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+          verificarSeTemDadosParaEnviar();
+        } else {
+          alert("Erro ao concluir: " + JSON.stringify(resposta));
+          if (btnCartas) { btnCartas.disabled = false; btnCartas.innerText = "Deixou Cartas?"; }
+          carregarRuasDoCacheLocal();
+        }
+      });
+    }
+
+    /* ==========================================================================
+       X. ENVIO GERAL DO RELATÓRIO DO DIA
+       ========================================================================== */
+    function abrirModalConfirmacao() {
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
+      if (!territorio || !quadra) {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Escolha o território e a quadra!');
+        return;
+      }
+      var modal = document.getElementById('modalConfirmacao');
+      if (!modal) {
+        var conf = confirm("Deseja enviar o relatório para o Dirigente?");
+        if (conf) enviarDados();
+        return;
+      }
+      modal.style.display = 'flex';
+      document.getElementById('btnCancelarModal').onclick = function() { modal.style.display = 'none'; };
+      document.getElementById('btnConfirmarModal').onclick = function() { modal.style.display = 'none'; enviarDados(); };
+    }
+
+    function enviarDados() {
+      var btn = document.getElementById("btnSalvar");
+      var territorio = document.getElementById("territorio").value;
+      var quadra = document.getElementById("quadra").value;
+      var ruasDados = [];
+      
+      Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(nomeRua) {
+        var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
+        if (casasMarcadas && casasMarcadas.length > 0) {
+          ruasDados.push({ nome: nomeRua, casas: casasMarcadas.join(", ") });
+        }
+      });
+
+      if (ruasDados.length === 0) return;
+      if (btn) btn.disabled = true;
+      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Enviando dados, aguarde...');
+
+      fetchData("salvarDados", { territorio: territorio, quadra: quadra, ruas: ruasDados }, function(resposta) {
+        if (resposta === "Sucesso" || resposta === "OK" || (resposta && resposta.status === "Sucesso")) {
+          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
+          ruasDados.forEach(function(rd) {
+            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+            if (ruaNoBD) {
+              var histAtual = String(ruaNoBD.historico || "").trim();
+              ruaNoBD.historico = (!histAtual || histAtual === "Nenhum registro recente") ? rd.casas : rd.casas + ", " + histAtual;
             }
-
-            // Atualiza o estado global e o campo de texto
-            MAPA_CASAS_TEMPORARIAS[index] = numeroDigitado;
-            input.value = numeroDigitado;
-            atualizarCacheLocalTemporario();
-            
-            exibirAlerta("Salvo", `As casas para a rua foram guardadas temporariamente no seu aparelho.`);
+          });
+          CASAS_TEMPORARIAS_POR_RUA = {};
+          CARTAS_POR_RUA = {};
+          setTimeout(carregarRuasDoCacheLocal, 1500);
+        } else {
+          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Erro no servidor.');
+          if (btn) btn.disabled = false;
         }
+      });
+    }
 
-        // Envia as informações da rua selecionada para a planilha centralizada do Google
-        function enviarRelatorioFinalDoBloco(botao) {
-            const index = botao.getAttribute("data-index");
-            const nomeRua = botao.getAttribute("data-rua");
-            const input = document.getElementById(`input_casas_${index}`);
-            
-            if (!input) return;
+    /* ==========================================================================
+       X. TOASTS E SISTEMA DE INSTALAÇÃO REAL DO PWA (CORRIGIDO)
+       ========================================================================== */
+    function exibirToast(svgPath, texto) {
+      var toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
+      toast.classList.add("visivel");
+      setTimeout(function() { toast.classList.remove("visivel"); }, 3000);
+    }
 
-            const casas = input.value.trim();
-            const cartas = CARTAS_POR_RUA[index] ? "Sim" : "Não";
-
-            if (casas === "") {
-                exibirAlerta("Atenção", "Preencha os números das casas antes de enviar o relatório.");
-                return;
+    // Monitora a intenção de instalação nativa do navegador
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      var btnInstalar = document.getElementById('btnInstalarApp');
+      if (btnInstalar) {
+        btnInstalar.style.display = 'block';
+        btnInstalar.onclick = function() {
+          btnInstalar.style.display = 'none';
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(choiceResult) {
+            if (choiceResult.outcome !== 'accepted') {
+              btnInstalar.style.display = 'block'; // Devolve o botão se recusar
             }
+            deferredPrompt = null;
+          });
+        };
+      }
+    });
 
-            const parametroDeEnvio = {
-                territorio: DADOS_TERRITORIO_ATUAL.nome,
-                rua: nomeRua,
-                casas: casas,
-                cartas: cartas
-            };
+    // CORREÇÃO MÁGICA: Só roda e avisa quando o sistema operacional GARANTIR a gravação off-line
+    window.addEventListener('appinstalled', function() {
+      var popup = document.getElementById("toastInstalacao");
+      var barra = document.getElementById("barraProgresso");
+      
+      if (popup && barra) {
+        popup.classList.add("ativo");
+        barra.style.width = "100%"; // Dispara o enchimento visual estável
 
-            fetchData("salvarRelatorioRua", parametroDeEnvio, function(resposta) {
-                // Remove apenas os dados específicos da rua que foi enviada com sucesso
-                delete MAPA_CASAS_TEMPORARIAS[index];
-                delete CARTAS_POR_RUA[index];
-                
-                // IMPORTANTE: Mantemos RUA_ABERTA_ATUAL = index para que a quadra continue aberta ao recarregar a lista
-                RUA_ABERTA_ATUAL = index;
-                atualizarCacheLocalTemporario();
-                
-                // Recarrega a listagem aplicando as atualizações visuais na tela
-                renderizarListaDeRuas();
-                
-                exibirAlerta("Sucesso", `Relatório da ${nomeRua} enviado com sucesso para o dirigente!`);
-            });
-        }
-        /* ==========================================================================
-           CONTROLES VISUAIS (MODAIS, CARREGAMENTO E ALERTAS)
-           ========================================================================== */
-        function exibirAlerta(titulo, mensagem) {
-            document.getElementById("modal-titulo").innerText = titulo;
-            document.getElementById("modal-mensagem").innerText = mensagem;
-            document.getElementById("modal-alerta").style.display = "flex";
-        }
+        setTimeout(function() {
+          popup.classList.remove("ativo");
+          setTimeout(function() { barra.style.width = "0%"; }, 400); // Reseta a barra escondida
+        }, 3500);
+      }
+    });
 
-        function fecharModalAlerta() {
-            document.getElementById("modal-alerta").style.display = "none";
-        }
-
-        function exibirCarregamentoRodape(texto) {
-            document.getElementById("texto-carregamento-rodape").innerText = texto;
-            document.getElementById("status-carregamento-rodape").style.display = "block";
-        }
-
-        function ocultarCarregamentoRodape() {
-            document.getElementById("status-carregamento-rodape").style.display = "none";
-        }
-
-        /* ==========================================================================
-           SUPORTE PWA: INSTALAÇÃO E ATUALIZAÇÃO
-           ========================================================================== */
-        // Captura o evento nativo de convite para instalação do navegador
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            DEFER_PROMPT_PWA = e;
-            
-            // Exibe o banner discreto de recomendação de instalação
-            const banner = document.getElementById("pwa-install-banner");
-            if (banner) banner.style.display = "flex";
-        });
-
-        // Gerencia o clique do botão de instalação com feedback dinâmico
-        function dispararInstalacaoPWA() {
-            if (!DEFER_PROMPT_PWA) return;
-
-            const botao = document.getElementById("btn-pwa-instalar");
-            const textoBanner = document.getElementById("pwa-install-text");
-            
-            // Atualiza os estados visuais para o modo "Instalando..." (Melhoria 4)
-            if (botao) {
-                botao.innerText = "Instalando...";
-                botao.disabled = true;
-            }
-            if (textoBanner) {
-                textoBanner.innerText = "Adicionando o ícone à tela inicial...";
-            }
-
-            DEFER_PROMPT_PWA.prompt();
-            DEFER_PROMPT_PWA.userChoice.then((escolha) => {
-                if (escolha.outcome === "accepted") {
-                    console.log("Usuário aceitou a instalação do PWA.");
-                } else {
-                    console.log("Usuário recusou a instalação do PWA.");
-                    // Se recusar, restaura os botões originais
-                    fecharBannerPWA();
-                }
-                DEFER_PROMPT_PWA = null;
-            });
-        }
-
-        // Evento real disparado pelo sistema operacional quando a instalação chega a 100%
-        window.addEventListener("appinstalled", (evt) => {
-            console.log("PWA instalado com sucesso!");
-            
-            const botao = document.getElementById("btn-pwa-instalar");
-            const textoBanner = document.getElementById("pwa-install-text");
-
-            if (botao) {
-                botao.innerText = "Pronto!";
-                botao.style.background = "var(--success)";
-            }
-            if (textoBanner) {
-                textoBanner.innerText = "Aplicativo instalado com sucesso!";
-            }
-
-            // Oculta o banner de forma elegante após 3 segundos
-            setTimeout(() => {
-                fecharBannerPWA();
-            }, 3000);
-        });
-
-        function fecharBannerPWA() {
-            const banner = document.getElementById("pwa-install-banner");
-            if (banner) banner.style.display = "none";
-        }
-        /* ==========================================================================
-           INICIALIZAÇÃO DO APLICATIVO (DOM LOAD)
-           ========================================================================== */
-        document.addEventListener("DOMContentLoaded", () => {
-            // Executa a primeira carga dos dados do dia vindo do Google Sheets
-            inicializarPainelComDados();
-        });
-    </script>
-
-    <!-- REGISTRO DO SERVICE WORKER (PWA OFFLINE) -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then((registro) => {
-                        console.log('ServiceWorker registrado com sucesso no escopo: ', registro.scope);
-                    })
-                    .catch((erro) => {
-                        console.error('Falha ao registrar o ServiceWorker: ', erro);
-                    });
-            });
-        }
-    </script>
+    // Registra o Service Worker obrigatório do PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+        console.error('Falha ao registrar Service Worker do PWA:', err);
+      });
+    }
+  </script>
 </body>
 </html>
