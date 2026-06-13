@@ -948,25 +948,22 @@ window.onload = function() {
 
   var combo = document.getElementById("territorio");
   
-  // ⚡ MUDANÇA CRÍTICA: Tenta carregar os dados salvos do cache local imediatamente
+  // Tenta carregar os dados salvos do cache local imediatamente
   var cacheSalvo = localStorage.getItem("BD_GLOBAL_CACHE");
   if (cacheSalvo) {
     try {
       BD_GLOBAL = JSON.parse(cacheSalvo);
-      // Desenha a tela instantaneamente com os dados antigos
       renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
     } catch(e) {
       console.error("Erro ao ler cache local", e);
     }
   } else {
-    // Se não tem cache, mostra o carregando normal
     if (combo) combo.innerHTML = '<option value="">⏳ Carregando territórios...</option>';
   }
   
   // Busca os dados atualizados da planilha em segundo plano
   fetchData("obterBancoCompleto", null, function(banco) {
     if (!banco || !banco.territorios) {
-      // Se a internet falhar mas temos o cache, não quebra a tela do usuário
       if (!BD_GLOBAL) {
         if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
         if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").innerHTML = "⚠️ Falha ao carregar.";
@@ -974,7 +971,7 @@ window.onload = function() {
       return;
     }
     
-    // ⚡ MUDANÇA CRÍTICA: Salva a versão mais nova no cache para a próxima abertura
+    // Salva a versão mais nova no cache para a próxima abertura
     localStorage.setItem("BD_GLOBAL_CACHE", JSON.stringify(banco));
     BD_GLOBAL = banco;
     
@@ -983,7 +980,7 @@ window.onload = function() {
   });
 };
 
-// Nova função auxiliar para desenhar os territórios na tela sem repetir código
+// Função auxiliar para desenhar os territórios na tela e liberar o painel
 function renderizarTerritorios(banco, combo, btnSalvar) {
   if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
   if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").style.display = "none";
@@ -1006,12 +1003,12 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
     combo.innerHTML = "";
     combo.appendChild(fragmento);
   }
-}
-    
-    // Ativa a verificação da escala do dia corrente
+
+  // Executa a verificação da escala do dia corrente após carregar os dados
+  if (typeof inicializarPainelComDados === "function") {
     inicializarPainelComDados();
-  });
-};
+  }
+}
 
 // Filtro em cascada
 function filtrarQuadrasLocalmente() {
