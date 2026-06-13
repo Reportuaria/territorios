@@ -1188,7 +1188,7 @@ function carregarRuasDoCacheLocal() {
     <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
   </div>
 
-  <form class="digitacao-container" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+<form class="digitacao-container" id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
     
     <!-- 👇 ATUALIZADO: Aceita letras (ex: 243c1) e abre o teclado inteligente -->
     <input 
@@ -1203,29 +1203,28 @@ function carregarRuasDoCacheLocal() {
       onblur="this.style.borderColor='var(--border)'"
     >
     
-</form>
-   </form> <!-- Fecha o formulário (o botão "Adicionar Registro" saiu daqui de dentro) -->
+</form> <!-- Fecha o formulário flex perfeitamente aqui -->
            
-  <!-- 👇 1º BOTÃO (Antigo 2º): O botão de cartas agora vem primeiro, logo embaixo do formulário -->
-  <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
-    
-    <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
-      <span>✉️ Deixou Cartas?</span>
-    </button>
-
-  </div> <!-- Fecha o wrapper do botão de cartas -->
-
-  <!-- 👇 2º BOTÃO (Antigo 1º): "Adicionar Registro" reposicionado FORA do formulário e no final de tudo -->
-  <!-- Mantemos o atributo form="id_do_seu_formulario" caso precise submeter o formulário de fora dele -->
-  <button 
-    type="submit" 
-    style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
-    ontouchstart="this.style.transform='scale(0.98)'"
-    ontouchend="this.style.transform='scale(1)'"
-  >
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-    <span>🏠 Adicionar Registro</span>
+<!-- 👇 1º BOTÃO: O botão de cartas agora fica logo embaixo do input -->
+<div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
+  
+  <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+    <span>✉️ Deixou Cartas?</span>
   </button>
+
+</div> <!-- Fecha o wrapper do botão de cartas -->
+
+<!-- 👇 2º BOTÃO: "Adicionar Registro" posicionado no final de tudo -->
+<button 
+  type="submit" 
+  form="formCasa_${index}"
+  style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
+  ontouchstart="this.style.transform='scale(0.98)'"
+  ontouchend="this.style.transform='scale(1)'"
+>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+  <span>🏠 Adicionar Registro</span>
+</button>
 
 </div> <!-- Mantido: Fechamento estrutural original 1 -->
 
@@ -1233,7 +1232,8 @@ function carregarRuasDoCacheLocal() {
       });
 
       areaRuas.innerHTML = htmlFinal;
-    } 
+    }
+
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
     function verificarSeTemDadosParaEnviar() {
