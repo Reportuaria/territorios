@@ -597,12 +597,24 @@
     <!-- ======================================================== -->
   <!-- 1. NOVO PAINEL INICIAL (Escala de Trabalho - Sanfona)    -->
   <!-- ======================================================== -->
-<!-- ⚡ MUDANÇA: Removemos o style="display: none;" daqui -->
 <div id="tela-painel-inicial">
+    
+    <div class="header-app">
+      <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 10px;">
+        <!-- Ícone sutil de início/painel -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span style="font-size: 18px; font-weight: 700; color: var(--text);">Painel de Escalas</span>
+      </div>
+      
+      <!-- Ícone sutil de usuário ou status do app à direita -->
+      <div class="header-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+      </div>
+    </div>
+
     <div class="container page-spacing">
-      <h2 class="titulo-principal">Território do Dia</h2>
+      <h3 class="titulo-principal" style="margin-top: 16px;">Território do Dia</h3>
        
-      <!-- O BOTÃO AGORA CARREGA IMEDIATAMENTE -->
       <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
       
       <div id="container-programacao" class="card-inicial">
@@ -611,11 +623,12 @@
 
        <!-- Linha divisória e contêiner para os próximos dias -->
       <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
-        <h3 class="subtitulo-secao">📅 Próximas Escalas</h3>
+        <h3 class="subtitulo-secao">📅 Próximos Dias</h3>
         <div id="container-proximos-dias"></div>
       </div>
     </div>
 </div>
+
 
   <!-- ======================================================== -->
   <!-- 2. PAGINA 2 - BUSCAR TERRITORIOS (Digitação e Ruas)          -->
@@ -773,9 +786,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
     combo.innerHTML = "";
     combo.appendChild(fragmento);
   }
-
-  // Mudança aqui: usamos requestAnimationFrame para rodar a lógica pesada da escala
-  // apenas na próxima piscada de tela do celular, liberando os primeiros milissegundos
+  
   if (typeof inicializarPainelComDados === "function") {
     requestAnimationFrame(function() {
       inicializarPainelComDados();
@@ -888,41 +899,42 @@ function acionarPregaçãoDoBloco(nomeTerritorio) {
             }
 
             var nomeTerritorioLimpo = (item.territorio || "").replace(/"/g, '&quot;');
+            
+var htmlBloco = `
+  <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
+    <!-- Cabeçalho da Sanfona Modernizado -->
+    <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
+      <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
+      <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
+    </div>
+    
+    <!-- 🌟 CONTEÚDO ENVELOPADO: Abre e fecha perfeitamente junto -->
+    <div class="conteudo-sanfona" style="display: none; padding: 20px;">
+      <div style="margin-bottom: 16px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+          <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+        </p>
+        <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+          <span style="opacity: 0.7; margin-right: 4px;">👔</span> Dirigente
+        </p>
+        <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
+      </div>
+      
+      <div style="margin-bottom: 22px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+          <span style="opacity: 0.7; margin-right: 4px;">📋</span> Fase do Trabalho
+        </p>
+        <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
+      </div>
 
-       var htmlBloco = `
-              <div class="card-inicial" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
-                <!-- Cabeçalho da Sanfona Modernizado -->
-                <div onclick="alternarAbas(this)" style="padding: 18px 20px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid var(--border);">
-                  <span style="font-size: 17px; font-weight: 700; color: var(--text);">📢 Campo - ${textoCabecalho}</span>
-                  <span class="seta-aba" style="font-size: 14px; color: var(--text-secondary); transition: transform 0.2s;">▼</span>
-                </div>
-                
-                <!-- Conteúdo Interno com Tipografia Premium -->
-                  <div style="margin-bottom: 16px;">
-    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-      <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
-    </p>
-    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
-  </div>
-  
-  <div style="margin-bottom: 16px;">
-    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-      <span style="opacity: 0.7; margin-right: 4px;">👔</span> Dirigente
-    </p>
-    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.dirigente || '---'}</span>
-  </div>
-  
-  <div style="margin-bottom: 22px;">
-    <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-      <span style="opacity: 0.7; margin-right: 4px;">📋</span> Fase do Trabalho
-    </p>
-    <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
-  </div>
-
-                  <!-- ✨ BOTÃO INICIAR TRABALHO: Agora em Azul Premium e com feedback tátil -->
-                  <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Iniciar Trabalho</button>
-                </div>
-              </div>`;
+      <!-- ✨ BOTÃO INICIAR TRABALHO -->
+      <button data-territorio="${nomeTerritorioLimpo}" onclick="acionarPregaçãoDoBloco(this.getAttribute('data-territorio'))" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Iniciar Trabalho</button>
+    </div>
+  </div>`;
             containerHoje.innerHTML += htmlBloco;
           });
         } else if (containerHoje) {
@@ -933,7 +945,7 @@ function acionarPregaçãoDoBloco(nomeTerritorio) {
               <button onclick="abrirBuscaLivre()" style="width: 100%; padding: 16px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">Abrir Busca Livre</button>
             </div>`;
         }
-
+   
 
         // 2. RENDERIZA AS ESCALAS DOS PRÓXIMOS DIAS (NOVO)
         if (prog && prog.proximosDias && prog.proximosDias.length > 0 && containerFuturo && secaoFuturo) {
