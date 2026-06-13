@@ -931,126 +931,141 @@
         }
       });
     }
-       // Entrada principal do PWA ao carregar a página
-    window.onload = function() {
-      // CORREÇÃO: Esconde o botão único se o app já estiver instalado e rodando em modo tela cheia (standalone)
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-        var btnInstalar = document.getElementById('btnInstalarApp');
-        if (btnInstalar) {
-          btnInstalar.style.display = 'none';
-        }
-      }
-      
-      var txtLoader = document.getElementById("loaderTexto");
-      if (txtLoader) txtLoader.innerText = "Conectando...";
-      
-      // Carrega territórios, quadras e ruas salvos na planilha
-      fetchData("obterBancoCompleto", null, function(banco) {
-        if (!banco || !banco.territorios) {
-          if (txtLoader) txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
-          return;
-        }
-        
-        BD_GLOBAL = banco;
-        if (txtLoader) txtLoader.innerHTML = "Conectado";
-        if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
-        if (document.getElementById("btnSalvar")) document.getElementById("btnSalvar").style.display = "flex";
-        
-        var combo = document.getElementById("territorio");
-        if (combo) {
-          var fragmento = document.createDocumentFragment();
-          var optPadrao = document.createElement("option");
-          optPadrao.value = "";
-          optPadrao.innerText = "-- Selecione o Território --";
-          fragmento.appendChild(optPadrao);
-          
-          banco.territorios.forEach(function(t) {
-            var opt = document.createElement("option");
-            opt.value = t;
-            opt.innerText = t;
-            fragmento.appendChild(opt);
-          });
-          combo.innerHTML = "";
-          combo.appendChild(fragmento);
-        }
-        
-        // Ativa a verificação da escala do dia corrente
-        inicializarPainelComDados();
-      });
-    };
-    // Filtra e lista as quadras baseadas no território selecionado
-    function filtrarQuadrasLocalmente() {
-      var territorio = document.getElementById("territorio").value;
-      var comboQuadra = document.getElementById("quadra");
-      
-      document.getElementById("area-ruas").innerHTML = "";
-      var btnSalvar = document.getElementById("btnSalvar");
-      if (btnSalvar) btnSalvar.disabled = true;
-      
-      if (!territorio) {
-        comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
-        comboQuadra.disabled = true;
-        return;
-      }
-      
-      var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
-        return q.territorio === territorio;
-      });
+      // VEJA QUE O SEU WINDOW.ONLOAD FOI SUBSTITUÍDO POR ESTE ABAIXO:
+window.onload = function() {
+  // CORREÇÃO PWA: Esconde o botão se rodar instalado (standalone)
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    var btnInstalar = document.getElementById('btnInstalarApp');
+    if (btnInstalar) {
+      btnInstalar.style.display = 'none';
+    }
+  }
+  
+  // 1. Otimização LCP: Garante que o botão salvar apareça rápido, mas desativado até os dados chegarem
+  var btnSalvar = document.getElementById("btnSalvar");
+  if (btnSalvar) {
+    btnSalvar.style.display = "flex";
+    btnSalvar.disabled = true; 
+  }
 
+  // 2. Coloca o status de carregamento direto na caixinha de Territórios
+  var combo = document.getElementById("territorio");
+  if (combo) {
+    combo.innerHTML = '<option value="">⏳ Carregando territórios...</option>';
+  }
+  
+  // Carrega territórios, quadras e ruas salvos na planilha
+  fetchData("obterBancoCompleto", null, function(banco) {
+    if (!banco || !banco.territorios) {
+      if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
+      var txtLoader = document.getElementById("loaderTexto");
+      if (txtLoader) txtLoader.innerHTML = "⚠️ Falha ao carregar banco de dados.";
+      return;
+    }
+    
+    BD_GLOBAL = banco;
+    
+    // Some com os elementos antigos de tela cheia se eles existirem no HTML
+    if (document.getElementById("loaderSpinner")) document.getElementById("loaderSpinner").style.display = "none";
+    if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").style.display = "none";
+    
+    // Ativa o botão de salvar após os dados chegarem da planilha
+    if (btnSalvar) btnSalvar.disabled = false;
+    
+    // Preenche a caixinha com os territórios reais recebidos
+    if (combo) {
       var fragmento = document.createDocumentFragment();
       var optPadrao = document.createElement("option");
       optPadrao.value = "";
-      optPadrao.innerText = "-- Selecione a Quadra --";
+      optPadrao.innerText = "-- Selecione o Território --";
       fragmento.appendChild(optPadrao);
-
-      quadrasFiltradas.forEach(function(q) {
+      
+      banco.territorios.forEach(function(t) {
         var opt = document.createElement("option");
-        opt.value = q.nome;
-        opt.innerText = q.nome;
+        opt.value = t;
+        opt.innerText = t;
         fragmento.appendChild(opt);
       });
+      combo.innerHTML = "";
+      combo.appendChild(fragmento);
+    }
+    
+    // Ativa a verificação da escala do dia corrente
+    inicializarPainelComDados();
+  });
+};
 
-      comboQuadra.innerHTML = "";
-      comboQuadra.appendChild(fragmento);
-      comboQuadra.disabled = false;
+// Filtro em cascada
+function filtrarQuadrasLocalmente() {
+  var territorio = document.getElementById("territorio").value;
+  var comboQuadra = document.getElementById("quadra");
+  
+  document.getElementById("area-ruas").innerHTML = "";
+  var btnSalvar = document.getElementById("btnSalvar");
+  if (btnSalvar) btnSalvar.disabled = true;
+  
+  if (!territorio) {
+    comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+    comboQuadra.disabled = true;
+    return;
+  }
+  
+  var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
+    return q.territorio === territorio;
+  });
+
+  var fragmento = document.createDocumentFragment();
+  var optPadrao = document.createElement("option");
+  optPadrao.value = "";
+  optPadrao.innerText = "-- Selecione a Quadra --";
+  fragmento.appendChild(optPadrao);
+
+  quadrasFiltradas.forEach(function(q) {
+    var opt = document.createElement("option");
+    opt.value = q.nome;
+    opt.innerText = q.nome;
+    fragmento.appendChild(opt);
+  });
+
+  comboQuadra.innerHTML = "";
+  comboQuadra.appendChild(fragmento);
+  comboQuadra.disabled = false;
+}
+
+function carregarRuasDoCacheLocal() {
+  var quadra = document.getElementById("quadra").value;
+  var areaRuas = document.getElementById("area-ruas");
+  var btnSalvar = document.getElementById("btnSalvar");
+  
+  if (!quadra) {
+    areaRuas.innerHTML = "";
+    if (btnSalvar) btnSalvar.disabled = true;
+    return;
+  }
+  
+  var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
+    return r.quadra === quadra;
+  });
+
+  if (ruasFiltradas.length === 0) {
+    areaRuas.innerHTML = "<p style='color:#c5221f; text-align:center; font-weight:700;'>Nenhuma rua encontrada nesta quadra.</p>";
+    if (btnSalvar) btnSalvar.disabled = true;
+    return;
+  }
+  
+  var htmlFinal = "";
+  
+  ruasFiltradas.forEach(function(item, index) {
+    if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
+      CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
     }
 
-    // Desenha as ruas e monta as caixas de rascunho de números
-    function carregarRuasDoCacheLocal() {
-      var quadra = document.getElementById("quadra").value;
-      var areaRuas = document.getElementById("area-ruas");
-      var btnSalvar = document.getElementById("btnSalvar");
-      
-      if (!quadra) {
-        areaRuas.innerHTML = "";
-        if (btnSalvar) btnSalvar.disabled = true;
-        return;
-      }
-      
-      var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
-        return r.quadra === quadra;
-      });
+    var chaveIdentificadora = quadra + "_" + item.nome;
 
-      if (ruasFiltradas.length === 0) {
-        areaRuas.innerHTML = "<p style='color:#c5221f; text-align:center; font-weight:700;'>Nenhuma rua encontrada nesta quadra.</p>";
-        if (btnSalvar) btnSalvar.disabled = true;
-        return;
-      }
-      
-      var htmlFinal = "";
-      
-      ruasFiltradas.forEach(function(item, index) {
-        if (!CASAS_TEMPORARIAS_POR_RUA[item.nome]) {
-          CASAS_TEMPORARIAS_POR_RUA[item.nome] = [];
-        }
-
-        var chaveIdentificadora = quadra + "_" + item.nome;
-
-        // Valida se a rua já foi concluída por cartas localmente ou na planilha
-        var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
-                          String(item.historico).includes("Cartas") || 
-                          String(item.historico).includes("Concluída");
-
+    var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
+                      String(item.historico).includes("Cartas") || 
+                      String(item.historico).includes("Concluída");
+   
         // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
         var htmlQuadradinhos = "";
         var h = String(item.historico || "").trim();
