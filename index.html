@@ -797,10 +797,15 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
     }
 
     // Ação do botão quando não há escalas cadastradas
-    function abrirBuscaLivre() {
-      if (document.getElementById("tela-painel-inicial")) document.getElementById("tela-painel-inicial").style.display = "none";
-      if (document.getElementById("tela-seu-app-antigo")) document.getElementById("tela-seu-app-antigo").style.display = "block";
-    }
+   function abrirBuscaLivre() {
+  // Verifica se as telas existem e faz a troca
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+
+  if (painelInicial) painelInicial.style.display = 'none';
+  if (appAntigo) appAntigo.style.display = 'block';
+}
+
       // Função para retornar ao painel inicial de escalas
   function voltarParaOPainel() {
     // 1. Oculta a tela do app antigo e revela o painel inicial
@@ -827,18 +832,23 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
     }
   }
 
+   // Vincula a escolha do painel com a listagem antiga de quadras
+function acionarPregaçãoDoBloco(nomeTerritorio) {
+  // 1. Verifica se os elementos existem e gerencia a troca de telas
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
 
-    // Vincula a escolha do painel com a listagem antiga de quadras
-    function acionarPregaçãoDoBloco(nomeTerritorio) {
-      if (document.getElementById("tela-painel-inicial")) document.getElementById("tela-painel-inicial").style.display = "none";
-      if (document.getElementById("tela-seu-app-antigo")) document.getElementById("tela-seu-app-antigo").style.display = "block";
-      
-      var campoTerritorio = document.getElementById("territorio");
-      if (campoTerritorio) {
-        campoTerritorio.value = nomeTerritorio;
-        filtrarQuadrasLocalmente(); 
-      }
-    }
+  if (painelInicial) painelInicial.style.display = 'none';
+  if (appAntigo) appAntigo.style.display = 'block';
+  
+  // 2. Vincula e filtra o território selecionado
+  var campoTerritorio = document.getElementById("territorio");
+  if (campoTerritorio) {
+    campoTerritorio.value = nomeTerritorio;
+    filtrarQuadrasLocalmente(); 
+  }
+}
+
     // Busca a escala agendada para hoje e monta as abas dinâmicas
     function inicializarPainelComDados() {
       fetch(URL_GOOGLE_SCRIPT, {
