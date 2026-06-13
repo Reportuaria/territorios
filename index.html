@@ -1203,10 +1203,10 @@ function carregarRuasDoCacheLocal() {
       onblur="this.style.borderColor='var(--border)'"
     >
     
-         <!-- 👇 ATUALIZADO: Botão de Adicionar agora é grande e confortável -->
+     <!-- 👇 1º BOTÃO: "Adicionar Registro" posicionado logo abaixo do contêiner de escrita -->
     <button 
       type="submit" 
-      style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 12px;"
+      style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px;"
       ontouchstart="this.style.transform='scale(0.98)'"
       ontouchend="this.style.transform='scale(1)'"
     >
@@ -1214,24 +1214,23 @@ function carregarRuasDoCacheLocal() {
       <span>🏠 Adicionar Registro</span>
     </button>
 
-  </form>
+  </form> <!-- Fecha o formulário aqui -->
            
-  <!-- 👇 ÁREA MANTIDA: O botão de cartas que você gostou fica aqui embaixo -->
+  <!-- 👇 2º BOTÃO: O botão de cartas fica logo embaixo do formulário -->
   <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
     
     <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
       <span>✉️ Deixou Cartas?</span>
     </button>
 
-  </div>
-</div>
+  </div> <!-- Fecha o wrapper do botão de cartas -->
+</div> <!-- Mantido: Fechamento estrutural original 1 -->
 
-          </div>`;
+          </div>`; // Mantido: Fechamento estrutural original 2 e fim da string template
       });
 
       areaRuas.innerHTML = htmlFinal;
       verificarSeTemDadosParaEnviar();
-    }
 
         // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
     function verificarSeTemDadosParaEnviar() {
