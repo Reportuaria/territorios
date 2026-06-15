@@ -836,17 +836,57 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
 // Verifica se há lixo ou anotações antigas esquecidas e mostra o alerta
 function verificarAnotacoesEsquecidas() {
   carregarCasasDoDispositivo();
+  
+  // Objeto para agrupar o que foi encontrado (ex: { "11": ["23"], "23": ["80"] })
+  var mapasPendentes = {};
   var temDados = false;
 
-  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chave) {
-    if (CASAS_TEMPORARIAS_POR_RUA[chave] && CASAS_TEMPORARIAS_POR_RUA[chave].length > 0) {
-      temDados = true;
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chaveUnica) {
+    var casas = CASAS_TEMPORARIAS_POR_RUA[chaveUnica];
+    if (casas && casas.length > 0) {
+      // Divide a chave "Territorio_Quadra_NomeDaRua" pelas linhas divisórias (_)
+      var partes = chaveUnica.split("_");
+      if (partes.length >= 2) {
+        var terr = partes[0]; // Pega o número do Território
+        var quad = partes[1]; // Pega o número da Quadra
+        
+        if (!mapasPendentes[terr]) {
+          mapasPendentes[terr] = [];
+        }
+        if (!mapasPendentes[terr].includes(quad)) {
+          mapasPendentes[terr].push(quad);
+        }
+        temDados = true;
+      }
     }
   });
 
   var divAlerta = document.getElementById("alerta-dados-pendentes");
   if (divAlerta) {
-    divAlerta.style.display = temDados ? "block" : "none";
+    if (temDados) {
+      divAlerta.style.display = "block";
+      
+      // Monta o texto listando todos os territórios e suas respectivas quadras
+      var resumoTexto = "";
+      Object.keys(mapasPendentes).forEach(function(t) {
+        var qListadas = mapasPendentes[t].map(function(q) { return "Quadra " + q; }).join(", ");
+        resumoTexto += `<div>• <strong>Território ${t}</strong> (${qListadas})</div>`;
+      });
+
+      var paragrafo = divAlerta.querySelector("p");
+      if (paragrafo) {
+        paragrafo.innerHTML = `
+          Você fechou o app sem enviar as marcações de de hoje:<br>
+          ${resumoTexto}
+          <div style="margin-top: 8px;">
+            Deseja <a href="#" onclick="retomarTrabalhoPendente(event)" style="color: #1a73e8; font-weight: 700; text-decoration: underline;">ir para a busca</a> para revisar/enviar ou 
+            <a href="#" onclick="limparTrabalhoPendente(event)" style="color: #c5221f; font-weight: 700; text-decoration: underline;">apagar tudo</a>?
+          </div>
+        `;
+      }
+    } else {
+      divAlerta.style.display = "none";
+    }
   }
 }
 
@@ -865,15 +905,33 @@ function limparTrabalhoPendente(event) {
 // Ação de RETOMAR: Abre direto a tela de territórios para ele enviar
 function retomarTrabalhoPendente(event) {
   if (event) event.preventDefault();
-  if (typeof abrirBuscaLivre === "function") {
-    abrirBuscaLivre();
-  } else {
-    // Se não usar busca livre, força a troca de tela manualmente
-    var painel = document.getElementById('tela-painel-inicial');
-    var appAntigo = document.getElementById('tela-seu-app-antigo');
-    if (painel) painel.classList.remove('active', 'ativa');
+  
+  // Abre a segunda página limpando a sobreposição de telas
+  var painel = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+  if (painel) painel.classList.remove('ativa');
+  
+  requestAnimationFrame(function() {
     if (appAntigo) appAntigo.classList.add('ativa');
-  }
+    
+    // Limpa os seletores para o irmão escolher qual território do aviso ele quer abrir
+    var campoTerritorio = document.getElementById("territorio");
+    var comboQuadra = document.getElementById("quadra");
+    var areaRuas = document.getElementById("area-ruas");
+    
+    if (campoTerritorio) campoTerritorio.value = "";
+    if (comboQuadra) {
+      comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+      comboQuadra.disabled = true;
+    }
+    if (areaRuas) areaRuas.innerHTML = "";
+
+    setTimeout(function() {
+      if (typeof exibirToast === "function") {
+        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Selecione o Território e a Quadra mostrados no aviso.');
+      }
+    }, 300);
+  });
 }
 
 // Executa a checagem automática assim que a página termina de carregar
