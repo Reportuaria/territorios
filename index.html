@@ -1142,7 +1142,7 @@ function carregarRuasDoCacheLocal() {
     return;
   }
 
-  // 1. ANTES DE QUALQUER COISA: Busca o que foi salvo no celular para não perder os dados
+  // 1. Busca as anotações do chip do celular para que os dados nunca sumam ao fechar o app
   carregarCasasDoDispositivo();
   
   var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
@@ -1182,126 +1182,91 @@ function carregarRuasDoCacheLocal() {
       });
     }
 
-    // 2. MONTAGEM COMPLETA DO SEU CARD DE RUA (Garantindo os IDs corretos para os balões)
+    // 2. MONTAGEM EXCLUSIVA DA SUA INTERFACE ORIGINAL (Moderna e adaptada para idosos)
     htmlFinal += `
-      <div class="card-rua" id="container_${index}">
-        <div class="cabecalho-rua" id="ruaCabecalho_${index}" onclick="setTimeout(function(){ var c = document.getElementById('corpoRua_${index}'); if(c && c.style.display==='block'){ atualizarVisualCasasTemporarias(${index}, '${item.nome.replace(/'/g, "\\'")}'); } }, 100)">
-          <div class="info-rua-esquerda">
-            <span class="nome-da-rua">${item.nome}</span>
-            <span class="badge-contador" id="badgeRua_${index}">0</span>
-          </div>
-          <svg class="seta-aba" id="setaRua_${index}" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
-        </div>
+      <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
         
-        <div class="corpo-rua" id="corpoRua_${index}" style="display: none; padding: 12px;">
-          <div class="secao-historico" style="margin-bottom: 12px;">
-            <p style="font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #5f6368;">Histórico:</p>
-            <div class="lista-quadradinhos">${htmlQuadradinhos}</div>
+        <div class="rua-header-clicavel" onclick="${jaConcluida ? '' : `alternarExpansaoRua(${index})`}" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: ${jaConcluida ? 'default' : 'pointer'}; user-select: none; background: ${jaConcluida ? '#e8f5e9' : '#ffffff'};">
+          <div class="rua-titulo" style="font-weight: 700; color: ${jaConcluida ? '#1b5e20' : 'var(--text)'}; display: flex; align-items: center; font-size: 16px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: ${jaConcluida ? '#2e7d32' : 'var(--text-secondary)'}; margin-right: 10px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15z"/></svg>
+            <span>${item.nome}</span>
           </div>
           
-          <div class="secao-rascunhos-atuais" style="margin-bottom: 12px;">
-            <p style="font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #5f6368;">Trabalho de Hoje:</p>
-            <span id="avisoNenhum_${index}" style="color: #868e96; font-style: italic; font-size: 13px;">Nenhuma casa anotada</span>
-            <div class="container-baloes-provisorios" id="listaProvisoria_${index}" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="badgeCasas_${index}" style="display: none; background: #007bff; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">0</span>
+            <svg id="setaRua_${index}" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #868e96; transition: transform 0.2s ease; display: ${jaConcluida ? 'none' : 'block'};"><path d="M7 10l5 5 5-5z"/></svg>
+            <div id="faixaConcluida_${index}" style="display: ${jaConcluida ? 'flex' : 'none'}; align-items: center; gap: 4px; color: #2e7d32; font-weight: 700; font-size: 13px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>Concluída</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--card-bg);">
+          
+          <!-- 1. CAIXA DO HISTÓRICO -->
+          <div class="hist-box">
+            <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
+            ${htmlQuadradinhos}
           </div>
 
-          <form onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 8px;">
-            <input type="text" id="inputCasa_${index}" class="input-numero-casa" placeholder="Nº da casa" inputmode="numeric" style="flex: 1; padding: 8px; border: 1px solid #dadce0; border-radius: 4px;">
-            <button type="submit" class="btn-adicionar-balao" style="padding: 8px 12px; background: var(--primary, #1a73e8); color: white; border: none; border-radius: 4px; font-weight: bold;">+</button>
+          <!-- 2. ANOTAÇÕES EXCLUSIVAS DO DIA -->
+          <div class="secao-provisorias-container">
+            <span class="titulo-provisorias">📍 Casas anotadas agora:</span>
+            <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
+          </div>
+
+          <form class="digitacao-container" id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+              <input 
+                type="text" 
+                inputmode="text" 
+                enterkeyhint="done" 
+                id="inputCasa_${index}" 
+                placeholder="Número da casa (ex: 243, 245)..." 
+                required
+                style="flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: #ffffff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s;"
+                onfocus="this.style.borderColor='var(--primary)'"
+                onblur="this.style.borderColor='var(--border)'"
+              >
           </form>
+                     
+          <!-- BOTÃO 1: Cartas embaixo do input -->
+          <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
+            <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+              <span>✉️ Deixou Cartas?</span>
+            </button>
+          </div>
+
+          <!-- BOTÃO 2: "Adicionar Registro" no final -->
+          <button 
+            type="submit" 
+            form="formCasa_${index}"
+            style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
+            ontouchstart="this.style.transform='scale(0.98)'"
+            ontouchend="this.style.transform='scale(1)'"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>🏠 Adicionar Casa</span>
+          </button>
+
         </div>
       </div>
     `;
   });
 
-        htmlFinal += `
-          <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
-            
-            <div class="rua-header-clicavel" onclick="${jaConcluida ? '' : `alternarExpansaoRua(${index})`}" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: ${jaConcluida ? 'default' : 'pointer'}; user-select: none; background: ${jaConcluida ? '#e8f5e9' : '#ffffff'};">
-              <div class="rua-titulo" style="font-weight: 700; color: ${jaConcluida ? '#1b5e20' : 'var(--text)'}; display: flex; align-items: center; font-size: 16px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: ${jaConcluida ? '#2e7d32' : 'var(--text-secondary)'}; margin-right: 10px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15z"/></svg>
-                <span>${item.nome}</span>
-              </div>
-              
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span id="badgeCasas_${index}" style="display: none; background: #007bff; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">0</span>
-                <svg id="setaRua_${index}" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #868e96; transition: transform 0.2s ease; display: ${jaConcluida ? 'none' : 'block'};"><path d="M7 10l5 5 5-5z"/></svg>
-                <div id="faixaConcluida_${index}" style="display: ${jaConcluida ? 'flex' : 'none'}; align-items: center; gap: 4px; color: #2e7d32; font-weight: 700; font-size: 13px;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                  <span>Concluída</span>
-                </div>
-              </div>
-            </div>
-            
-           <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--card-bg);">
-  
-  <!-- 1. CAIXA DO HISTÓRICO (Fundo azul suave que combinamos) -->
-  <div class="hist-box">
-    <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
-    ${htmlQuadradinhos}
-  </div>
-
-  <!-- 2. 👇 NOVA CAIXA DE DIVISÃO EXCLUSIVA PARA AS ANOTAÇÕES DO DIA -->
-  <div class="secao-provisorias-container">
-    <span class="titulo-provisorias">📍 Casas anotadas agora:</span>
-    <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
-  </div>
-
-<form class="digitacao-container" id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
-    
-    <!-- 👇 ATUALIZADO: Aceita letras (ex: 243c1) e abre o teclado inteligente -->
-    <input 
-      type="text" 
-      inputmode="text" 
-      enterkeyhint="done" 
-      id="inputCasa_${index}" 
-      placeholder="Número da casa (ex: 243, 245)..." 
-      required
-      style="flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: #ffffff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s;"
-      onfocus="this.style.borderColor='var(--primary)'"
-      onblur="this.style.borderColor='var(--border)'"
-    >
-    
-</form> <!-- Fecha o formulário flex perfeitamente aqui -->
-           
-<!-- 👇 1º BOTÃO: O botão de cartas agora fica logo embaixo do input -->
-<div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
-  
-  <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
-    <span>✉️ Deixou Cartas?</span>
-  </button>
-
-</div> <!-- Fecha o wrapper do botão de cartas -->
-
-<!-- 👇 2º BOTÃO: "Adicionar Registro" posicionado no final de tudo -->
-<button 
-  type="submit" 
-  form="formCasa_${index}"
-  style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
-  ontouchstart="this.style.transform='scale(0.98)'"
-  ontouchend="this.style.transform='scale(1)'"
->
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-  <span>🏠 Adicionar Casa</span>
-</button>
-
-</div> <!-- Mantido: Fechamento estrutural original 1 -->
-
-          </div>`; // Mantido: Fechamento estrutural original 2 e fim da string template
-      });
-
-    // Injeta todas as ruas geradas no HTML
+  // Injeta todas as ruas geradas no HTML do app antigo
   areaRuas.innerHTML = htmlFinal;
 
-  // 3. O SEGREDO DO SUCESSO: Roda um segundo loop rápido para injetar e pintar na tela todos os balões antigos
+  // 3. Pinta os balões salvos no celular e atualiza os contadores na hora
   ruasFiltradas.forEach(function(item, index) {
     atualizarVisualCasasTemporarias(index, item.nome);
     atualizarBadgeCasasTemporarias(index, item.nome);
   });
 
-  // Atualiza o estado do botão principal de salvar/enviar
+  // Valida o botão geral de enviar para o dirigente
   verificarSeTemDadosParaEnviar();
 }
+
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
     function verificarSeTemDadosParaEnviar() {
