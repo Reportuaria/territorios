@@ -625,16 +625,12 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
         <span style="font-size: 18px; font-weight: 700; color: var(--text);">Painel de Escalas</span>
       </div>
-      
-      <!-- Ícone sutil de usuário ou status do app à direita -->
-      <div class="header-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
-      </div>
-    </div>
-<!-- O JavaScript usará esta div apenas como ponto de ancoragem para injetar o seu design -->
+  
+<!-- O JavaScript usará esta div apenas para injetar o seu design envelopado com os botões compactos -->
 <div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box;">
   <div id="lista-mapas-esquecidos-container"></div>
 </div>
+
 
   <!-- 👇 O JAVASCRIPT INJETARÁ AS QUADRAS REFEITAS COM O SEU DESIGN AQUI DENTRO -->
   <div id="lista-mapas-esquecidos-container"></div>
@@ -880,10 +876,9 @@ function verificarAnotacoesEsquecidas() {
     var casas = CASAS_TEMPORARIAS_POR_RUA[chaveUnica];
     if (casas && casas.length > 0) {
       var partes = chaveUnica.split("_");
-      // Verifica se a chave realmente tem a estrutura Territorio_Quadra_Rua
       if (partes.length >= 2) {
-        var terr = partes[0]; // [0] pega o número do Território com precisão
-        var quad = partes[1]; // [1] pega o número da Quadra com precisão
+        var terr = partes[0]; 
+        var quad = partes[1]; 
         
         if (!mapasPendentes[terr]) {
           mapasPendentes[terr] = [];
@@ -901,12 +896,10 @@ function verificarAnotacoesEsquecidas() {
 
   if (divAlerta && containerLista) {
     if (temDados) {
-      // 1. Torna o bloco visível apenas se houver rascunhos
       divAlerta.style.display = "block";
       
       var htmlBlocosDinamicos = "";
 
-      // 2. Monta os blocos replicando exatamente o design "conteudo-sanfona" que você usa
       Object.keys(mapasPendentes).forEach(function(t) {
         var qListadas = mapasPendentes[t].map(function(q) { return q; }).join(", ");
         
@@ -920,30 +913,30 @@ function verificarAnotacoesEsquecidas() {
               </p>
             </div>
 
-            <!-- Item 1: Território (Cópia fiel do seu estilo) -->
-           <div style="margin-bottom: 16px;">
-  <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-    <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
-  </p>
-  <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
-</div>
+            <!-- Item 1: Território (Limpo e direto) -->
+            <div style="margin-bottom: 16px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+              </p>
+              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
+            </div>
             
-            <!-- Item 2: Quadras (Mesma concordância visual) -->
-           <div style="margin-bottom: 22px;">
-  <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-    <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
-  </p>
-  <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
-</div>
+            <!-- Item 2: Quadras (Limpo e direto) -->
+            <div style="margin-bottom: 22px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
+              </p>
+              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
+            </div>
 
-            <!-- Botões gêmeos de ação no seu padrão tátil e visual -->
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <button onclick="retomarTrabalhoPendente(event)" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                Retomar Trabalho
+            <!-- 👇 BOTÕES DESIGN LADO A LADO E MAIS COMPACTOS -->
+            <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+              <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                Buscar
               </button>
               
-              <button onclick="limparTrabalhoPendente(event)" style="width: 100%; padding: 14px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; opacity: 0.9;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                🗑️ Apagar Registros Antigos
+              <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                Apagar
               </button>
             </div>
 
@@ -953,6 +946,7 @@ function verificarAnotacoesEsquecidas() {
 
       containerLista.innerHTML = htmlBlocosDinamicos;
     } else {
+      // 🛠️ Se não tiver dados, limpa o HTML interno e esconde a div inteira, sumindo com os botões
       divAlerta.style.display = "none";
       containerLista.innerHTML = "";
     }
