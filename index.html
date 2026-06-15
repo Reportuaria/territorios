@@ -833,8 +833,8 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
         seta.style.transform = "rotate(0deg)";
       }
     }
-// Verifica se há lixo ou anotações antigas esquecidas e mostra o alerta
-// 1. VERIFICAÇÃO INTELIGENTE (Corrigida com os índices [0] e)
+    
+    // Salvar numeros temporarios para nao sumir
 function verificarAnotacoesEsquecidas() {
   carregarCasasDoDispositivo();
   
@@ -847,8 +847,8 @@ function verificarAnotacoesEsquecidas() {
       var partes = chaveUnica.split("_");
       // Verifica se a chave realmente tem a estrutura Territorio_Quadra_Rua
       if (partes.length >= 2) {
-        var terr = partes[0]; // Correção aqui: índice 0 pega o Território
-        var quad = partes[1]; // Correção aqui: índice 1 pega a Quadra
+        var terr = partes[0]; // [0] pega o número do Território
+        var quad = partes[1]; // [1] pega o número da Quadra
         
         if (!mapasPendentes[terr]) {
           mapasPendentes[terr] = [];
