@@ -631,17 +631,10 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
       </div>
     </div>
-<!-- CARD DE ALERTA DE ANOTAÇÕES MODERNIZADO -->
-<div id="alerta-dados-pendentes" class="card-inicial" style="display: none; padding: 20px; margin-top: 16px; margin-bottom: 16px; border: 2px dashed #f59e0b; background: #fffbeb;">
-  
-  <div style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-    <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
-      <span style="margin-right: 4px;">⚠️</span> Alerta do Sistema
-    </p>
-    <span style="font-size: 16px; font-weight: 600; color: var(--text); display: block; line-height: 1.4;">
-      Você fechou o app sem enviar as últimas marcações feitas no campo.
-    </span>
-  </div>
+<!-- O JavaScript usará esta div apenas como ponto de ancoragem para injetar o seu design -->
+<div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box;">
+  <div id="lista-mapas-esquecidos-container"></div>
+</div>
 
   <!-- 👇 O JAVASCRIPT INJETARÁ AS QUADRAS REFEITAS COM O SEU DESIGN AQUI DENTRO -->
   <div id="lista-mapas-esquecidos-container"></div>
@@ -908,38 +901,58 @@ function verificarAnotacoesEsquecidas() {
 
   if (divAlerta && containerLista) {
     if (temDados) {
-      // 1. Torna o card principal visível apenas se houver rascunhos
+      // 1. Torna o bloco visível apenas se houver rascunhos
       divAlerta.style.display = "block";
       
       var htmlBlocosDinamicos = "";
 
-      // 2. Monta os blocos de informação exatamente no formato visual sanfona do seu app
+      // 2. Monta os blocos replicando exatamente o design "conteudo-sanfona" que você usa
       Object.keys(mapasPendentes).forEach(function(t) {
         var qListadas = mapasPendentes[t].map(function(q) { return q; }).join(", ");
         
         htmlBlocosDinamicos += `
-          <div style="margin-bottom: 14px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-            <div style="margin-bottom: 8px;">
-              <p style="margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-                <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território Pendente
-              </p>
-              <span style="font-size: 16px; font-weight: 600; color: var(--text); display: block;">Território ${t}</span>
-            </div>
+          <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg);">
             
-            <div>
-              <p style="margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-                <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Anotações
+            <!-- Título sutil do Alerta -->
+            <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
+              <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
+                ⚠️ Anotações Pendentes Encontradas
               </p>
-              <span style="font-size: 15px; font-weight: 600; color: var(--text); display: block;">Quadra(s): ${qListadas}</span>
             </div>
+
+            <!-- Item 1: Território (Cópia fiel do seu estilo) -->
+           <div style="margin-bottom: 16px;">
+  <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+    <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+  </p>
+  <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
+</div>
+            
+            <!-- Item 2: Quadras (Mesma concordância visual) -->
+           <div style="margin-bottom: 22px;">
+  <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+    <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
+  </p>
+  <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
+</div>
+
+            <!-- Botões gêmeos de ação no seu padrão tátil e visual -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button onclick="retomarTrabalhoPendente(event)" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                Retomar Trabalho
+              </button>
+              
+              <button onclick="limparTrabalhoPendente(event)" style="width: 100%; padding: 14px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; opacity: 0.9;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                🗑️ Apagar Registros Antigos
+              </button>
+            </div>
+
           </div>
         `;
       });
 
-      // 3. Injeta o novo layout de forma limpa dentro do container do aviso
       containerLista.innerHTML = htmlBlocosDinamicos;
     } else {
-      // 4. Esconde tudo se não houver registros pendentes
       divAlerta.style.display = "none";
       containerLista.innerHTML = "";
     }
@@ -1552,11 +1565,21 @@ function carregarRuasDoCacheLocal() {
       }
     }
 
-    // Remove um número de rascunho individual clicado pelo usuário
-   function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
-  if (CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
-    CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
+   // Remove um número de rascunho individual clicado pelo usuário
+function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
+  // 👇 CRUCIAL: Monta a mesma chave única para localizar a gaveta certa no celular
+  var idTerritorio = document.getElementById("territorio").value || "SemTerritorio";
+  var idQuadra = document.getElementById("quadra").value || "SemQuadra";
+  var chaveUnicaRua = idTerritorio + "_" + idQuadra + "_" + nomeRua;
+
+  if (CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua]) {
+    // 1. Remove o número da lista na memória RAM
+    CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua].splice(posicaoNaLista, 1);
+    
+    // 2. Salva a alteração imediatamente no chip do celular
     sincronizarCasasNoDispositivo();
+    
+    // 3. Atualiza os desenhos dos balões e contadores na tela
     atualizarVisualCasasTemporarias(index, nomeRua);
     atualizarBadgeCasasTemporarias(index, nomeRua);
     verificarSeTemDadosParaEnviar(); 
@@ -1661,19 +1684,25 @@ function carregarCasasDoDispositivo() {
 }
 
     // Controla o contador azul de registros pendentes na rua recolhida
-    function atualizarBadgeCasasTemporarias(index, nomeRua) {
-      var badge = document.getElementById("badgeCasas_" + index);
-      if (!badge) return;
-      
-      var qtd = CASAS_TEMPORARIAS_POR_RUA[nomeRua] ? CASAS_TEMPORARIAS_POR_RUA[nomeRua].length : 0;
-      
-      if (qtd > 0) {
-        badge.innerText = qtd;
-        badge.style.display = "inline-block";
-      } else {
-        badge.style.display = "none";
-      }
-    }
+   function atualizarBadgeCasasTemporarias(index, nomeRua) {
+  var badge = document.getElementById("badgeCasas_" + index);
+  if (!badge) return;
+  
+  // 👇 CRUCIAL: Monta a mesma chave única para ler a gaveta certa
+  var idTerritorio = document.getElementById("territorio").value || "SemTerritorio";
+  var idQuadra = document.getElementById("quadra").value || "SemQuadra";
+  var chaveUnicaRua = idTerritorio + "_" + idQuadra + "_" + nomeRua;
+  
+  // Busca a quantidade correta baseada na chave unificada
+  var qtd = CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua] ? CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua].length : 0;
+  
+  if (qtd > 0) {
+    badge.innerText = qtd;
+    badge.style.display = "inline-block";
+  } else {
+    badge.style.display = "none";
+  }
+}
 
     // Expande ou recolhe o bloco principal das ruas
     function alternarExpansaoRua(index) {
