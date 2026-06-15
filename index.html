@@ -1658,7 +1658,6 @@ function sincronizarCasasNoDispositivo() {
   localStorage.setItem('pwa_casas_temporarias', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA));
 }
 
-// Mantido exatamente como você já tem (Não mude)
 function carregarCasasDoDispositivo() {
   var dadosSalvos = localStorage.getItem('pwa_casas_temporarias');
   if (dadosSalvos) {
@@ -1667,6 +1666,8 @@ function carregarCasasDoDispositivo() {
     } catch(e) {
       CASAS_TEMPORARIAS_POR_RUA = {};
     }
+  } else {
+    CASAS_TEMPORARIAS_POR_RUA = {}; // Garante que inicia vazia se não houver dados
   }
 }
 
@@ -1797,7 +1798,7 @@ function carregarCasasDoDispositivo() {
       document.getElementById('btnConfirmarModal').onclick = function() { modal.style.display = 'none'; enviarDados(); };
     }
 
-  function enviarDados() {
+function enviarDados() {
   var btn = document.getElementById("btnSalvar");
   var territorio = document.getElementById("territorio").value;
   var quadra = document.getElementById("quadra").value;
@@ -1829,10 +1830,16 @@ function carregarCasasDoDispositivo() {
       // 1. LIMPEZA NO DISPOSITIVO (Apaga os dados gravados no chip do celular)
       localStorage.removeItem('pwa_casas_temporarias');
       
-      // 2. Limpeza na memória RAM do aplicativo (Código que você já tinha)
+      // 2. Limpeza na memória RAM do aplicativo
       CASAS_TEMPORARIAS_POR_RUA = {};
       CARTAS_POR_RUA = {};
       
+      // 3. Atualiza o painel para esconder o aviso amarelo imediatamente
+      if (typeof verificarAnotacoesEsquecidas === "function") {
+        verificarAnotacoesEsquecidas();
+      }
+      
+      // 🌟 CORREÇÃO: Mantido apenas um carregamento do cache local
       setTimeout(carregarRuasDoCacheLocal, 1500);
     } else {
       exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Erro no servidor.');
@@ -1894,11 +1901,16 @@ function carregarCasasDoDispositivo() {
         console.error('Falha ao registrar Service Worker do PWA:', err);
       });
     }
-      function limparTrabalhoPendente(event) {
-      if (event) event.preventDefault();
-      var modal = document.getElementById("modalApagarRegistros");
-      if (modal) modal.style.display = "flex";
-    }
+     
+    function limparTrabalhoPendente(event) {
+  if (event) event.preventDefault();
+  
+  CASAS_TEMPORARIAS_POR_RUA = {}; 
+  localStorage.removeItem('pwa_casas_temporarias');
+  
+  verificarAnotacoesEsquecidas(); 
+}
+
 
     function fecharModalApagar() {
       var modal = document.getElementById("modalApagarRegistros");
