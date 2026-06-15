@@ -1469,7 +1469,6 @@ function carregarRuasDoCacheLocal() {
   }
 }
 
-    
     function adicionarCasaTemporaria(event, index, nomeRua) {
   if (event) event.preventDefault();
 
@@ -1483,26 +1482,28 @@ function carregarRuasDoCacheLocal() {
     return;
   }
 
-  // Garante que o banco de dados local da memória esteja sincronizado antes de adicionar
+  // 👇 CRUCIAL: Pega o território e a quadra selecionados na tela para criar a chave única
+  var idTerritorio = document.getElementById("territorio").value || "SemTerritorio";
+  var idQuadra = document.getElementById("quadra").value || "SemQuadra";
+  var chaveUnicaRua = idTerritorio + "_" + idQuadra + "_" + nomeRua;
+
   carregarCasasDoDispositivo();
 
-  if (!CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
-    CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+  if (!CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua]) {
+    CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua] = [];
   }
 
-  CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+  CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua].push(numero);
   
-  // SALVA NO CELULAR IMEDIATAMENTE APÓS ADICIONAR
   sincronizarCasasNoDispositivo();
 
   input.value = ""; 
-  input.blur(); // Recolhe o teclado no celular para dar conforto ao idoso
+  input.blur(); 
 
   atualizarVisualCasasTemporarias(index, nomeRua);
   atualizarBadgeCasasTemporarias(index, nomeRua);
   verificarSeTemDadosParaEnviar(); 
 
-  // Timeout cirúrgico para travar o contêiner aberto enquanto a interface se reorganiza
   setTimeout(function() {
     var corpo = document.getElementById("corpoRua_" + index);
     if (corpo) corpo.style.display = "block"; 
@@ -1515,15 +1516,21 @@ function carregarRuasDoCacheLocal() {
   }, 50); 
 }
 
+
 // Monta os balões cinzas de rascunhos na tela
 function atualizarVisualCasasTemporarias(index, nomeRua) {
   var listaDiv = document.getElementById("listaProvisoria_" + index);
   if (!listaDiv) return;
 
-  // Garante que vai buscar os dados atualizados do celular antes de desenhar na tela
+  // 👇 ATUALIZADO: Cria a chave com traços (Territorio_Quadra_Rua) para o aviso amarelo funcionar
+  var idTerritorio = document.getElementById("territorio").value || "SemTerritorio";
+  var idQuadra = document.getElementById("quadra").value || "SemQuadra";
+  var chaveUnicaRua = idTerritorio + "_" + idQuadra + "_" + nomeRua;
+
   carregarCasasDoDispositivo();
 
-  var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[nomeRua] || [];
+  // 👇 ATUALIZADO: Busca os dados na gaveta com a chave nova
+  var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua] || [];
   var htmlBaloes = "";
 
   var avisoNenhum = document.getElementById("avisoNenhum_" + index);
@@ -1542,12 +1549,12 @@ function atualizarVisualCasasTemporarias(index, nomeRua) {
   listaDiv.innerHTML = htmlBaloes;
 }
 
-    // Salva todas as marcações de ruas atuais no celular
+// Mantido exatamente como você já tem (Não mude)
 function sincronizarCasasNoDispositivo() {
   localStorage.setItem('pwa_casas_temporarias', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA));
 }
 
-// Recupera as marcações salvas ao reabrir o app ou recarregar as ruas
+// Mantido exatamente como você já tem (Não mude)
 function carregarCasasDoDispositivo() {
   var dadosSalvos = localStorage.getItem('pwa_casas_temporarias');
   if (dadosSalvos) {
