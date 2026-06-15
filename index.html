@@ -401,33 +401,38 @@
     transform: translateX(-50%) scale(0.98);
   }
       
-  .toast-aviso {
-    position: fixed;
-    bottom: 95px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background-color: #1e293b;
-    color: #ffffff;
-    padding: 16px 28px;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 600;
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-  }
+ .toast-aviso {
+  position: fixed;
+  bottom: 24px; 
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 16px 24px; 
+  border-radius: 16px; 
+  font-size: 15px; 
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999; 
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  /* 🛠️ AS DUAS LINHAS QUE CORRIGEM O ERRO NO CELULAR: */
+  white-space: normal !important; 
+  width: calc(100% - 32px) !important; 
+  max-width: 380px;
+  box-sizing: border-box;
+}
 
-  .toast-aviso.visivel {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-  }
+.toast-aviso.visivel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
 
   .loader-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -918,23 +923,55 @@ function verificarAnotacoesEsquecidas() {
   }
 }
 
-// 2. CORREÇÃO DO EVENTO DE FECHAR (Removeu a linha que apagava os dados antes da hora)
-window.addEventListener('beforeunload', function (event) {
+// 1. GARANTIA DE INICIALIZAÇÃO SEGURA (Roda na ordem certa ao ligar/recarregar o app)
+window.addEventListener('DOMContentLoaded', function() {
+  // Passo A: Lê os números salvos no chip do celular e joga para o app
   carregarCasasDoDispositivo();
-  var temDadosPendentes = false;
   
-  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chave) {
-    if (CASAS_TEMPORARIAS_POR_RUA[chave] && CASAS_TEMPORARIAS_POR_RUA[chave].length > 0) {
-      temDadosPendentes = true;
-    }
-  });
-
-  if (temDadosPendentes) {
-    event.preventDefault();
-    event.returnValue = 'Você tem marcações pendentes!'; 
-    return 'Você tem marcações pendentes!';
-  }
+  // Passo B: Só depois que os dados estão carregados, verifica se mostra o aviso amarelo
+  verificarAnotacoesEsquecidas();
 });
+
+// 1. Abre o novo modal moderno na tela
+function limparTrabalhoPendente(event) {
+  if (event) event.preventDefault();
+  var modal = document.getElementById("modalApagarRegistros");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+}
+
+// 2. Fecha o modal caso o irmão clique em "Voltar"
+function fecharModalApagar() {
+  var modal = document.getElementById("modalApagarRegistros");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
+// 3. Executa a limpeza de verdade quando clica em "Sim, Apagar"
+function confirmarApagarTrabalhoPendente() {
+  fecharModalApagar();
+
+  // Limpa o chip do celular
+  localStorage.removeItem('pwa_casas_temporarias');
+  
+  // Limpa a memória ativa do aplicativo
+  CASAS_TEMPORARIAS_POR_RUA = {};
+  
+  // Atualiza a tela inicial para sumir com o aviso amarelo
+  verificarAnotacoesEsquecidas();
+  
+  // Se as ruas estiverem abertas na tela, limpa elas também
+  if (typeof carregarRuasDoCacheLocal === "function") {
+    carregarRuasDoCacheLocal();
+  }
+  
+  // Exibe o balão de confirmação moderno na parte inferior
+  if (typeof exibirToast === "function") {
+    exibirToast('<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>', 'Rascunhos antigos apagados com sucesso.');
+  }
+}
 
 // 3. LIMPAR TRABALHO PENDENTE
 function limparTrabalhoPendente(event) {
@@ -1818,6 +1855,32 @@ function carregarCasasDoDispositivo() {
         console.error('Falha ao registrar Service Worker do PWA:', err);
       });
     }
+
+    <!-- JANELA DE CONFIRMAÇÃO DE APAGAR REGISTROS (Estilo Aplicativo Nativo) -->
+<div id="modalApagarRegistros" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 10000; box-sizing: border-box; padding: 20px;">
+  <div class="modal-content" style="background: #ffffff; padding: 24px; border-radius: var(--radius-md, 12px); max-width: 360px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: center; font-family: system-ui, sans-serif; box-sizing: border-box;">
+    
+    <!-- Ícone de Alerta Vermelho -->
+    <div style="width: 56px; height: 56px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+    </div>
+    
+    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #1f2937;">Apagar Anotações?</h3>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #4b5563; line-height: 1.5;">Tem certeza que deseja apagar todas as anotações antigas que não foram enviadas? Esta ação não pode ser desfeita.</p>
+    
+    <!-- Botões de Ação Empilhados ou Lado a Lado -->
+    <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+      <button onclick="fecharModalApagar()" style="flex: 1; padding: 14px; border: 1px solid #dee2e6; border-radius: var(--radius-md, 8px); background: #ffffff; color: #4b5563; font-weight: 600; font-size: 14px; cursor: pointer;" ontouchstart="this.style.background='#f3f4f6'" ontouchend="this.style.background='#ffffff'">
+        Voltar
+      </button>
+      <button onclick="confirmarApagarTrabalhoPendente()" style="flex: 1; padding: 14px; border: none; border-radius: var(--radius-md, 8px); background: #ef4444; color: #ffffff; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(239,68,68,0.2);" ontouchstart="this.style.background='#dc2626'" ontouchend="this.style.background='#ef4444'">
+        Sim, Apagar
+      </button>
+    </div>
+
+  </div>
+</div>
+
   </script>
 </body>
 </html>
