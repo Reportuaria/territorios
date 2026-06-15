@@ -626,6 +626,18 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
       </div>
     </div>
+  
+<!-- Alerta discreto de anotações esquecidas -->
+<div id="alerta-dados-pendentes" class="card-inicial" style="display: none; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; margin-top: 12px; margin-bottom: 12px; padding: 14px; border-radius: var(--radius-md, 8px);">
+  <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+    <span>⚠️ Atenção: Há casas anotadas!</span>
+  </div>
+  <p style="margin: 0; font-size: 13px; color: #665014; line-height: 1.4;">
+    Você fechou o app sem enviar as últimas marcações. Deseja 
+    <a href="#" onclick="retomarTrabalhoPendente(event)" style="color: #1a73e8; font-weight: 700; text-decoration: underline;">retomar e enviar</a> ou 
+    <a href="#" onclick="limparTrabalhoPendente(event)" style="color: #c5221f; font-weight: 700; text-decoration: underline;">apagar tudo</a>?
+  </p>
+</div>
 
     <div class="container page-spacing">
       <h3 class="titulo-principal" style="margin-top: 16px;">Território do Dia</h3>
@@ -821,6 +833,51 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
         seta.style.transform = "rotate(0deg)";
       }
     }
+// Verifica se há lixo ou anotações antigas esquecidas e mostra o alerta
+function verificarAnotacoesEsquecidas() {
+  carregarCasasDoDispositivo();
+  var temDados = false;
+
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chave) {
+    if (CASAS_TEMPORARIAS_POR_RUA[chave] && CASAS_TEMPORARIAS_POR_RUA[chave].length > 0) {
+      temDados = true;
+    }
+  });
+
+  var divAlerta = document.getElementById("alerta-dados-pendentes");
+  if (divAlerta) {
+    divAlerta.style.display = temDados ? "block" : "none";
+  }
+}
+
+// Ação de APAGAR tudo caso o irmão queira limpar o dia anterior
+function limparTrabalhoPendente(event) {
+  if (event) event.preventDefault();
+  if (confirm("Deseja mesmo apagar todas as anotações antigas que não foram enviadas?")) {
+    localStorage.removeItem('pwa_casas_temporarias');
+    CASAS_TEMPORARIAS_POR_RUA = {};
+    verificarAnotacoesEsquecidas();
+    if (typeof carregarRuasDoCacheLocal === "function") carregarRuasDoCacheLocal();
+    exibirToast('<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>', 'Rascunhos antigos apagados.');
+  }
+}
+
+// Ação de RETOMAR: Abre direto a tela de territórios para ele enviar
+function retomarTrabalhoPendente(event) {
+  if (event) event.preventDefault();
+  if (typeof abrirBuscaLivre === "function") {
+    abrirBuscaLivre();
+  } else {
+    // Se não usar busca livre, força a troca de tela manualmente
+    var painel = document.getElementById('tela-painel-inicial');
+    var appAntigo = document.getElementById('tela-seu-app-antigo');
+    if (painel) painel.classList.remove('active', 'ativa');
+    if (appAntigo) appAntigo.classList.add('ativa');
+  }
+}
+
+// Executa a checagem automática assim que a página termina de carregar
+window.addEventListener('DOMContentLoaded', verificarAnotacoesEsquecidas);
 
   // Ação do botão quando não há escalas cadastradas
 function abrirBuscaLivre() {
@@ -1063,6 +1120,34 @@ window.onload = function() {
     renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
   });
 };
+
+    // Monitora se o usuário está tentando fechar ou atualizar o aplicativo
+window.addEventListener('beforeunload', function (event) {
+  // 1. Busca os dados atuais salvos na memória ou no dispositivo
+  carregarCasasDoDispositivo();
+  
+  var temDadosPendentes = false;
+  
+  // 2. Vasculha se existe alguma casa digitada em qualquer rua
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chave) {
+    if (CASAS_TEMPORARIAS_POR_RUA[chave] && CASAS_TEMPORARIAS_POR_RUA[chave].length > 0) {
+      temDadosPendentes = true;
+    }
+  });
+
+  // 3. Se houver rascunhos, ativa o bloqueio de segurança do navegador
+  if (temDadosPendentes) {
+    // Cancela a ação de fechar imediata
+    event.preventDefault();
+    
+    // Configura a limpeza em segundo plano: se ele decidir fechar a aba de vez, o celular limpa a memória
+    localStorage.removeItem('pwa_casas_temporarias');
+    
+    // O texto abaixo é exigido pela especificação do navegador para ativar o alerta na tela
+    event.returnValue = ''; 
+    return '';
+  }
+});
 
 // Função auxiliar para desenhar os territórios na tela e liberar o painel
 function renderizarTerritorios(banco, combo, btnSalvar) {
