@@ -573,6 +573,21 @@
       height: 100%;
       background: #ffffff;
     }
+    /* FIX DE TRANSIÇÃO DE TELAS*/
+.tela-pwa {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+}
+
+.tela-pwa.ativa {
+    display: block !important;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+}
   </style>
 </head>
 <body>
@@ -597,7 +612,7 @@
     <!-- ======================================================== -->
   <!-- 1. NOVO PAINEL INICIAL (Escala de Trabalho - Sanfona)    -->
   <!-- ======================================================== -->
-<div id="tela-painel-inicial">
+<div id="tela-painel-inicial" class="tela-pwa ativa">
     
     <div class="header-app">
       <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 10px;">
@@ -633,7 +648,7 @@
   <!-- ======================================================== -->
   <!-- 2. PAGINA 2 - BUSCAR TERRITORIOS (Digitação e Ruas)          -->
   <!-- ======================================================== -->
-  <div id="tela-seu-app-antigo" style="display: none;">
+<div id="tela-seu-app-antigo" class="tela-pwa">
     
      <!-- CABEÇALHO LIMPO E MODERNO -->
     <div class="header-app">
@@ -807,25 +822,31 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       }
     }
 
-    // Ação do botão quando não há escalas cadastradas
-   function abrirBuscaLivre() {
-  // Verifica se as telas existem e faz a troca
+  // Ação do botão quando não há escalas cadastradas
+function abrirBuscaLivre() {
   var painelInicial = document.getElementById('tela-painel-inicial');
   var appAntigo = document.getElementById('tela-seu-app-antigo');
 
-  if (painelInicial) painelInicial.style.display = 'none';
-  if (appAntigo) appAntigo.style.display = 'block';
+  if (painelInicial) painelInicial.classList.remove('ativa');
+  
+  // Aguarda um milissegundo para o navegador limpar a tela anterior antes de abrir a nova
+  requestAnimationFrame(function() {
+    if (appAntigo) appAntigo.classList.add('ativa');
+  });
 }
 
-      // Função para retornar ao painel inicial de escalas
-  function voltarParaOPainel() {
-    // 1. Oculta a tela do app antigo e revela o painel inicial
-    if (document.getElementById("tela-seu-app-antigo")) {
-      document.getElementById("tela-seu-app-antigo").style.display = "none";
-    }
-    if (document.getElementById("tela-painel-inicial")) {
-      document.getElementById("tela-painel-inicial").style.display = "block";
-    }
+// Função para retornar ao painel inicial de escalas
+function voltarParaOPainel() {
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+
+  if (appAntigo) appAntigo.classList.remove('ativa');
+  
+  // Aguarda um milissegundo para limpar o efeito cascata antes de voltar
+  requestAnimationFrame(function() {
+    if (painelInicial) painelInicial.classList.add('ativa');
+  });
+}
 
     // 2. Limpa os campos de seleção para que o usuário possa escolher outro território sem misturar dados
     var campoTerritorio = document.getElementById("territorio");
