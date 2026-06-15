@@ -626,17 +626,31 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
       </div>
     </div>
+<!-- CARD DE ALERTA DE ANOTAÇÕES MODERNIZADO -->
+<div id="alerta-dados-pendentes" class="card-inicial" style="display: none; padding: 20px; margin-top: 16px; margin-bottom: 16px; border: 2px dashed #f59e0b; background: #fffbeb;">
   
-<!-- Alerta discreto de anotações esquecidas -->
-<div id="alerta-dados-pendentes" class="card-inicial" style="display: none; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; margin-top: 12px; margin-bottom: 12px; padding: 14px; border-radius: var(--radius-md, 8px);">
-  <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
-    <span>⚠️ Atenção: Há casas anotadas!</span>
+  <div style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+    <p style="margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
+      <span style="margin-right: 4px;">⚠️</span> Alerta do Sistema
+    </p>
+    <span style="font-size: 16px; font-weight: 600; color: var(--text); display: block; line-height: 1.4;">
+      Você fechou o app sem enviar as últimas marcações feitas no campo.
+    </span>
   </div>
-  <p style="margin: 0; font-size: 13px; color: #665014; line-height: 1.4;">
-    Você fechou o app sem enviar as últimas marcações. Deseja 
-    <a href="#" onclick="retomarTrabalhoPendente(event)" style="color: #1a73e8; font-weight: 700; text-decoration: underline;">retomar e enviar</a> ou 
-    <a href="#" onclick="limparTrabalhoPendente(event)" style="color: #c5221f; font-weight: 700; text-decoration: underline;">apagar tudo</a>?
-  </p>
+
+  <!-- 👇 O JAVASCRIPT INJETARÁ AS QUADRAS REFEITAS COM O SEU DESIGN AQUI DENTRO -->
+  <div id="lista-mapas-esquecidos-container"></div>
+
+  <!-- ✨ BOTÕES GÊMEOS DE AÇÃO NO SEU PADRÃO VISUAL -->
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+    <button onclick="retomarTrabalhoPendente(event)" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+      🚀 Ir para a Busca Livre
+    </button>
+    
+    <button onclick="limparTrabalhoPendente(event)" style="width: 100%; padding: 14px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; opacity: 0.9;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+      🗑️ Apagar Registros Antigos
+    </button>
+  </div>
 </div>
 
     <div class="container page-spacing">
@@ -847,8 +861,8 @@ function verificarAnotacoesEsquecidas() {
       var partes = chaveUnica.split("_");
       // Verifica se a chave realmente tem a estrutura Territorio_Quadra_Rua
       if (partes.length >= 2) {
-        var terr = partes[0]; // [0] pega o número do Território
-        var quad = partes[1]; // [1] pega o número da Quadra
+        var terr = partes[0]; // [0] pega o número do Território com precisão
+        var quad = partes[1]; // [1] pega o número da Quadra com precisão
         
         if (!mapasPendentes[terr]) {
           mapasPendentes[terr] = [];
@@ -862,29 +876,44 @@ function verificarAnotacoesEsquecidas() {
   });
 
   var divAlerta = document.getElementById("alerta-dados-pendentes");
-  if (divAlerta) {
+  var containerLista = document.getElementById("lista-mapas-esquecidos-container");
+
+  if (divAlerta && containerLista) {
     if (temDados) {
+      // 1. Torna o card principal visível apenas se houver rascunhos
       divAlerta.style.display = "block";
       
-      var resumoTexto = "";
-      Object.keys(mapasPendentes).forEach(function(t) {
-        var qListadas = mapasPendentes[t].map(function(q) { return "Quadra " + q; }).join(", ");
-        resumoTexto += `<div>• <strong>Território ${t}</strong> (${qListadas})</div>`;
-      });
+      var htmlBlocosDinamicos = "";
 
-      var paragrafo = divAlerta.querySelector("p");
-      if (paragrafo) {
-        paragrafo.innerHTML = `
-          Você fechou o app sem enviar as marcações de hoje:<br>
-          ${resumoTexto}
-          <div style="margin-top: 8px;">
-            Deseja <a href="#" onclick="retomarTrabalhoPendente(event)" style="color: #1a73e8; font-weight: 700; text-decoration: underline;">ir para a busca</a> para revisar/enviar ou 
-            <a href="#" onclick="limparTrabalhoPendente(event)" style="color: #c5221f; font-weight: 700; text-decoration: underline;">apagar tudo</a>?
+      // 2. Monta os blocos de informação exatamente no formato visual sanfona do seu app
+      Object.keys(mapasPendentes).forEach(function(t) {
+        var qListadas = mapasPendentes[t].map(function(q) { return q; }).join(", ");
+        
+        htmlBlocosDinamicos += `
+          <div style="margin-bottom: 14px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="margin-bottom: 8px;">
+              <p style="margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território Pendente
+              </p>
+              <span style="font-size: 16px; font-weight: 600; color: var(--text); display: block;">Território ${t}</span>
+            </div>
+            
+            <div>
+              <p style="margin: 0 0 2px 0; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Anotações
+              </p>
+              <span style="font-size: 15px; font-weight: 600; color: var(--text); display: block;">Quadra(s): ${qListadas}</span>
+            </div>
           </div>
         `;
-      }
+      });
+
+      // 3. Injeta o novo layout de forma limpa dentro do container do aviso
+      containerLista.innerHTML = htmlBlocosDinamicos;
     } else {
+      // 4. Esconde tudo se não houver registros pendentes
       divAlerta.style.display = "none";
+      containerLista.innerHTML = "";
     }
   }
 }
@@ -934,6 +963,7 @@ function retomarTrabalhoPendente(event) {
     var comboQuadra = document.getElementById("quadra");
     var areaRuas = document.getElementById("area-ruas");
     
+    // 1. Limpa os seletores antigos para evitar misturar dados na reabertura
     if (campoTerritorio) campoTerritorio.value = "";
     if (comboQuadra) {
       comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
@@ -941,11 +971,15 @@ function retomarTrabalhoPendente(event) {
     }
     if (areaRuas) areaRuas.innerHTML = "";
 
+    // 2. 👇 TIMEOUT CORRIGIDO: Dá tempo do layout se estabilizar no celular antes de exibir a mensagem
     setTimeout(function() {
       if (typeof exibirToast === "function") {
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Selecione o Território e a Quadra mostrados no aviso.');
+        exibirToast(
+          '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 
+          'Selecione o Território e a Quadra que foram mostrados no aviso para enviar.'
+        );
       }
-    }, 300);
+    }, 500); // 500ms é o tempo ideal para PWAs mobile renderizarem a transição de forma limpa
   });
 }
 
