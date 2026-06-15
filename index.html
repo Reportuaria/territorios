@@ -1141,6 +1141,9 @@ function carregarRuasDoCacheLocal() {
     if (btnSalvar) btnSalvar.disabled = true;
     return;
   }
+
+  // 1. ANTES DE QUALQUER COISA: Busca o que foi salvo no celular para não perder os dados
+  carregarCasasDoDispositivo();
   
   var ruasFiltradas = BD_GLOBAL.ruas.filter(function(r) {
     return r.quadra === quadra;
@@ -1165,19 +1168,51 @@ function carregarRuasDoCacheLocal() {
                       String(item.historico).includes("Cartas") || 
                       String(item.historico).includes("Concluída");
    
-        // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
-        var htmlQuadradinhos = "";
-        var h = String(item.historico || "").trim();
+    // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
+    var htmlQuadradinhos = "";
+    var h = String(item.historico || "").trim();
+    
+    if (!h || h === "undefined" || h === "Nenhum registro recente") {
+      htmlQuadradinhos = `<span style="color: #868e96; font-style: italic; margin-right: 4px;">Nenhum registro recente</span>`;
+    } else {
+      var numeros = h.split(/[\s,\|]+/);
+      numeros.forEach(function(num) {
+        var limpo = num.trim();
+        if (limpo) htmlQuadradinhos += `<span class="quadradinho-casa">${limpo}</span>`;
+      });
+    }
+
+    // 2. MONTAGEM COMPLETA DO SEU CARD DE RUA (Garantindo os IDs corretos para os balões)
+    htmlFinal += `
+      <div class="card-rua" id="container_${index}">
+        <div class="cabecalho-rua" id="ruaCabecalho_${index}" onclick="setTimeout(function(){ var c = document.getElementById('corpoRua_${index}'); if(c && c.style.display==='block'){ atualizarVisualCasasTemporarias(${index}, '${item.nome.replace(/'/g, "\\'")}'); } }, 100)">
+          <div class="info-rua-esquerda">
+            <span class="nome-da-rua">${item.nome}</span>
+            <span class="badge-contador" id="badgeRua_${index}">0</span>
+          </div>
+          <svg class="seta-aba" id="setaRua_${index}" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+        </div>
         
-        if (!h || h === "undefined" || h === "Nenhum registro recente") {
-          htmlQuadradinhos = `<span id="avisoNenhum_${index}" style="color: #868e96; font-style: italic; margin-right: 4px;">Nenhum registro recente</span>`;
-        } else {
-          var numeros = h.split(/[\s,\|]+/);
-          numeros.forEach(function(num) {
-            var limpo = num.trim();
-            if (limpo) htmlQuadradinhos += `<span class="quadradinho-casa">${limpo}</span>`;
-          });
-        }
+        <div class="corpo-rua" id="corpoRua_${index}" style="display: none; padding: 12px;">
+          <div class="secao-historico" style="margin-bottom: 12px;">
+            <p style="font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #5f6368;">Histórico:</p>
+            <div class="lista-quadradinhos">${htmlQuadradinhos}</div>
+          </div>
+          
+          <div class="secao-rascunhos-atuais" style="margin-bottom: 12px;">
+            <p style="font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #5f6368;">Trabalho de Hoje:</p>
+            <span id="avisoNenhum_${index}" style="color: #868e96; font-style: italic; font-size: 13px;">Nenhuma casa anotada</span>
+            <div class="container-baloes-provisorios" id="listaProvisoria_${index}" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+          </div>
+
+          <form onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 8px;">
+            <input type="text" id="inputCasa_${index}" class="input-numero-casa" placeholder="Nº da casa" inputmode="numeric" style="flex: 1; padding: 8px; border: 1px solid #dadce0; border-radius: 4px;">
+            <button type="submit" class="btn-adicionar-balao" style="padding: 8px 12px; background: var(--primary, #1a73e8); color: white; border: none; border-radius: 4px; font-weight: bold;">+</button>
+          </form>
+        </div>
+      </div>
+    `;
+  });
 
         htmlFinal += `
           <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
@@ -1247,7 +1282,7 @@ function carregarRuasDoCacheLocal() {
   ontouchend="this.style.transform='scale(1)'"
 >
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-  <span>🏠 Adicionar Registro</span>
+  <span>🏠 Adicionar Casa</span>
 </button>
 
 </div> <!-- Mantido: Fechamento estrutural original 1 -->
@@ -1255,9 +1290,18 @@ function carregarRuasDoCacheLocal() {
           </div>`; // Mantido: Fechamento estrutural original 2 e fim da string template
       });
 
-      areaRuas.innerHTML = htmlFinal;
-    }
+    // Injeta todas as ruas geradas no HTML
+  areaRuas.innerHTML = htmlFinal;
 
+  // 3. O SEGREDO DO SUCESSO: Roda um segundo loop rápido para injetar e pintar na tela todos os balões antigos
+  ruasFiltradas.forEach(function(item, index) {
+    atualizarVisualCasasTemporarias(index, item.nome);
+    atualizarBadgeCasasTemporarias(index, item.nome);
+  });
+
+  // Atualiza o estado do botão principal de salvar/enviar
+  verificarSeTemDadosParaEnviar();
+}
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
     function verificarSeTemDadosParaEnviar() {
@@ -1292,77 +1336,105 @@ function carregarRuasDoCacheLocal() {
     }
 
     // Remove um número de rascunho individual clicado pelo usuário
-    function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
-      if (CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
-        CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
-        atualizarVisualCasasTemporarias(index, nomeRua);
-        atualizarBadgeCasasTemporarias(index, nomeRua);
-        verificarSeTemDadosParaEnviar(); 
-      }
-    }
+   function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
+  if (CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
+    CASAS_TEMPORARIAS_POR_RUA[nomeRua].splice(posicaoNaLista, 1);
+    sincronizarCasasNoDispositivo();
+    atualizarVisualCasasTemporarias(index, nomeRua);
+    atualizarBadgeCasasTemporarias(index, nomeRua);
+    verificarSeTemDadosParaEnviar(); 
+  }
+}
+
     
-    // Insere um novo número na lista provisória de rascunhos da rua
     function adicionarCasaTemporaria(event, index, nomeRua) {
-      if (event) event.preventDefault();
+  if (event) event.preventDefault();
 
-      var input = document.getElementById("inputCasa_" + index);
-      if (!input) return;
-      
-      var numero = input.value.trim();
+  var input = document.getElementById("inputCasa_" + index);
+  if (!input) return;
+  
+  var numero = input.value.trim();
 
-      if (!numero) {
-        exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
-        return;
-      }
+  if (!numero) {
+    exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Digite o número da casa primeiro!');
+    return;
+  }
 
-      if (!CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
-        CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
-      }
+  // Garante que o banco de dados local da memória esteja sincronizado antes de adicionar
+  carregarCasasDoDispositivo();
 
-      CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
-      input.value = ""; 
-      input.blur(); // Recolhe o teclado no celular para dar conforto ao idoso
+  if (!CASAS_TEMPORARIAS_POR_RUA[nomeRua]) {
+    CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+  }
 
-      atualizarVisualCasasTemporarias(index, nomeRua);
-      atualizarBadgeCasasTemporarias(index, nomeRua);
-      verificarSeTemDadosParaEnviar(); 
+  CASAS_TEMPORARIAS_POR_RUA[nomeRua].push(numero);
+  
+  // SALVA NO CELULAR IMEDIATAMENTE APÓS ADICIONAR
+  sincronizarCasasNoDispositivo();
 
-      // Timeout cirúrgico para travar o contêiner aberto enquanto a interface se reorganiza
-      setTimeout(function() {
-        var corpo = document.getElementById("corpoRua_" + index);
-        if (corpo) corpo.style.display = "block"; 
-        
-        var seta = document.getElementById("setaRua_" + index);
-        if (seta) seta.style.transform = "rotate(180deg)"; 
+  input.value = ""; 
+  input.blur(); // Recolhe o teclado no celular para dar conforto ao idoso
 
-        var container = document.getElementById("container_" + index);
-        if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; 
-      }, 50); 
+  atualizarVisualCasasTemporarias(index, nomeRua);
+  atualizarBadgeCasasTemporarias(index, nomeRua);
+  verificarSeTemDadosParaEnviar(); 
+
+  // Timeout cirúrgico para travar o contêiner aberto enquanto a interface se reorganiza
+  setTimeout(function() {
+    var corpo = document.getElementById("corpoRua_" + index);
+    if (corpo) corpo.style.display = "block"; 
+    
+    var seta = document.getElementById("setaRua_" + index);
+    if (seta) seta.style.transform = "rotate(180deg)"; 
+
+    var container = document.getElementById("container_" + index);
+    if (container) container.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; 
+  }, 50); 
+}
+
+// Monta os balões cinzas de rascunhos na tela
+function atualizarVisualCasasTemporarias(index, nomeRua) {
+  var listaDiv = document.getElementById("listaProvisoria_" + index);
+  if (!listaDiv) return;
+
+  // Garante que vai buscar os dados atualizados do celular antes de desenhar na tela
+  carregarCasasDoDispositivo();
+
+  var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[nomeRua] || [];
+  var htmlBaloes = "";
+
+  var avisoNenhum = document.getElementById("avisoNenhum_" + index);
+  if (avisoNenhum) {
+    avisoNenhum.style.display = listaDeNumeros.length > 0 ? "none" : "inline-block";
+  }
+
+  listaDeNumeros.forEach(function(num, idx) {
+    htmlBaloes += `
+      <div class="balao-casa">
+        <span>${num}</span>
+        <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua.replace(/'/g, "\\'")}', ${idx})">✕</span>
+      </div>`;
+  });
+
+  listaDiv.innerHTML = htmlBaloes;
+}
+
+    // Salva todas as marcações de ruas atuais no celular
+function sincronizarCasasNoDispositivo() {
+  localStorage.setItem('pwa_casas_temporarias', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA));
+}
+
+// Recupera as marcações salvas ao reabrir o app ou recarregar as ruas
+function carregarCasasDoDispositivo() {
+  var dadosSalvos = localStorage.getItem('pwa_casas_temporarias');
+  if (dadosSalvos) {
+    try {
+      CASAS_TEMPORARIAS_POR_RUA = JSON.parse(dadosSalvos);
+    } catch(e) {
+      CASAS_TEMPORARIAS_POR_RUA = {};
     }
-
-    // Monta os balões cinzas de rascunhos na tela
-    function atualizarVisualCasasTemporarias(index, nomeRua) {
-      var listaDiv = document.getElementById("listaProvisoria_" + index);
-      if (!listaDiv) return;
-
-      var listaDeNumeros = CASAS_TEMPORARIAS_POR_RUA[nomeRua] || [];
-      var htmlBaloes = "";
-
-      var avisoNenhum = document.getElementById("avisoNenhum_" + index);
-      if (avisoNenhum) {
-        avisoNenhum.style.display = listaDeNumeros.length > 0 ? "none" : "inline-block";
-      }
-
-      listaDeNumeros.forEach(function(num, idx) {
-        htmlBaloes += `
-          <div class="balao-casa">
-            <span>${num}</span>
-            <span class="btn-apagar-casa" onclick="removerCasaTemporaria(${index}, '${nomeRua.replace(/'/g, "\\'")}', ${idx})">✕</span>
-          </div>`;
-      });
-
-      listaDiv.innerHTML = htmlBaloes;
-    }
+  }
+}
 
     // Controla o contador azul de registros pendentes na rua recolhida
     function atualizarBadgeCasasTemporarias(index, nomeRua) {
@@ -1485,42 +1557,49 @@ function carregarRuasDoCacheLocal() {
       document.getElementById('btnConfirmarModal').onclick = function() { modal.style.display = 'none'; enviarDados(); };
     }
 
-    function enviarDados() {
-      var btn = document.getElementById("btnSalvar");
-      var territorio = document.getElementById("territorio").value;
-      var quadra = document.getElementById("quadra").value;
-      var ruasDados = [];
-      
-      Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(nomeRua) {
-        var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
-        if (casasMarcadas && casasMarcadas.length > 0) {
-          ruasDados.push({ nome: nomeRua, casas: casasMarcadas.join(", ") });
-        }
-      });
-
-      if (ruasDados.length === 0) return;
-      if (btn) btn.disabled = true;
-      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Enviando dados, aguarde...');
-
-      fetchData("salvarDados", { territorio: territorio, quadra: quadra, ruas: ruasDados }, function(resposta) {
-        if (resposta === "Sucesso" || resposta === "OK" || (resposta && resposta.status === "Sucesso")) {
-          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
-          ruasDados.forEach(function(rd) {
-            var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
-            if (ruaNoBD) {
-              var histAtual = String(ruaNoBD.historico || "").trim();
-              ruaNoBD.historico = (!histAtual || histAtual === "Nenhum registro recente") ? rd.casas : rd.casas + ", " + histAtual;
-            }
-          });
-          CASAS_TEMPORARIAS_POR_RUA = {};
-          CARTAS_POR_RUA = {};
-          setTimeout(carregarRuasDoCacheLocal, 1500);
-        } else {
-          exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Erro no servidor.');
-          if (btn) btn.disabled = false;
-        }
-      });
+  function enviarDados() {
+  var btn = document.getElementById("btnSalvar");
+  var territorio = document.getElementById("territorio").value;
+  var quadra = document.getElementById("quadra").value;
+  var ruasDados = [];
+  
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(nomeRua) {
+    var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
+    if (casasMarcadas && casasMarcadas.length > 0) {
+      ruasDados.push({ nome: nomeRua, casas: casasMarcadas.join(", ") });
     }
+  });
+
+  if (ruasDados.length === 0) return;
+  if (btn) btn.disabled = true;
+  exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Enviando dados, aguarde...');
+
+  fetchData("salvarDados", { territorio: territorio, quadra: quadra, ruas: ruasDados }, function(resposta) {
+    if (resposta === "Sucesso" || resposta === "OK" || (resposta && resposta.status === "Sucesso")) {
+      exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
+      
+      ruasDados.forEach(function(rd) {
+        var ruaNoBD = BD_GLOBAL.ruas.find(function(r) { return r.nome === rd.nome && r.quadra === quadra; });
+        if (ruaNoBD) {
+          var histAtual = String(ruaNoBD.historico || "").trim();
+          ruaNoBD.historico = (!histAtual || histAtual === "Nenhum registro recente") ? rd.casas : rd.casas + ", " + histAtual;
+        }
+      });
+
+      // 1. LIMPEZA NO DISPOSITIVO (Apaga os dados gravados no chip do celular)
+      localStorage.removeItem('pwa_casas_temporarias');
+      
+      // 2. Limpeza na memória RAM do aplicativo (Código que você já tinha)
+      CASAS_TEMPORARIAS_POR_RUA = {};
+      CARTAS_POR_RUA = {};
+      
+      setTimeout(carregarRuasDoCacheLocal, 1500);
+    } else {
+      exibirToast('<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>', 'Erro no servidor.');
+      if (btn) btn.disabled = false;
+    }
+  });
+}
 
     /* ==========================================================================
        X. TOASTS E SISTEMA DE INSTALAÇÃO REAL DO PWA (CORRIGIDO)
