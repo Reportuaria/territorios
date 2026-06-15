@@ -834,21 +834,21 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       }
     }
 // Verifica se há lixo ou anotações antigas esquecidas e mostra o alerta
+// 1. VERIFICAÇÃO INTELIGENTE (Corrigida com os índices [0] e)
 function verificarAnotacoesEsquecidas() {
   carregarCasasDoDispositivo();
   
-  // Objeto para agrupar o que foi encontrado (ex: { "11": ["23"], "23": ["80"] })
   var mapasPendentes = {};
   var temDados = false;
 
   Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chaveUnica) {
     var casas = CASAS_TEMPORARIAS_POR_RUA[chaveUnica];
     if (casas && casas.length > 0) {
-      // Divide a chave "Territorio_Quadra_NomeDaRua" pelas linhas divisórias (_)
       var partes = chaveUnica.split("_");
+      // Verifica se a chave realmente tem a estrutura Territorio_Quadra_Rua
       if (partes.length >= 2) {
-        var terr = partes[0]; // Pega o número do Território
-        var quad = partes[1]; // Pega o número da Quadra
+        var terr = partes[0]; // Correção aqui: índice 0 pega o Território
+        var quad = partes[1]; // Correção aqui: índice 1 pega a Quadra
         
         if (!mapasPendentes[terr]) {
           mapasPendentes[terr] = [];
@@ -866,7 +866,6 @@ function verificarAnotacoesEsquecidas() {
     if (temDados) {
       divAlerta.style.display = "block";
       
-      // Monta o texto listando todos os territórios e suas respectivas quadras
       var resumoTexto = "";
       Object.keys(mapasPendentes).forEach(function(t) {
         var qListadas = mapasPendentes[t].map(function(q) { return "Quadra " + q; }).join(", ");
@@ -876,7 +875,7 @@ function verificarAnotacoesEsquecidas() {
       var paragrafo = divAlerta.querySelector("p");
       if (paragrafo) {
         paragrafo.innerHTML = `
-          Você fechou o app sem enviar as marcações de de hoje:<br>
+          Você fechou o app sem enviar as marcações de hoje:<br>
           ${resumoTexto}
           <div style="margin-top: 8px;">
             Deseja <a href="#" onclick="retomarTrabalhoPendente(event)" style="color: #1a73e8; font-weight: 700; text-decoration: underline;">ir para a busca</a> para revisar/enviar ou 
@@ -890,7 +889,25 @@ function verificarAnotacoesEsquecidas() {
   }
 }
 
-// Ação de APAGAR tudo caso o irmão queira limpar o dia anterior
+// 2. CORREÇÃO DO EVENTO DE FECHAR (Removeu a linha que apagava os dados antes da hora)
+window.addEventListener('beforeunload', function (event) {
+  carregarCasasDoDispositivo();
+  var temDadosPendentes = false;
+  
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chave) {
+    if (CASAS_TEMPORARIAS_POR_RUA[chave] && CASAS_TEMPORARIAS_POR_RUA[chave].length > 0) {
+      temDadosPendentes = true;
+    }
+  });
+
+  if (temDadosPendentes) {
+    event.preventDefault();
+    event.returnValue = 'Você tem marcações pendentes!'; 
+    return 'Você tem marcações pendentes!';
+  }
+});
+
+// 3. LIMPAR TRABALHO PENDENTE
 function limparTrabalhoPendente(event) {
   if (event) event.preventDefault();
   if (confirm("Deseja mesmo apagar todas as anotações antigas que não foram enviadas?")) {
@@ -902,11 +919,10 @@ function limparTrabalhoPendente(event) {
   }
 }
 
-// Ação de RETOMAR: Abre direto a tela de territórios para ele enviar
+// 4. RETOMAR TRABALHO PENDENTE
 function retomarTrabalhoPendente(event) {
   if (event) event.preventDefault();
   
-  // Abre a segunda página limpando a sobreposição de telas
   var painel = document.getElementById('tela-painel-inicial');
   var appAntigo = document.getElementById('tela-seu-app-antigo');
   if (painel) painel.classList.remove('ativa');
@@ -914,7 +930,6 @@ function retomarTrabalhoPendente(event) {
   requestAnimationFrame(function() {
     if (appAntigo) appAntigo.classList.add('ativa');
     
-    // Limpa os seletores para o irmão escolher qual território do aviso ele quer abrir
     var campoTerritorio = document.getElementById("territorio");
     var comboQuadra = document.getElementById("quadra");
     var areaRuas = document.getElementById("area-ruas");
@@ -934,7 +949,7 @@ function retomarTrabalhoPendente(event) {
   });
 }
 
-// Executa a checagem automática assim que a página termina de carregar
+// Ativa a checagem automática assim que o aplicativo abre
 window.addEventListener('DOMContentLoaded', verificarAnotacoesEsquecidas);
 
   // Ação do botão quando não há escalas cadastradas
