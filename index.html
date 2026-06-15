@@ -619,21 +619,23 @@
   <!-- ======================================================== -->
 <div id="tela-painel-inicial" class="tela-pwa ativa">
     
+    <!-- 1. CABEÇALHO DO APLICATIVO (Isolado e limpo) -->
     <div class="header-app">
       <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 10px;">
         <!-- Ícone sutil de início/painel -->
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: var(--primary);"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
         <span style="font-size: 18px; font-weight: 700; color: var(--text);">Painel de Escalas</span>
       </div>
-  
-      <!-- 🌟 O alerta agora contém apenas o container dinâmico. Tudo será gerado pelo JS! -->
-      <div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box;">
+    </div> <!-- Fim do header-app -->
+
+    <!-- 2. CONTEÚDO PRINCIPAL DA PÁGINA -->
+    <div class="container page-spacing">
+      
+      <!-- 🌟 CORREÇÃO: O alerta agora fica aqui no início do conteúdo, fora do cabeçalho! -->
+      <div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box; margin-top: 16px;">
         <div id="lista-mapas-esquecidos-container"></div>
       </div>
 
-    </div>
-
-    <div class="container page-spacing">
       <h3 class="titulo-principal" style="margin-top: 16px;">Território do Dia</h3>
        
       <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
@@ -642,11 +644,13 @@
         <p class="txt-loading">Buscando escala do dia...</p>
       </div>
 
+       <!-- Linha divisória e contêiner para os próximos dias -->
       <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
         <h3 class="subtitulo-secao">📅 Próximos Dias</h3>
         <div id="container-proximos-dias"></div>
       </div>
-    </div>
+    </div> <!-- Fim do container page-spacing -->
+
 </div>
 
   <!-- ======================================================== -->
