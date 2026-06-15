@@ -626,22 +626,12 @@
         <span style="font-size: 18px; font-weight: 700; color: var(--text);">Painel de Escalas</span>
       </div>
   
-<!-- O JavaScript usará esta div apenas para injetar o seu design envelopado com os botões compactos -->
-<div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box;">
-  <div id="lista-mapas-esquecidos-container"></div>
-</div>
+      <!-- 🌟 O alerta agora contém apenas o container dinâmico. Tudo será gerado pelo JS! -->
+      <div id="alerta-dados-pendentes" style="display: none; width: 100%; box-sizing: border-box;">
+        <div id="lista-mapas-esquecidos-container"></div>
+      </div>
 
-  <!-- ✨ BOTÕES GÊMEOS DE AÇÃO NO SEU PADRÃO VISUAL -->
-  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
-    <button onclick="retomarTrabalhoPendente(event)" style="width: 100%; padding: 16px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-      🚀 Ir para a Busca Livre
-    </button>
-    
-    <button onclick="limparTrabalhoPendente(event)" style="width: 100%; padding: 14px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; opacity: 0.9;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-      🗑️ Apagar Registros Antigos
-    </button>
-  </div>
-</div>
+    </div>
 
     <div class="container page-spacing">
       <h3 class="titulo-principal" style="margin-top: 16px;">Território do Dia</h3>
@@ -652,14 +642,12 @@
         <p class="txt-loading">Buscando escala do dia...</p>
       </div>
 
-       <!-- Linha divisória e contêiner para os próximos dias -->
       <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
         <h3 class="subtitulo-secao">📅 Próximos Dias</h3>
         <div id="container-proximos-dias"></div>
       </div>
     </div>
 </div>
-
 
   <!-- ======================================================== -->
   <!-- 2. PAGINA 2 - BUSCAR TERRITORIOS (Digitação e Ruas)          -->
@@ -868,24 +856,29 @@ function verificarAnotacoesEsquecidas() {
   var mapasPendentes = {};
   var temDados = false;
 
-  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chaveUnica) {
-    var casas = CASAS_TEMPORARIAS_POR_RUA[chaveUnica];
-    if (casas && casas.length > 0) {
-      var partes = chaveUnica.split("_");
-      if (partes.length >= 2) {
-        var terr = partes[0]; 
-        var quad = partes[1]; 
-        
-        if (!mapasPendentes[terr]) {
-          mapasPendentes[terr] = [];
+  // Garante que o objeto existe antes de iterar
+  if (typeof CASAS_TEMPORARIAS_POR_RUA === "object" && CASAS_TEMPORARIAS_POR_RUA !== null) {
+    Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chaveUnica) {
+      var casas = CASAS_TEMPORARIAS_POR_RUA[chaveUnica];
+      
+      // Validação estrita: verifica se é um array populado
+      if (Array.isArray(casas) && casas.length > 0) {
+        var partes = chaveUnica.split("_");
+        if (partes.length >= 2) {
+          var terr = partes[0]; 
+          var quad = partes[1]; 
+          
+          if (!mapasPendentes[terr]) {
+            mapasPendentes[terr] = [];
+          }
+          if (!mapasPendentes[terr].includes(quad)) {
+            mapasPendentes[terr].push(quad);
+          }
+          temDados = true;
         }
-        if (!mapasPendentes[terr].includes(quad)) {
-          mapasPendentes[terr].push(quad);
-        }
-        temDados = true;
       }
-    }
-  });
+    });
+  }
 
   var divAlerta = document.getElementById("alerta-dados-pendentes");
   var containerLista = document.getElementById("lista-mapas-esquecidos-container");
@@ -897,10 +890,10 @@ function verificarAnotacoesEsquecidas() {
       var htmlBlocosDinamicos = "";
 
       Object.keys(mapasPendentes).forEach(function(t) {
-        var qListadas = mapasPendentes[t].map(function(q) { return q; }).join(", ");
+        var qListadas = mapasPendentes[t].join(", ");
         
         htmlBlocosDinamicos += `
-          <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg);">
+          <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
             
             <!-- Título sutil do Alerta -->
             <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
@@ -909,7 +902,7 @@ function verificarAnotacoesEsquecidas() {
               </p>
             </div>
 
-            <!-- Item 1: Território (Limpo e direto) -->
+            <!-- Item 1: Território -->
             <div style="margin-bottom: 16px;">
               <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
                 <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
@@ -917,7 +910,7 @@ function verificarAnotacoesEsquecidas() {
               <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
             </div>
             
-            <!-- Item 2: Quadras (Limpo e direto) -->
+            <!-- Item 2: Quadras -->
             <div style="margin-bottom: 22px;">
               <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
                 <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
@@ -925,14 +918,14 @@ function verificarAnotacoesEsquecidas() {
               <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
             </div>
 
-            <!-- 👇 BOTÕES DESIGN LADO A LADO E MAIS COMPACTOS -->
+            <!-- BOTÕES GERADOS APENAS SE HOUVER DADOS -->
             <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
-              <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #64748b; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                Buscar
+              <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                🚀 Buscar
               </button>
               
               <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                Apagar
+                🗑️ Apagar
               </button>
             </div>
 
@@ -942,7 +935,7 @@ function verificarAnotacoesEsquecidas() {
 
       containerLista.innerHTML = htmlBlocosDinamicos;
     } else {
-      // 🛠️ Se não tiver dados, limpa o HTML interno e esconde a div inteira, sumindo com os botões
+      // Esconde completamente o container se estiver vazio
       divAlerta.style.display = "none";
       containerLista.innerHTML = "";
     }
