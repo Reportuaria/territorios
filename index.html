@@ -1893,12 +1893,22 @@ function enviarDados() {
   var quadra = document.getElementById("quadra").value;
   var ruasDados = [];
   
-  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(nomeRua) {
-    var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[nomeRua];
+  // CORREÇÃO: Separa o nome real da rua do território e quadra grudados na chave
+  Object.keys(CASAS_TEMPORARIAS_POR_RUA).forEach(function(chaveCompleta) {
+    var casasMarcadas = CASAS_TEMPORARIAS_POR_RUA[chaveCompleta];
     if (casasMarcadas && casasMarcadas.length > 0) {
-      ruasDados.push({ nome: nomeRua, casas: casasMarcadas.join(", ") });
+      
+      // Quebra a chave (Ex: "Territorio 1_Quadra 1_Rua Direita") pelo caractere "_"
+      var partesDaChave = chaveCompleta.split("_");
+      
+      // Pega apenas o último pedaço, que é o nome puro da rua
+      var nomeRealDaRua = partesDaChave[partesDaChave.length - 1]; 
+      
+      // Envia o nome limpo para a planilha
+      ruasDados.push({ nome: nomeRealDaRua, casas: casasMarcadas.join(", ") });
     }
   });
+
 
   if (ruasDados.length === 0) return;
   if (btn) btn.disabled = true;
