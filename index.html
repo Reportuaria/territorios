@@ -1563,7 +1563,7 @@ function carregarRuasDoCacheLocal() {
             ontouchend="this.style.transform='scale(1)'"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <span>🏠 Adicionar Casa</span>
+            <span>🏠 Marcar Casa</span>
           </button>
 
         </div>
@@ -1930,56 +1930,66 @@ function enviarDados() {
     /* ==========================================================================
        X. TOASTS E SISTEMA DE INSTALAÇÃO REAL DO PWA (CORRIGIDO)
        ========================================================================== */
-    function exibirToast(svgPath, texto) {
-      var toast = document.getElementById("toast");
-      if (!toast) return;
-      toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
-      toast.classList.add("visivel");
-      setTimeout(function() { toast.classList.remove("visivel"); }, 3000);
+   function exibirToast(svgPath, texto) {
+  var toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">${svgPath}</svg> <span>${texto}</span>`;
+  toast.classList.add("visivel");
+  setTimeout(function() { toast.classList.remove("visivel"); }, 3000);
+}
+
+// Monitora a intenção de instalação nativa do navegador
+window.addEventListener('appinstalled', function() {
+  var popup = document.getElementById("toastInstalacao");
+  var barra = document.getElementById("barraProgresso");
+  var textoPopup = popup ? popup.querySelector("span") || popup : null;
+  
+  if (popup && barra) {
+    // 1. Descobre se o usuário usa Android ou iPhone/PC para dar a instrução certa
+    var userAgent = navigator.userAgent.toLowerCase();
+    var instrucaoOS = "Procure pelo ícone na tela inicial do seu celular.";
+    
+    if (userAgent.includes("android")) {
+      instrucaoOS = "Deslize para cima na sua tela inicial e procure pelo ícone no final da sua lista de aplicativos.";
+    } else if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
+      instrucaoOS = "O ícone foi adicionado à última página da sua tela de início.";
+    } else {
+      instrucaoOS = "O aplicativo foi adicionado à sua Área de Trabalho ou menu Iniciar.";
     }
 
-    // Monitora a intenção de instalação nativa do navegador
-    window.addEventListener('beforeinstallprompt', function(e) {
-      e.preventDefault();
-      deferredPrompt = e;
-      var btnInstalar = document.getElementById('btnInstalarApp');
-      if (btnInstalar) {
-        btnInstalar.style.display = 'block';
-        btnInstalar.onclick = function() {
-          btnInstalar.style.display = 'none';
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function(choiceResult) {
-            if (choiceResult.outcome !== 'accepted') {
-              btnInstalar.style.display = 'block'; // Devolve o botão se recusar
-            }
-            deferredPrompt = null;
-          });
-        };
-      }
-    });
-
-    // CORREÇÃO MÁGICA: Só roda e avisa quando o sistema operacional GARANTIR a gravação off-line
-    window.addEventListener('appinstalled', function() {
-      var popup = document.getElementById("toastInstalacao");
-      var barra = document.getElementById("barraProgresso");
-      
-      if (popup && barra) {
-        popup.classList.add("ativo");
-        barra.style.width = "100%"; // Dispara o enchimento visual estável
-
-        setTimeout(function() {
-          popup.classList.remove("ativo");
-          setTimeout(function() { barra.style.width = "0%"; }, 400); // Reseta a barra escondida
-        }, 3500);
-      }
-    });
-
-    // Registra o Service Worker obrigatório do PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
-        console.error('Falha ao registrar Service Worker do PWA:', err);
-      });
+    // 2. Insere a instrução detalhada e estilizada no popup
+    if (textoPopup) {
+      textoPopup.innerHTML = `
+        <div style="text-align: left; line-height: 1.4;">
+          <span style="font-size: 15px; font-weight: 700; color: #10b981; display: block; margin-bottom: 4px;">✨ Instalado com Sucesso!</span>
+          <span style="font-size: 13px; color: var(--text); font-weight: 500;">${instrucaoOS}</span>
+          <div style="margin-top: 8px; font-size: 11px; color: #6b7280; background: rgba(0,0,0,0.03); padding: 6px; border-radius: 4px; border-left: 3px solid var(--primary);">
+            💡 <b>Dica:</b> Você já pode fechar esta aba do navegador e usar o aplicativo direto pelo ícone criado!
+          </div>
+        </div>
+      `;
     }
+    
+    barra.style.width = "100%"; 
+
+    // Aumentamos para 7 segundos para que o usuário tenha tempo de ler o minitutorial
+    setTimeout(function() {
+      popup.classList.remove("ativo");
+      setTimeout(function() { 
+        barra.style.width = "0%"; 
+        if (textoPopup) textoPopup.innerText = "Instalando o aplicativo..."; 
+      }, 400); 
+    }, 7000);
+  }
+});
+
+
+// Registra o Service Worker obrigatório do PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+    console.error('Falha ao registrar Service Worker do PWA:', err);
+  });
+}
      
     function limparTrabalhoPendente(event) {
   if (event) event.preventDefault();
