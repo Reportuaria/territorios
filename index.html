@@ -1419,42 +1419,6 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
 }
 
 // Filtro em cascada
-function filtrarQuadrasLocalmente() {
-  var territorio = document.getElementById("territorio").value;
-  var comboQuadra = document.getElementById("quadra");
-  
-  document.getElementById("area-ruas").innerHTML = "";
-  var btnSalvar = document.getElementById("btnSalvar");
-  if (btnSalvar) btnSalvar.disabled = true;
-  
-  if (!territorio) {
-    comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
-    comboQuadra.disabled = true;
-    return;
-  }
-  
-  var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
-    return q.territorio === territorio;
-  });
-
-  var fragmento = document.createDocumentFragment();
-  var optPadrao = document.createElement("option");
-  optPadrao.value = "";
-  optPadrao.innerText = "-- Selecione a Quadra --";
-  fragmento.appendChild(optPadrao);
-
-  quadrasFiltradas.forEach(function(q) {
-    var opt = document.createElement("option");
-    opt.value = q.nome;
-    opt.innerText = q.nome;
-    fragmento.appendChild(opt);
-  });
-
-  comboQuadra.innerHTML = "";
-  comboQuadra.appendChild(fragmento);
-  comboQuadra.disabled = false;
-}
-
 function carregarRuasDoCacheLocal() {
   var quadra = document.getElementById("quadra").value;
   var areaRuas = document.getElementById("area-ruas");
@@ -1505,6 +1469,56 @@ function carregarRuasDoCacheLocal() {
         if (limpo) htmlQuadradinhos += `<span class="quadradinho-casa">${limpo}</span>`;
       });
     }
+
+    // 🔒 [PROPRIEDADES DINÂMICAS]: Define estilos e bloqueios baseados no status da rua
+    // Se estiver concluída aplica fundo verde claro (#d1fae5) e borda verde (#10b981)
+    var estiloCard = jaConcluida 
+      ? "background: #d1fae5; border-left: 6px solid #10b981; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" 
+      : "background: white; border-left: 6px solid var(--primary); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;";
+      
+    var travaCampos = jaConcluida ? "disabled" : "";
+    var estiloBotao = jaConcluida ? "background: #9ca3af; cursor: not-allowed;" : "background: var(--primary);";
+    var textoBloqueio = jaConcluida ? " 🔒 <span style='color: #065f46; font-weight: 700; font-size: 14px;'>CONCLUÍDA</span>" : "";
+
+    // 📝 [MONTAGEM DO CARGO DA RUA]: Injeta as propriedades geradas acima
+    htmlFinal += `
+      <div id="container_${index}" style="${estiloCard}">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1f2937;">${item.nome}${textoBloqueio}</h3>
+        </div>
+
+        <!-- Área de Histórico (Quadradinhos) -->
+        <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 6px;">
+          ${htmlQuadradinhos}
+        </div>
+
+        <!-- Formulário de Entrada de dados -->
+        <form id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome}')" style="display: flex; flex-direction: column; gap: 8px;">
+          <input 
+            type="text" 
+            id="inputCasa_${index}" 
+            ${travaCampos} 
+            placeholder="${jaConcluida ? 'Rua concluída e travada' : 'Digite o número da casa...'}" 
+            style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box;"
+          />
+          
+          <button 
+            type="submit" 
+            form="formCasa_${index}"
+            ${travaCampos}
+            style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; color: white; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; transition: all 0.2s; ${estiloBotao}"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>🏠 Marcar Casa</span>
+          </button>
+        </form>
+      </div>
+    `;
+  });
+
+  areaRuas.innerHTML = htmlFinal;
+  if (btnSalvar) btnSalvar.disabled = false;
+}
 
     // 2. MONTAGEM EXCLUSIVA DA SUA INTERFACE ORIGINAL (Moderna e adaptada para idosos)
     htmlFinal += `
