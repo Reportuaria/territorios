@@ -852,7 +852,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
         seta.style.transform = "rotate(0deg)";
       }
     }
-  
+    
     // Salvar numeros temporarios para nao sumir
 function verificarAnotacoesEsquecidas() {
   carregarCasasDoDispositivo();
@@ -884,87 +884,65 @@ function verificarAnotacoesEsquecidas() {
     });
   }
 
- var divAlerta = document.getElementById("alerta-dados-pendentes");
-var containerLista = document.getElementById("lista-mapas-esquecidos-container");
+  var divAlerta = document.getElementById("alerta-dados-pendentes");
+  var containerLista = document.getElementById("lista-mapas-esquecidos-container");
 
-if (divAlerta && containerLista) {
-  if (temDados) {
-    divAlerta.style.display = "block";
+  if (divAlerta && containerLista) {
+    if (temDados) {
+      divAlerta.style.display = "block";
+      
+      var htmlBlocosDinamicos = "";
 
-    var htmlBlocosDinamicos = "";
-
-    Object.keys(mapasPendentes).forEach(function(t) {
-      var qListadas = mapasPendentes[t].join(", ");
-
-      htmlBlocosDinamicos += `
-        <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
-          
-          <!-- Título -->
-          <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
-            <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
-              ⚠️ Anotações Pendentes Encontradas
-            </p>
-          </div>
-
-          <!-- Território (CLICÁVEL) -->
-          <div style="margin-bottom: 16px;">
-            <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-              <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
-            </p>
-
-            <button
-              onclick="abrirTerritorio('${String(t)}')"
-              style="
-                font-size: 17px;
-                font-weight: 600;
-                color: var(--primary);
-                background: none;
-                border: none;
-                cursor: pointer;
-                padding: 0;
-                text-decoration: underline;
-              ">
-              Nº ${t}
-            </button>
-          </div>
-          
-          <!-- Quadras -->
-          <div style="margin-bottom: 22px;">
-            <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-              <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
-            </p>
-
-            <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">
-              ${qListadas}
-            </span>
-          </div>
-
-          <!-- BOTÕES -->
-          <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+      Object.keys(mapasPendentes).forEach(function(t) {
+        var qListadas = mapasPendentes[t].join(", ");
+        
+        htmlBlocosDinamicos += `
+          <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
             
-            <button
-              onclick="retomarTrabalhoPendente(event)"
-              style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer;">
-              Buscar
-            </button>
+            <!-- Título sutil do Alerta -->
+            <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
+              <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
+                ⚠️ Anotações Pendentes Encontradas
+              </p>
+            </div>
 
-            <button
-              onclick="limparTrabalhoPendente(event)"
-              style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer;">
-              🗑️ Apagar
-            </button>
+            <!-- Item 1: Território -->
+            <div style="margin-bottom: 16px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+              </p>
+              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
+            </div>
+            
+            <!-- Item 2: Quadras -->
+            <div style="margin-bottom: 22px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
+                <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
+              </p>
+              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
+            </div>
+
+            <!-- BOTÕES GERADOS APENAS SE HOUVER DADOS -->
+            <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+              <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                Buscar
+              </button>
+              
+              <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+                🗑️ Apagar
+              </button>
+            </div>
 
           </div>
+        `;
+      });
 
-        </div>
-      `;
-    });
-
-    containerLista.innerHTML = htmlBlocosDinamicos;
-
-  } else {
-    divAlerta.style.display = "none";
-    containerLista.innerHTML = "";
+      containerLista.innerHTML = htmlBlocosDinamicos;
+    } else {
+      // Esconde completamente o container se estiver vazio
+      divAlerta.style.display = "none";
+      containerLista.innerHTML = "";
+    }
   }
 }
 
