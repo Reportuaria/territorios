@@ -823,10 +823,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   
   if (btnSalvar) btnSalvar.disabled = false;
   
-  // Identifica o elemento real do território na tela usando o combo ou a ID
-  var elementoTerritorio = combo || document.getElementById("territorio");
-  
-  if (elementoTerritorio) {
+  if (combo) {
     var fragmento = document.createDocumentFragment();
     var optPadrao = document.createElement("option");
     optPadrao.value = "";
@@ -839,16 +836,8 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       opt.innerText = t;
       fragmento.appendChild(opt);
     });
-    elementoTerritorio.innerHTML = "";
-    elementoTerritorio.appendChild(fragmento);
-
-    // ⚡ SOLUÇÃO SEGURA E DIRETA (Sem Loop Infinito):
-    // Quando mudar o território, chama direto a função que criamos para carregar as quadras
-    elementoTerritorio.onchange = function() {
-      if (typeof filtrarQuadrasLocalmente === "function") {
-        filtrarQuadrasLocalmente();
-      }
-    };
+    combo.innerHTML = "";
+    combo.appendChild(fragmento);
   }
   
   if (typeof inicializarPainelComDados === "function") {
@@ -1087,24 +1076,29 @@ function abrirBuscaLivre() {
     
 function filtrarPorTerritorio(territorio, event) {
   if (event) event.preventDefault();
+  console.log("Filtrando o app pelo Território:", territorio);
   
-  // 1. Seleciona o select do território e define o valor
-  var selectTerritorio = document.getElementById("territorio");
-  if (selectTerritorio) {
-    selectTerritorio.value = territorio;
-  }
-
-  // 2. CHAMA a função que carrega as quadras localmente
-  if (typeof filtrarQuadrasLocalmente === "function") {
-    filtrarQuadrasLocalmente();
-  }
-
-  // 3. ⚡ A CORREÇÃO: Força o desbloqueio do campo da quadra na tela!
-  var selectQuadra = document.getElementById("quadra"); // Certifique-se de usar o ID real da sua quadra
-  if (selectQuadra) {
-    selectQuadra.disabled = false; 
+  var campoTerritorio = document.getElementById("territorio");
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+  
+  if (campoTerritorio) {
+    // 1. Preenche o select com o número do território correspondente
+    campoTerritorio.value = territorio;
+    
+    // 2. Dispara a sua função nativa que carrega as quadras do território
+    if (typeof filtrarQuadrasLocalmente === "function") {
+      filtrarQuadrasLocalmente();
+    } else {
+      campoTerritorio.dispatchEvent(new Event('change'));
+    }
+    
+    // 3. Transiciona da tela do painel para a tela do app
+    if (painelInicial) painelInicial.classList.remove('ativa');
+    if (appAntigo) appAntigo.classList.add('ativa');
   }
 }
+
 function filtrarPorQuadra(territorio, quadra, event) {
   if (event) event.preventDefault();
   console.log("Filtrando o app pelo Território:", territorio, "e Quadra:", quadra);
@@ -1127,19 +1121,15 @@ function filtrarPorQuadra(territorio, quadra, event) {
 
     // 3. Pequena pausa para garantir que o HTML do combo de quadras foi atualizado
     setTimeout(function() {
-      // ⚡ A CORREÇÃO: Força o desbloqueio da quadra antes de definir o valor
-      comboQuadra.disabled = false; 
-      
-      // 4. Define o valor da quadra selecionada
       comboQuadra.value = quadra;
       
-      // 5. Dispara o evento da quadra para que as ruas/casas apareçam na tela
+      // 4. Dispara o evento da quadra para que as ruas/casas apareçam na tela
       comboQuadra.dispatchEvent(new Event('change'));
       
-      // 6. Muda para a tela de trabalho do app
+      // 5. Muda para a tela de trabalho do app
       if (painelInicial) painelInicial.classList.remove('ativa');
       if (appAntigo) appAntigo.classList.add('ativa');
-    }, 100); // Aumentamos ligeiramente para 100ms para total estabilidade em PWAs móveis
+    }, 60); // 60ms garante estabilidade em PWAs rodando em celulares mais antigos
   }
 }
 
@@ -1405,10 +1395,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   
   if (btnSalvar) btnSalvar.disabled = false;
   
-  // Identifica o elemento real do território na tela
-  var elementoTerritorio = combo || document.getElementById("territorio");
-  
-  if (elementoTerritorio) {
+  if (combo) {
     var fragmento = document.createDocumentFragment();
     var optPadrao = document.createElement("option");
     optPadrao.value = "";
@@ -1421,30 +1408,22 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       opt.innerText = t;
       fragmento.appendChild(opt);
     });
-    elementoTerritorio.innerHTML = "";
-    elementoTerritorio.appendChild(fragmento);
-
-    // ⚡ CORREÇÃO DA CASCATA: Quando o usuário mudar o território, 
-    // força o disparo do evento 'change' para recarregar as quadras nativamente!
-    elementoTerritorio.onchange = function() {
-      elementoTerritorio.dispatchEvent(new Event('change'));
-    };
+    combo.innerHTML = "";
+    combo.appendChild(fragmento);
   }
-  
+
+  // Executa a verificação da escala do dia corrente após carregar os dados
   if (typeof inicializarPainelComDados === "function") {
-    requestAnimationFrame(function() {
-      inicializarPainelComDados();
-    });
+    inicializarPainelComDados();
   }
 }
+
+// Filtro em cascada
 function filtrarQuadrasLocalmente() {
   var territorio = document.getElementById("territorio").value;
   var comboQuadra = document.getElementById("quadra");
   
-  if (document.getElementById("area-ruas")) {
-    document.getElementById("area-ruas").innerHTML = "";
-  }
-  
+  document.getElementById("area-ruas").innerHTML = "";
   var btnSalvar = document.getElementById("btnSalvar");
   if (btnSalvar) btnSalvar.disabled = true;
   
@@ -1454,18 +1433,9 @@ function filtrarQuadrasLocalmente() {
     return;
   }
   
-  var nomesQuadras = [];
-  
-  // Extrai as quadras de dentro da lista de ruas do BD_GLOBAL
-  if (BD_GLOBAL && BD_GLOBAL.ruas) {
-    BD_GLOBAL.ruas.forEach(function(r) {
-      if (r.territorio === territorio && r.quadra && !nomesQuadras.includes(r.quadra)) {
-        nomesQuadras.push(r.quadra);
-      }
-    });
-  }
-
-  nomesQuadras.sort();
+  var quadrasFiltradas = BD_GLOBAL.quadras.filter(function(q) {
+    return q.territorio === territorio;
+  });
 
   var fragmento = document.createDocumentFragment();
   var optPadrao = document.createElement("option");
@@ -1473,21 +1443,18 @@ function filtrarQuadrasLocalmente() {
   optPadrao.innerText = "-- Selecione a Quadra --";
   fragmento.appendChild(optPadrao);
 
-  nomesQuadras.forEach(function(nomeDaQuadra) {
+  quadrasFiltradas.forEach(function(q) {
     var opt = document.createElement("option");
-    opt.value = nomeDaQuadra;
-    opt.innerText = nomeDaQuadra;
+    opt.value = q.nome;
+    opt.innerText = q.nome;
     fragmento.appendChild(opt);
   });
 
   comboQuadra.innerHTML = "";
   comboQuadra.appendChild(fragmento);
-  
-  // 🔓 DESTRAVA O BLOQUEIO VISUAL DA QUADRA AQUI:
-  comboQuadra.disabled = false; 
+  comboQuadra.disabled = false;
 }
 
-// Filtro em cascada
 function carregarRuasDoCacheLocal() {
   var quadra = document.getElementById("quadra").value;
   var areaRuas = document.getElementById("area-ruas");
@@ -1521,11 +1488,9 @@ function carregarRuasDoCacheLocal() {
 
     var chaveIdentificadora = quadra + "_" + item.nome;
 
-    // 🔒 CORREÇÃO DA COLUNA: Verifica o status da Coluna D enviado pela planilha
     var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
-                      String(item.status).includes("Concluída") ||
-                      String(item.status).includes("Concluida") ||
-                      String(item.historico).includes("Cartas");
+                      String(item.historico).includes("Cartas") || 
+                      String(item.historico).includes("Concluída");
    
     // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
     var htmlQuadradinhos = "";
@@ -1541,60 +1506,92 @@ function carregarRuasDoCacheLocal() {
       });
     }
 
-    // [PROPRIEDADES DINÂMICAS]: Define estilos e bloqueios baseados no status real da coluna D
-    var estiloCard = jaConcluida 
-      ? "background: #d1fae5; border-left: 6px solid #10b981; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" 
-      : "background: white; border-left: 6px solid var(--primary); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;";
-      
-    var travaCampos = jaConcluida ? "disabled" : "";
-    var estiloBotao = jaConcluida ? "background: #9ca3af; cursor: not-allowed;" : "background: var(--primary);";
-    var textoBloqueio = jaConcluida ? " 🔒 <span style='color: #065f46; font-weight: 700; font-size: 14px;'>CONCLUÍDA</span>" : "";
-
     // 2. MONTAGEM EXCLUSIVA DA SUA INTERFACE ORIGINAL (Moderna e adaptada para idosos)
     htmlFinal += `
-      <div id="container_${index}" style="${estiloCard}">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1f2937;">${item.nome}${textoBloqueio}</h3>
-        </div>
-
-        <!-- Área de Histórico (Quadradinhos) -->
-        <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 6px;">
-          ${htmlQuadradinhos}
-        </div>
-
-        <!-- Formulário de Entrada de dados -->
-        <form id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome}')" style="display: flex; flex-direction: column; gap: 8px;">
-          <input 
-            type="text" 
-            id="inputCasa_${index}" 
-            ${travaCampos} 
-            placeholder="${jaConcluida ? 'Rua concluída e travada' : 'Digite o número da casa...'}" 
-            style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box;"
-          />
+      <div class="rua-container" id="container_${index}" style="background: ${jaConcluida ? '#e8f5e9' : 'var(--card-bg)'}; border-radius: 12px; margin-bottom: 12px; border: 1px solid ${jaConcluida ? '#c8e6c9' : 'var(--border)'}; box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;">
+        
+        <div class="rua-header-clicavel" onclick="${jaConcluida ? '' : `alternarExpansaoRua(${index})`}" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: ${jaConcluida ? 'default' : 'pointer'}; user-select: none; background: ${jaConcluida ? '#e8f5e9' : '#ffffff'};">
+          <div class="rua-titulo" style="font-weight: 700; color: ${jaConcluida ? '#1b5e20' : 'var(--text)'}; display: flex; align-items: center; font-size: 16px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color: ${jaConcluida ? '#2e7d32' : 'var(--text-secondary)'}; margin-right: 10px; vertical-align: middle;"><path d="M10,2V4.26C10.71,4.41 11.39,4.72 12,5.15V4H18V18H17.2C17.65,18.78 17.91,19.66 17.97,20.59C17.98,20.73 18,20.86 18,21H22V2H10M12,11H14V13H12V11M12,7H14V9H12V7M15,7H17V9H15V7M15,11H17V13H15V11M2,8.5L7,4.5L12,8.5V21H2V8.5M7,6.3L4,8.7V19H10V8.7L7,6.3M5,11H7V13H5V11M8,11H9.5V13H8V11M5,15H7V17H5V15M8,15H9.5V17H8V15z"/></svg>
+            <span>${item.nome}</span>
+          </div>
           
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="badgeCasas_${index}" style="display: none; background: #007bff; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">0</span>
+            <svg id="setaRua_${index}" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #868e96; transition: transform 0.2s ease; display: ${jaConcluida ? 'none' : 'block'};"><path d="M7 10l5 5 5-5z"/></svg>
+            <div id="faixaConcluida_${index}" style="display: ${jaConcluida ? 'flex' : 'none'}; align-items: center; gap: 4px; color: #2e7d32; font-weight: 700; font-size: 13px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>Concluída</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="corpoRua_${index}" style="display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--card-bg);">
+          
+          <!-- 1. CAIXA DO HISTÓRICO -->
+          <div class="hist-box">
+            <strong style="display: block; width: 100%; margin-bottom: 2px;">Casas já faladas:</strong>
+            ${htmlQuadradinhos}
+          </div>
+
+          <!-- 2. ANOTAÇÕES EXCLUSIVAS DO DIA -->
+          <div class="secao-provisorias-container">
+            <span class="titulo-provisorias">📍 Casas anotadas agora:</span>
+            <div class="lista-casas-provisorias" id="listaProvisoria_${index}"></div>
+          </div>
+
+          <form class="digitacao-container" id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome.replace(/'/g, "\\'")}')" style="display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+              <input 
+                type="text" 
+                inputmode="text" 
+                enterkeyhint="done" 
+                id="inputCasa_${index}" 
+                placeholder="Número da casa (ex: 243, 245)..." 
+                required
+                style="flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: #ffffff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s;"
+                onfocus="this.style.borderColor='var(--primary)'"
+                onblur="this.style.borderColor='var(--border)'"
+              >
+          </form>
+                     
+          <!-- BOTÃO 1: Cartas embaixo do input -->
+          <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
+            <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+              <span>✉️ Deixou Cartas?</span>
+            </button>
+          </div>
+
+          <!-- BOTÃO 2: "Adicionar Registro" no final -->
           <button 
             type="submit" 
             form="formCasa_${index}"
-            ${travaCampos}
-            style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; color: white; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; transition: all 0.2s; ${estiloBotao}"
+            style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); transition: all 0.2s; margin-top: 16px; box-sizing: border-box;"
+            ontouchstart="this.style.transform='scale(0.98)'"
+            ontouchend="this.style.transform='scale(1)'"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             <span>🏠 Marcar Casa</span>
           </button>
-        </form>
+
+        </div>
       </div>
     `;
-  }); // 👈 O laço fecha aqui perfeitamente
+  });
 
-  // 3. Injeta o resultado final completo na tela
+  // Injeta todas as ruas geradas no HTML do app antigo
   areaRuas.innerHTML = htmlFinal;
-  if (btnSalvar) btnSalvar.disabled = false;
 
-  // 4. Valida o botão geral de enviar para o dirigente (Colocado no lugar correto)
-  if (typeof verificarSeTemDadosParaEnviar === "function") {
-    verificarSeTemDadosParaEnviar();
-  }
+  // 3. Pinta os balões salvos no celular e atualiza os contadores na hora
+  ruasFiltradas.forEach(function(item, index) {
+    atualizarVisualCasasTemporarias(index, item.nome);
+    atualizarBadgeCasasTemporarias(index, item.nome);
+  });
+
+  // Valida o botão geral de enviar para o dirigente
+  verificarSeTemDadosParaEnviar();
 }
+
+
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
    function verificarSeTemDadosParaEnviar() {
   var btn = document.getElementById("btnSalvar");
