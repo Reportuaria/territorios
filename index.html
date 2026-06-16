@@ -1087,29 +1087,24 @@ function abrirBuscaLivre() {
     
 function filtrarPorTerritorio(territorio, event) {
   if (event) event.preventDefault();
-  console.log("Filtrando o app pelo Território:", territorio);
   
-  var campoTerritorio = document.getElementById("territorio");
-  var painelInicial = document.getElementById('tela-painel-inicial');
-  var appAntigo = document.getElementById('tela-seu-app-antigo');
-  
-  if (campoTerritorio) {
-    // 1. Preenche o select com o número do território correspondente
-    campoTerritorio.value = territorio;
-    
-    // 2. Dispara a sua função nativa que carrega as quadras do território
-    if (typeof filtrarQuadrasLocalmente === "function") {
-      filtrarQuadrasLocalmente();
-    } else {
-      campoTerritorio.dispatchEvent(new Event('change'));
-    }
-    
-    // 3. Transiciona da tela do painel para a tela do app
-    if (painelInicial) painelInicial.classList.remove('ativa');
-    if (appAntigo) appAntigo.classList.add('ativa');
+  // 1. Seleciona o select do território e define o valor
+  var selectTerritorio = document.getElementById("territorio");
+  if (selectTerritorio) {
+    selectTerritorio.value = territorio;
+  }
+
+  // 2. CHAMA a função que carrega as quadras localmente
+  if (typeof filtrarQuadrasLocalmente === "function") {
+    filtrarQuadrasLocalmente();
+  }
+
+  // 3. ⚡ A CORREÇÃO: Força o desbloqueio do campo da quadra na tela!
+  var selectQuadra = document.getElementById("quadra"); // Certifique-se de usar o ID real da sua quadra
+  if (selectQuadra) {
+    selectQuadra.disabled = false; 
   }
 }
-
 function filtrarPorQuadra(territorio, quadra, event) {
   if (event) event.preventDefault();
   console.log("Filtrando o app pelo Território:", territorio, "e Quadra:", quadra);
@@ -1132,15 +1127,19 @@ function filtrarPorQuadra(territorio, quadra, event) {
 
     // 3. Pequena pausa para garantir que o HTML do combo de quadras foi atualizado
     setTimeout(function() {
+      // ⚡ A CORREÇÃO: Força o desbloqueio da quadra antes de definir o valor
+      comboQuadra.disabled = false; 
+      
+      // 4. Define o valor da quadra selecionada
       comboQuadra.value = quadra;
       
-      // 4. Dispara o evento da quadra para que as ruas/casas apareçam na tela
+      // 5. Dispara o evento da quadra para que as ruas/casas apareçam na tela
       comboQuadra.dispatchEvent(new Event('change'));
       
-      // 5. Muda para a tela de trabalho do app
+      // 6. Muda para a tela de trabalho do app
       if (painelInicial) painelInicial.classList.remove('ativa');
       if (appAntigo) appAntigo.classList.add('ativa');
-    }, 60); // 60ms garante estabilidade em PWAs rodando em celulares mais antigos
+    }, 100); // Aumentamos ligeiramente para 100ms para total estabilidade em PWAs móveis
   }
 }
 
