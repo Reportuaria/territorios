@@ -1515,27 +1515,17 @@ function carregarRuasDoCacheLocal() {
         </form>
       </div>
     `;
-  }); 
+  }); // 👈 O laço fecha aqui perfeitamente
 
   // 3. Injeta o resultado final completo na tela
   areaRuas.innerHTML = htmlFinal;
   if (btnSalvar) btnSalvar.disabled = false;
-} 
 
-  // Injeta todas as ruas geradas no HTML do app antigo
-  areaRuas.innerHTML = htmlFinal;
-
-  // 3. Pinta os balões salvos no celular e atualiza os contadores na hora
-  ruasFiltradas.forEach(function(item, index) {
-    atualizarVisualCasasTemporarias(index, item.nome);
-    atualizarBadgeCasasTemporarias(index, item.nome);
-  });
-
-  // Valida o botão geral de enviar para o dirigente
-  verificarSeTemDadosParaEnviar();
+  // 4. Valida o botão geral de enviar para o dirigente (Colocado no lugar correto)
+  if (typeof verificarSeTemDadosParaEnviar === "function") {
+    verificarSeTemDadosParaEnviar();
+  }
 }
-
-
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
    function verificarSeTemDadosParaEnviar() {
   var btn = document.getElementById("btnSalvar");
