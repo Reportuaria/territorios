@@ -959,10 +959,7 @@ function verificarAnotacoesEsquecidas() {
 
 // 1. GARANTIA DE INICIALIZAÇÃO SEGURA (Roda na ordem certa ao ligar/recarregar o app)
 window.addEventListener('DOMContentLoaded', function() {
-  // Passo A: Lê os números salvos no chip do celular e joga para o app
   carregarCasasDoDispositivo();
-  
-  // Passo B: Só depois que os dados estão carregados, verifica se mostra o aviso amarelo
   verificarAnotacoesEsquecidas();
 });
 
@@ -1375,13 +1372,10 @@ window.addEventListener('beforeunload', function (event) {
 
   // 3. Se houver rascunhos, ativa o bloqueio de segurança do navegador
   if (temDadosPendentes) {
-    // Cancela a ação de fechar imediata
+    // Cancela a ação de fechar imediata para exibir o aviso nativo
     event.preventDefault();
     
-    // Configura a limpeza em segundo plano: se ele decidir fechar a aba de vez, o celular limpa a memória
-    localStorage.removeItem('pwa_casas_temporarias');
-    
-    // O texto abaixo é exigido pela especificação do navegador para ativar o alerta na tela
+    // Se a pessoa clicar em "Cancelar", os dados continuarão salvos intactos.
     event.returnValue = ''; 
     return '';
   }
