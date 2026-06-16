@@ -643,7 +643,7 @@
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
   </svg>
-  <span>📥 Instalar Aplicativo no Celular</span>
+  <span>Instalar Aplicativo no Celular</span>
 </button>
 
       
@@ -1799,69 +1799,72 @@ function carregarCasasDoDispositivo() {
     /* ==========================================================================
        X. PROCESSAMENTO, MODAIS E ENVIO DE CARTAS INDIVIDUAIS
        ========================================================================== */
-    function alternarCartas(index, nomeRua) {
-      var territorio = document.getElementById("territorio").value;
-      var quadra = document.getElementById("quadra").value;
+function alternarCartas(index, nomeRua) {
+  var territorio = document.getElementById("territorio").value;
+  var quadra = document.getElementById("quadra").value;
+  
+  var modal = document.getElementById("modalCartas");
+  var textoP = document.getElementById("textoModalCartas");
+  var btnCancelar = document.getElementById("btnCancelarCartas");
+  var btnConfirmar = document.getElementById("btnConfirmarCartas");
+  
+  if (!modal || !textoP) {
+    var conf = confirm("Deseja marcar " + nomeRua + " como concluída por cartas?");
+    if (conf) executarEnvioCartas(index, territorio, quadra, nomeRua);
+    return;
+  }
+
+  textoP.innerHTML = "Tem certeza que deseja marcar a <strong>" + nomeRua + "</strong> como concluída por cartas? <br><span style='font-size:13px; color:#777; display:inline-block; margin-top:6px;'>O aviso será enviado ao dirigente.</span>";
+  modal.style.display = "flex";
+
+  btnCancelar.onclick = function() { modal.style.display = "none"; };
+  btnConfirmar.onclick = function() {
+    modal.style.display = "none";
+    executarEnvioCartas(index, territorio, quadra, nomeRua);
+  };
+}
+
+function executarEnvioCartas(index, territorio, quadra, nomeRua) {
+  var btnCartas = document.getElementById("btnCartas_" + index);
+  if (btnCartas) {
+    btnCartas.disabled = true;
+    btnCartas.innerText = "Enviando...";
+  }
+
+  var dadosConclusao = { territorio: territorio, quadra: quadra, rua: nomeRua, status: "Concluída" };
+  exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Registrando conclusão...');
+
+  fetchData("registrarConclusaoRua", dadosConclusao, function(resposta) {
+    if (resposta === "OK" || resposta === "Sucesso" || (resposta && resposta.status === "Sucesso")) {
+      exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
       
-      var modal = document.getElementById("modalCartas");
-      var textoP = document.getElementById("textoModalCartas");
-      var btnCancelar = document.getElementById("btnCancelarCartas");
-      var btnConfirmar = document.getElementById("btnConfirmarCartas");
+      var chaveIdentificadora = quadra + "_" + nomeRua;
+      CARTAS_POR_RUA[chaveIdentificadora] = true;
+      localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(CARTAS_POR_RUA)); // Grava a conclusão no aparelho
       
-      if (!modal || !textoP) {
-        var conf = confirm("Deseja marcar " + nomeRua + " como concluída por cartas?");
-        if (conf) executarEnvioCartas(index, territorio, quadra, nomeRua);
-        return;
+      var container = document.getElementById("container_" + index);
+      if (container) {
+        container.style.background = "#e8f5e9";
+        container.style.borderColor = "#c8e6c9";
+        var header = container.querySelector(".rua-header-clicavel");
+        if (header) { header.style.background = "#e8f5e9"; header.style.cursor = "default"; header.onclick = null; }
+        var titulo = container.querySelector(".rua-titulo");
+        if (titulo) { titulo.style.color = "#1b5e20"; var svg = titulo.querySelector("svg"); if (svg) svg.style.color = "#2e7d32"; }
+        var seta = document.getElementById("setaRua_" + index); if (seta) seta.style.display = "none";
+        var faixa = document.getElementById("faixaConcluida_" + index); if (faixa) faixa.style.display = "flex";
+        var corpo = document.getElementById("corpoRua_" + index); if (corpo) corpo.style.display = "none";
       }
-
-      textoP.innerHTML = "Tem certeza que deseja marcar a <strong>" + nomeRua + "</strong> como concluída por cartas? <br><span style='font-size:13px; color:#777; display:inline-block; margin-top:6px;'>O aviso será enviado ao dirigente.</span>";
-      modal.style.display = "flex";
-
-      btnCancelar.onclick = function() { modal.style.display = "none"; };
-      btnConfirmar.onclick = function() {
-        modal.style.display = "none";
-        executarEnvioCartas(index, territorio, quadra, nomeRua);
-      };
+      CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
+      localStorage.setItem('CASAS_TEMPORARIAS_POR_RUA', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA)); // Grava a limpeza no aparelho
+      
+      verificarSeTemDadosParaEnviar();
+    } else {
+      alert("Erro ao concluir: " + JSON.stringify(resposta));
+      if (btnCartas) { btnCartas.disabled = false; btnCartas.innerText = "Deixou Cartas?"; }
+      carregarRuasDoCacheLocal();
     }
-
-    function executarEnvioCartas(index, territorio, quadra, nomeRua) {
-      var btnCartas = document.getElementById("btnCartas_" + index);
-      if (btnCartas) {
-        btnCartas.disabled = true;
-        btnCartas.innerText = "Enviando...";
-      }
-
-      var dadosConclusao = { territorio: territorio, quadra: quadra, rua: nomeRua, status: "Concluída" };
-      exibirToast('<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>', 'Registrando conclusão...');
-
-      fetchData("registrarConclusaoRua", dadosConclusao, function(resposta) {
-        if (resposta === "OK" || resposta === "Sucesso" || (resposta && resposta.status === "Sucesso")) {
-          exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
-          
-          var chaveIdentificadora = quadra + "_" + nomeRua;
-          CARTAS_POR_RUA[chaveIdentificadora] = true;
-          
-          var container = document.getElementById("container_" + index);
-          if (container) {
-            container.style.background = "#e8f5e9";
-            container.style.borderColor = "#c8e6c9";
-            var header = container.querySelector(".rua-header-clicavel");
-            if (header) { header.style.background = "#e8f5e9"; header.style.cursor = "default"; header.onclick = null; }
-            var titulo = container.querySelector(".rua-titulo");
-            if (titulo) { titulo.style.color = "#1b5e20"; var svg = titulo.querySelector("svg"); if (svg) svg.style.color = "#2e7d32"; }
-            var seta = document.getElementById("setaRua_" + index); if (seta) seta.style.display = "none";
-            var faixa = document.getElementById("faixaConcluida_" + index); if (faixa) faixa.style.display = "flex";
-            var corpo = document.getElementById("corpoRua_" + index); if (corpo) corpo.style.display = "none";
-          }
-          CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
-          verificarSeTemDadosParaEnviar();
-        } else {
-          alert("Erro ao concluir: " + JSON.stringify(resposta));
-          if (btnCartas) { btnCartas.disabled = false; btnCartas.innerText = "Deixou Cartas?"; }
-          carregarRuasDoCacheLocal();
-        }
-      });
-    }
+  });
+}
 
     /* ==========================================================================
        X. ENVIO GERAL DO RELATÓRIO DO DIA
@@ -2003,7 +2006,7 @@ window.addEventListener('appinstalled', function() {
   var textoPopup = popup ? popup.querySelector("span") || popup : null;
   
   if (popup && barra) {
-    if (textoPopup) textoPopup.innerText = "✨ Aplicativo instalado com sucesso!";
+    if (textoPopup) textoPopup.innerText = "O aplicativo está sendo instalado...";
     barra.style.width = "100%"; 
 
     setTimeout(function() {
