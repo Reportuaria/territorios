@@ -1395,7 +1395,9 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   
   if (btnSalvar) btnSalvar.disabled = false;
   
-  if (combo) {
+  var elementoTerritorio = combo || document.getElementById("territorio");
+  
+  if (elementoTerritorio) {
     var fragmento = document.createDocumentFragment();
     var optPadrao = document.createElement("option");
     optPadrao.value = "";
@@ -1408,18 +1410,17 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       opt.innerText = t;
       fragmento.appendChild(opt);
     });
-    combo.innerHTML = "";
-    combo.appendChild(fragmento);
-
-    // ⚡ CORREÇÃO CRUCIAL: Garante que, ao escolher o território, a cascata funcione e destrave a quadra
-    combo.onchange = function() {
-      if (typeof filtrarQuadrasLocalmente === "function") {
-        filtrarQuadrasLocalmente();
-      }
+    
+    elementoTerritorio.innerHTML = "";
+    elementoTerritorio.appendChild(fragmento);
+    
+    // ⚡ A CORREÇÃO COLOFÃO: Quando você mudar o território manualmente,
+    // o app vai disparar o evento 'change' nativo que o seu código antigo precisa!
+    elementoTerritorio.onchange = function() {
+      elementoTerritorio.dispatchEvent(new Event('change'));
     };
   }
 
-  // Executa a verificação da escala do dia corrente após carregar os dados
   if (typeof inicializarPainelComDados === "function") {
     inicializarPainelComDados();
   }
