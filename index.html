@@ -1554,22 +1554,23 @@ function carregarRuasDoCacheLocal() {
 
    // Remove um número de rascunho individual clicado pelo usuário
 function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
-  // 👇 CRUCIAL: Monta a mesma chave única para localizar a gaveta certa no celular
   var idTerritorio = document.getElementById("territorio").value || "SemTerritorio";
   var idQuadra = document.getElementById("quadra").value || "SemQuadra";
   var chaveUnicaRua = idTerritorio + "_" + idQuadra + "_" + nomeRua;
 
   if (CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua]) {
-    // 1. Remove o número da lista na memória RAM
+
     CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua].splice(posicaoNaLista, 1);
-    
-    // 2. Salva a alteração imediatamente no chip do celular
+
+    // 🔥 SE FICOU VAZIO, REMOVE A CHAVE INTEIRA
+    if (CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua].length === 0) {
+      delete CASAS_TEMPORARIAS_POR_RUA[chaveUnicaRua];
+    }
+
     sincronizarCasasNoDispositivo();
-    
-    // 3. Atualiza os desenhos dos balões e contadores na tela
     atualizarVisualCasasTemporarias(index, nomeRua);
     atualizarBadgeCasasTemporarias(index, nomeRua);
-    verificarSeTemDadosParaEnviar(); 
+    verificarSeTemDadosParaEnviar();
   }
 }
 
