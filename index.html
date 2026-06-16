@@ -1452,9 +1452,11 @@ function carregarRuasDoCacheLocal() {
 
     var chaveIdentificadora = quadra + "_" + item.nome;
 
+    // 🔒 CORREÇÃO DA COLUNA: Agora verifica o status da Coluna D (item.status) enviado pela planilha
     var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
-                      String(item.historico).includes("Cartas") || 
-                      String(item.historico).includes("Concluída");
+                      String(item.status).includes("Concluída") ||
+                      String(item.status).includes("Concluida") ||
+                      String(item.historico).includes("Cartas"); // Mantido por segurança se usar cartas
    
     // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
     var htmlQuadradinhos = "";
@@ -1470,8 +1472,7 @@ function carregarRuasDoCacheLocal() {
       });
     }
 
-    // 🔒 [PROPRIEDADES DINÂMICAS]: Define estilos e bloqueios baseados no status da rua
-    // Se estiver concluída aplica fundo verde claro (#d1fae5) e borda verde (#10b981)
+    // [PROPRIEDADES DINÂMICAS]: Define estilos e bloqueios baseados no status real da coluna D
     var estiloCard = jaConcluida 
       ? "background: #d1fae5; border-left: 6px solid #10b981; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" 
       : "background: white; border-left: 6px solid var(--primary); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;";
@@ -1480,7 +1481,7 @@ function carregarRuasDoCacheLocal() {
     var estiloBotao = jaConcluida ? "background: #9ca3af; cursor: not-allowed;" : "background: var(--primary);";
     var textoBloqueio = jaConcluida ? " 🔒 <span style='color: #065f46; font-weight: 700; font-size: 14px;'>CONCLUÍDA</span>" : "";
 
-    // 📝 [MONTAGEM DO CARGO DA RUA]: Injeta as propriedades geradas acima
+    // 📝 [MONTAGEM DO CARD DA RUA]
     htmlFinal += `
       <div id="container_${index}" style="${estiloCard}">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
