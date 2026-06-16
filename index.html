@@ -815,6 +815,36 @@ function fetchData(funcao, parametro, callback) {
     });
   }, 50); 
 }
+    // Exemplo de como tratar a resposta vinda do seu doPost
+function processarDadosVindosDoPost(respostaServidor) {
+  // Certifique-se de que a resposta contém a lista atualizada de ruas
+  if (respostaServidor && respostaServidor.ruas) {
+    
+    // 1. Atualiza o banco global na memória do PWA
+    BD_GLOBAL = respostaServidor;
+    localStorage.setItem('BD_GLOBAL', JSON.stringify(BD_GLOBAL));
+
+    // 2. Criamos um mapeamento totalmente novo e zerado
+    var novoStatusCartas = {};
+
+    // 3. Varremos as ruas que vieram direto da planilha do Google
+    respostaServidor.ruas.forEach(function(item) {
+      // Se na planilha estiver escrito "Concluída", guardamos no novo objeto
+      if (item.status === "Concluída") {
+        var chave = item.quadra + "_" + item.nome;
+        novoStatusCartas[chave] = true;
+      }
+    });
+
+    // 4. Sobrescrevemos o localStorage do celular com o novo mapa limpo
+    localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(novoStatusCartas));
+    CARTAS_POR_RUA = novoStatusCartas;
+
+    // 5. Atualiza a tela dos idosos na hora
+    carregarRuasDoCacheLocal();
+  }
+}
+
 
 // ⚡ VERSÃO OTIMIZADA: Desafoga a Thread Principal do navegador chamar google planilha
 function renderizarTerritorios(banco, combo, btnSalvar) {
@@ -1357,11 +1387,36 @@ window.onload = function() {
     // Salva a versão mais nova no cache para a próxima abertura
     localStorage.setItem("BD_GLOBAL_CACHE", JSON.stringify(banco));
     BD_GLOBAL = banco;
+
+    // =========================================================================
+    // PASSO NOVO: SINCRONIZAR O STATUS DA PLANILHA COM O CELULAR
+    // =========================================================================
+    var novoStatusCartas = {};
+
+    // Se o banco vindo do Google tiver a lista de ruas, vamos ler uma por uma
+    if (banco && banco.ruas) {
+      banco.ruas.forEach(function(item) {
+        // Se na planilha do Google o status for "Concluída", salva no celular
+        if (item.status === "Concluída") {
+          var chave = item.quadra + "_" + item.nome;
+          novoStatusCartas[chave] = true;
+        }
+      });
+    }
+
+    // Sobrescreve o celular com o que está na planilha. 
+    // Se você apagou o "Concluída" lá na planilha, a rua volta a ficar pendente aqui!
+    localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(novoStatusCartas));
+    if (typeof CARTAS_POR_RUA !== "undefined") {
+      CARTAS_POR_RUA = novoStatusCartas;
+    }
+    // =========================================================================
     
     // Atualiza a tela com os dados novinhos do Google
     renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
   });
 };
+
 
     // Monitora se o usuário está tentando fechar ou atualizar o aplicativo
 window.addEventListener('beforeunload', function (event) {
@@ -1466,6 +1521,13 @@ function carregarRuasDoCacheLocal() {
     return;
   }
 
+  // ATUALIZAÇÃO CRÍTICA: Garante que o app leia o estado do aparelho antes de desenhar a tela
+  if (typeof CARTAS_POR_RUA === "undefined" || !CARTAS_POR_RUA) {
+    window.CARTAS_POR_RUA = JSON.parse(localStorage.getItem('CARTAS_POR_RUA')) || {};
+  } else {
+    CARTAS_POR_RUA = JSON.parse(localStorage.getItem('CARTAS_POR_RUA')) || {};
+  }
+
   // 1. Busca as anotações do chip do celular para que os dados nunca sumam ao fechar o app
   carregarCasasDoDispositivo();
   
@@ -1488,9 +1550,8 @@ function carregarRuasDoCacheLocal() {
 
     var chaveIdentificadora = quadra + "_" + item.nome;
 
-    var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
-                      String(item.historico).includes("Cartas") || 
-                      String(item.historico).includes("Concluída");
+    // CORREÇÃO: A rua só fica verde se estiver salva no aparelho OU se a planilha disser explicitamente que está Concluída
+    var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || item.status === "Concluída";
    
     // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
     var htmlQuadradinhos = "";
@@ -1556,8 +1617,8 @@ function carregarRuasDoCacheLocal() {
                      
           <!-- BOTÃO 1: Cartas embaixo do input -->
           <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
-            <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
-              <span>✉️ Deixou Cartas?</span>
+            <button type="button" class="btn-cartas" id="btnCartas_${index}" ${jaConcluida ? 'disabled' : ''} onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
+              <span>${jaConcluida ? '✔ Enviado com sucesso!' : '✉️ Deixou Cartas?'}</span>
             </button>
           </div>
 
@@ -1590,7 +1651,6 @@ function carregarRuasDoCacheLocal() {
   // Valida o botão geral de enviar para o dirigente
   verificarSeTemDadosParaEnviar();
 }
-
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
    function verificarSeTemDadosParaEnviar() {
@@ -1838,26 +1898,18 @@ function executarEnvioCartas(index, territorio, quadra, nomeRua) {
     if (resposta === "OK" || resposta === "Sucesso" || (resposta && resposta.status === "Sucesso")) {
       exibirToast('<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>', 'Enviado com sucesso!');
       
+      // 1. Grava a conclusão no aparelho imediatamente
       var chaveIdentificadora = quadra + "_" + nomeRua;
       CARTAS_POR_RUA[chaveIdentificadora] = true;
-      localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(CARTAS_POR_RUA)); // Grava a conclusão no aparelho
+      localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(CARTAS_POR_RUA)); 
       
-      var container = document.getElementById("container_" + index);
-      if (container) {
-        container.style.background = "#e8f5e9";
-        container.style.borderColor = "#c8e6c9";
-        var header = container.querySelector(".rua-header-clicavel");
-        if (header) { header.style.background = "#e8f5e9"; header.style.cursor = "default"; header.onclick = null; }
-        var titulo = container.querySelector(".rua-titulo");
-        if (titulo) { titulo.style.color = "#1b5e20"; var svg = titulo.querySelector("svg"); if (svg) svg.style.color = "#2e7d32"; }
-        var seta = document.getElementById("setaRua_" + index); if (seta) seta.style.display = "none";
-        var faixa = document.getElementById("faixaConcluida_" + index); if (faixa) faixa.style.display = "flex";
-        var corpo = document.getElementById("corpoRua_" + index); if (corpo) corpo.style.display = "none";
-      }
+      // 2. Limpa as anotações provisórias daquela rua no aparelho
       CASAS_TEMPORARIAS_POR_RUA[nomeRua] = [];
-      localStorage.setItem('CASAS_TEMPORARIAS_POR_RUA', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA)); // Grava a limpeza no aparelho
-      
-      verificarSeTemDadosParaEnviar();
+      localStorage.setItem('CASAS_TEMPORARIAS_POR_RUA', JSON.stringify(CASAS_TEMPORARIAS_POR_RUA)); 
+
+      // 3. Redesenha apenas as ruas da tela para pintar de verde na hora
+      carregarRuasDoCacheLocal();
+
     } else {
       alert("Erro ao concluir: " + JSON.stringify(resposta));
       if (btnCartas) { btnCartas.disabled = false; btnCartas.innerText = "Deixou Cartas?"; }
