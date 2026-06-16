@@ -925,7 +925,7 @@ function verificarAnotacoesEsquecidas() {
             <!-- BOTÕES GERADOS APENAS SE HOUVER DADOS -->
             <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
               <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                🚀 Buscar
+                Buscar
               </button>
               
               <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
@@ -1059,8 +1059,9 @@ function abrirBuscaLivre() {
   });
 }
 
-// Função para retornar ao painel inicial de escalas
 function voltarParaOPainel() {
+  console.log("VOLTAR PARA PAINEL EXECUTOU");
+
   var painelInicial = document.getElementById('tela-painel-inicial');
   var appAntigo = document.getElementById('tela-seu-app-antigo');
 
@@ -1071,6 +1072,7 @@ function voltarParaOPainel() {
   requestAnimationFrame(function() {
     if (painelInicial) painelInicial.classList.add('ativa');
   });
+}
 
   // 2. Limpa os campos de seleção para que o usuário possa escolher outro território sem misturar dados
   var campoTerritorio = document.getElementById("territorio");
