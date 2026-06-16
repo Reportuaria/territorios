@@ -1642,14 +1642,19 @@ function carregarRuasDoCacheLocal() {
 
   // 3. Pinta os balões salvos no celular e atualiza os contadores na hora
   ruasFiltradas.forEach(function(item, index) {
-    atualizarVisualCasasTemporarias(index, item.nome);
-    atualizarBadgeCasasTemporarias(index, item.nome);
+    if (typeof atualizarVisualCasasTemporarias === "function") {
+      atualizarVisualCasasTemporarias(index, item.nome);
+    }
+    if (typeof atualizarBadgeCasasTemporarias === "function") {
+      atualizarBadgeCasasTemporarias(index, item.nome);
+    }
   });
 
   // Valida o botão geral de enviar para o dirigente
-  verificarSeTemDadosParaEnviar();
+  if (typeof verificarSeTemDadosParaEnviar === "function") {
+    verificarSeTemDadosParaEnviar();
+  }
 }
-
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
    function verificarSeTemDadosParaEnviar() {
   var btn = document.getElementById("btnSalvar");
