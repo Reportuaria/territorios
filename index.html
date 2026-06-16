@@ -1375,50 +1375,48 @@ window.onload = function() {
   }
   
   // Busca os dados atualizados da planilha em segundo plano
-  fetchData("obterBancoCompleto", null, function(banco) {
-    if (!banco || !banco.territorios) {
-      if (!BD_GLOBAL) {
-        if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
-        if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").innerHTML = "⚠️ Falha ao carregar.";
+ fetchData("obterBancoCompleto", null, function(banco) {
+  if (!banco || !banco.territorios) {
+    if (!BD_GLOBAL) {
+      if (combo) combo.innerHTML = '<option value="">⚠️ Falha ao carregar dados</option>';
+      if (document.getElementById("loaderTexto")) document.getElementById("loaderTexto").innerHTML = "⚠️ Falha ao carregar.";
+    }
+    return;
+  }
+  
+  // Salva a versão mais nova no cache para a próxima abertura
+  localStorage.setItem("BD_GLOBAL_CACHE", JSON.stringify(banco));
+  BD_GLOBAL = banco;
+
+  // =========================================================================
+  // PASSO NOVO: SINCRONIZAR O STATUS DA PLANILHA COM O CELULAR
+  // =========================================================================
+  var novoStatusCartas = {};
+
+  // Se o banco vindo do Google tiver a lista de ruas, vamos ler uma por uma
+  if (banco && banco.ruas) {
+    banco.ruas.forEach(function(item) {
+      // Se na planilha do Google o status for "Concluída", salva no celular
+      if (item.status === "Concluída") {
+        var chave = item.quadra + "_" + item.nome;
+        novoStatusCartas[chave] = true;
       }
-      return;
-    }
-    
-    // Salva a versão mais nova no cache para a próxima abertura
-    localStorage.setItem("BD_GLOBAL_CACHE", JSON.stringify(banco));
-    BD_GLOBAL = banco;
+    });
+  }
 
-    // =========================================================================
-    // PASSO NOVO: SINCRONIZAR O STATUS DA PLANILHA COM O CELULAR
-    // =========================================================================
-    var novoStatusCartas = {};
+  // Sobrescreve o celular com o que está na planilha. 
+  // Se você apagou o "Concluída" lá na planilha, a rua volta a ficar pendente aqui!
+  localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(novoStatusCartas));
+  if (typeof CARTAS_POR_RUA !== "undefined") {
+    CARTAS_POR_RUA = novoStatusCartas;
+  }
+  // =========================================================================
+  
+  // Atualiza a tela com os dados novinhos do Google
+  renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
+});
 
-    // Se o banco vindo do Google tiver a lista de ruas, vamos ler uma por uma
-    if (banco && banco.ruas) {
-      banco.ruas.forEach(function(item) {
-        // Se na planilha do Google o status for "Concluída", salva no celular
-        if (item.status === "Concluída") {
-          var chave = item.quadra + "_" + item.nome;
-          novoStatusCartas[chave] = true;
-        }
-      });
-    }
-
-    // Sobrescreve o celular com o que está na planilha. 
-    // Se você apagou o "Concluída" lá na planilha, a rua volta a ficar pendente aqui!
-    localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(novoStatusCartas));
-    if (typeof CARTAS_POR_RUA !== "undefined") {
-      CARTAS_POR_RUA = novoStatusCartas;
-    }
-    // =========================================================================
-    
-    // Atualiza a tela com os dados novinhos do Google
-    renderizarTerritorios(BD_GLOBAL, combo, btnSalvar);
-  });
-};
-
-
-    // Monitora se o usuário está tentando fechar ou atualizar o aplicativo
+// Monitora se o usuário está tentando fechar ou atualizar o aplicativo
 window.addEventListener('beforeunload', function (event) {
   // 1. Busca os dados atuais salvos na memória ou no dispositivo
   carregarCasasDoDispositivo();
