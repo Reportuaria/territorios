@@ -1065,14 +1065,15 @@ function voltarParaOPainel() {
   var painelInicial = document.getElementById('tela-painel-inicial');
   var appAntigo = document.getElementById('tela-seu-app-antigo');
 
-  // 1. Remove o estado ativo da segunda página imediatamente
   if (appAntigo) appAntigo.classList.remove('ativa');
-  
+
   requestAnimationFrame(function() {
     if (painelInicial) painelInicial.classList.add('ativa');
+
+    // 🔥 AQUI é o ponto crítico
+    verificarAnotacoesEsquecidas();
   });
 
-  // 2. Limpa os campos de seleção
   var campoTerritorio = document.getElementById("territorio");
   var comboQuadra = document.getElementById("quadra");
   var areaRuas = document.getElementById("area-ruas");
@@ -1081,13 +1082,13 @@ function voltarParaOPainel() {
   if (campoTerritorio) campoTerritorio.value = "";
   if (areaRuas) areaRuas.innerHTML = "";
   if (btnSalvar) btnSalvar.disabled = true;
-  
+
   if (comboQuadra) {
     comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
     comboQuadra.disabled = true;
   }
 }
-
+    
 // Vincula a escolha do painel com a listagem antiga de quadras
 function acionarPregaçãoDoBloco(nomeTerritorio) {
   // 1. Verifica se os elementos existem e gerencia a troca de telas de forma limpa
