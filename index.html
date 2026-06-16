@@ -1395,6 +1395,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   
   if (btnSalvar) btnSalvar.disabled = false;
   
+  // Identifica o elemento real do território na tela
   var elementoTerritorio = combo || document.getElementById("territorio");
   
   if (elementoTerritorio) {
@@ -1410,20 +1411,70 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       opt.innerText = t;
       fragmento.appendChild(opt);
     });
-    
     elementoTerritorio.innerHTML = "";
     elementoTerritorio.appendChild(fragmento);
-    
-    // ⚡ A CORREÇÃO COLOFÃO: Quando você mudar o território manualmente,
-    // o app vai disparar o evento 'change' nativo que o seu código antigo precisa!
+
+    // ⚡ CORREÇÃO DA CASCATA: Quando o usuário mudar o território, 
+    // força o disparo do evento 'change' para recarregar as quadras nativamente!
     elementoTerritorio.onchange = function() {
       elementoTerritorio.dispatchEvent(new Event('change'));
     };
   }
-
+  
   if (typeof inicializarPainelComDados === "function") {
-    inicializarPainelComDados();
+    requestAnimationFrame(function() {
+      inicializarPainelComDados();
+    });
   }
+}
+function filtrarQuadrasLocalmente() {
+  var territorio = document.getElementById("territorio").value;
+  var comboQuadra = document.getElementById("quadra");
+  
+  if (document.getElementById("area-ruas")) {
+    document.getElementById("area-ruas").innerHTML = "";
+  }
+  
+  var btnSalvar = document.getElementById("btnSalvar");
+  if (btnSalvar) btnSalvar.disabled = true;
+  
+  if (!territorio) {
+    comboQuadra.innerHTML = '<option value="">Selecione um território primeiro</option>';
+    comboQuadra.disabled = true;
+    return;
+  }
+  
+  var nomesQuadras = [];
+  
+  // Extrai as quadras de dentro da lista de ruas do BD_GLOBAL
+  if (BD_GLOBAL && BD_GLOBAL.ruas) {
+    BD_GLOBAL.ruas.forEach(function(r) {
+      if (r.territorio === territorio && r.quadra && !nomesQuadras.includes(r.quadra)) {
+        nomesQuadras.push(r.quadra);
+      }
+    });
+  }
+
+  nomesQuadras.sort();
+
+  var fragmento = document.createDocumentFragment();
+  var optPadrao = document.createElement("option");
+  optPadrao.value = "";
+  optPadrao.innerText = "-- Selecione a Quadra --";
+  fragmento.appendChild(optPadrao);
+
+  nomesQuadras.forEach(function(nomeDaQuadra) {
+    var opt = document.createElement("option");
+    opt.value = nomeDaQuadra;
+    opt.innerText = nomeDaQuadra;
+    fragmento.appendChild(opt);
+  });
+
+  comboQuadra.innerHTML = "";
+  comboQuadra.appendChild(fragmento);
+  
+  // 🔓 DESTRAVA O BLOQUEIO VISUAL DA QUADRA AQUI:
+  comboQuadra.disabled = false; 
 }
 
 // Filtro em cascada
