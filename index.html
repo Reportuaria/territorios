@@ -1592,36 +1592,49 @@ function carregarRuasDoCacheLocal() {
 
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
-    function verificarSeTemDadosParaEnviar() {
-      var btn = document.getElementById("btnSalvar");
-      if (!btn) return;
+   function verificarSeTemDadosParaEnviar() {
+  var btn = document.getElementById("btnSalvar");
+  if (!btn) return;
 
+  var campoTerritorio = document.getElementById("territorio");
+  var textoBotao = btn.querySelector("span") || btn;
+  
+  if (textoBotao) textoBotao.innerText = "Enviar para o Dirigente";
 
-      var textoBotao = btn.querySelector("span") || btn;
-      var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { 
-        return lista && lista.length > 0; 
-      });
-      
-      if (textoBotao) textoBotao.innerText = "Enviar para o Dirigente";
+  // 1. CORREÇÃO: Se não escolheu território, o botão FICA DESATIVADO obrigatoriamente
+  if (!campoTerritorio || !campoTerritorio.value) {
+    btn.disabled = true;
+    btn.style.background = "#e8eaed"; 
+    btn.style.color = "#9aa0a6";
+    btn.style.boxShadow = "none";
+    btn.style.cursor = "not-allowed";
+    return; // Para a execução aqui e impede o botão de ficar azul
+  }
 
-      if (temCasas) {
-        btn.disabled = false;
-        
-        // NOVO VISUAL AZUL: Gradiente premium e moderno com sombra destacada
-        btn.style.background = "linear-gradient(135deg, #1a73e8, #0056b3)"; 
-        btn.style.color = "#ffffff";
-        btn.style.boxShadow = "0 8px 24px rgba(26, 115, 232, 0.35)";
-        btn.style.cursor = "pointer";
-      } else {
-        btn.disabled = true;
-        
-        // Restaura o cinza padrão do CSS quando a tela está limpa
-        btn.style.background = "#e8eaed"; 
-        btn.style.color = "#9aa0a6";
-        btn.style.boxShadow = "none";
-        btn.style.cursor = "not-allowed";
-      }
-    }
+  // 2. Se o território foi escolhido, aí sim verifica se há marcações salvas
+  var temCasas = Object.values(CASAS_TEMPORARIAS_POR_RUA).some(function(lista) { 
+    return lista && lista.length > 0; 
+  });
+  
+  if (temCasas) {
+    btn.disabled = false;
+    
+    // NOVO VISUAL AZUL: Gradiente premium e moderno com sombra destacada
+    btn.style.background = "linear-gradient(135deg, #1a73e8, #0056b3)"; 
+    btn.style.color = "#ffffff";
+    btn.style.boxShadow = "0 8px 24px rgba(26, 115, 232, 0.35)";
+    btn.style.cursor = "pointer";
+  } else {
+    btn.disabled = true;
+    
+    // Restaura o cinza padrão do CSS quando a tela está limpa
+    btn.style.background = "#e8eaed"; 
+    btn.style.color = "#9aa0a6";
+    btn.style.boxShadow = "none";
+    btn.style.cursor = "not-allowed";
+  }
+}
+
 
    // Remove um número de rascunho individual clicado pelo usuário
 function removerCasaTemporaria(index, nomeRua, posicaoNaLista) {
