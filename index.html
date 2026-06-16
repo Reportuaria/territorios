@@ -1068,13 +1068,11 @@ function voltarParaOPainel() {
   // 1. Remove o estado ativo da segunda página imediatamente
   if (appAntigo) appAntigo.classList.remove('ativa');
   
-  // Aguarda um milissegundo para limpar a renderização antes de voltar
   requestAnimationFrame(function() {
     if (painelInicial) painelInicial.classList.add('ativa');
   });
-}
 
-  // 2. Limpa os campos de seleção para que o usuário possa escolher outro território sem misturar dados
+  // 2. Limpa os campos de seleção
   var campoTerritorio = document.getElementById("territorio");
   var comboQuadra = document.getElementById("quadra");
   var areaRuas = document.getElementById("area-ruas");
