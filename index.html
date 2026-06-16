@@ -1452,11 +1452,11 @@ function carregarRuasDoCacheLocal() {
 
     var chaveIdentificadora = quadra + "_" + item.nome;
 
-    // 🔒 CORREÇÃO DA COLUNA: Agora verifica o status da Coluna D (item.status) enviado pela planilha
+    // 🔒 CORREÇÃO DA COLUNA: Verifica o status da Coluna D enviado pela planilha
     var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
                       String(item.status).includes("Concluída") ||
                       String(item.status).includes("Concluida") ||
-                      String(item.historico).includes("Cartas"); // Mantido por segurança se usar cartas
+                      String(item.historico).includes("Cartas");
    
     // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
     var htmlQuadradinhos = "";
@@ -1481,48 +1481,7 @@ function carregarRuasDoCacheLocal() {
     var estiloBotao = jaConcluida ? "background: #9ca3af; cursor: not-allowed;" : "background: var(--primary);";
     var textoBloqueio = jaConcluida ? " 🔒 <span style='color: #065f46; font-weight: 700; font-size: 14px;'>CONCLUÍDA</span>" : "";
 
-    // 📝 [MONTAGEM DO CARD DA RUA]
-    htmlFinal += `
-      <div id="container_${index}" style="${estiloCard}">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1f2937;">${item.nome}${textoBloqueio}</h3>
-        </div>
-
-        <!-- Área de Histórico (Quadradinhos) -->
-        <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 6px;">
-          ${htmlQuadradinhos}
-        </div>
-
-        <!-- Formulário de Entrada de dados -->
-        <form id="formCasa_${index}" onsubmit="adicionarCasaTemporaria(event, ${index}, '${item.nome}')" style="display: flex; flex-direction: column; gap: 8px;">
-          <input 
-            type="text" 
-            id="inputCasa_${index}" 
-            ${travaCampos} 
-            placeholder="${jaConcluida ? 'Rua concluída e travada' : 'Digite o número da casa...'}" 
-            style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box;"
-          />
-          
-          <button 
-            type="submit" 
-            form="formCasa_${index}"
-            ${travaCampos}
-            style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; color: white; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; transition: all 0.2s; ${estiloBotao}"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <span>🏠 Marcar Casa</span>
-          </button>
-        </form>
-      </div>
-    `;
-  });
-
-  areaRuas.innerHTML = htmlFinal;
-  if (btnSalvar) btnSalvar.disabled = false;
-}
-
     // 2. MONTAGEM EXCLUSIVA DA SUA INTERFACE ORIGINAL (Moderna e adaptada para idosos)
-       // 📝 [MONTAGEM DO CARD DA RUA] - Sintaxe Corrigida
     htmlFinal += `
       <div id="container_${index}" style="${estiloCard}">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1556,11 +1515,12 @@ function carregarRuasDoCacheLocal() {
         </form>
       </div>
     `;
-  });
+  }); 
 
+  // 3. Injeta o resultado final completo na tela
   areaRuas.innerHTML = htmlFinal;
   if (btnSalvar) btnSalvar.disabled = false;
-}
+} 
 
   // Injeta todas as ruas geradas no HTML do app antigo
   areaRuas.innerHTML = htmlFinal;
