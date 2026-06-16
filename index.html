@@ -823,7 +823,10 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   
   if (btnSalvar) btnSalvar.disabled = false;
   
-  if (combo) {
+  // Identifica o elemento real do território na tela usando o combo ou a ID
+  var elementoTerritorio = combo || document.getElementById("territorio");
+  
+  if (elementoTerritorio) {
     var fragmento = document.createDocumentFragment();
     var optPadrao = document.createElement("option");
     optPadrao.value = "";
@@ -836,8 +839,16 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       opt.innerText = t;
       fragmento.appendChild(opt);
     });
-    combo.innerHTML = "";
-    combo.appendChild(fragmento);
+    elementoTerritorio.innerHTML = "";
+    elementoTerritorio.appendChild(fragmento);
+
+    // ⚡ SOLUÇÃO SEGURA E DIRETA (Sem Loop Infinito):
+    // Quando mudar o território, chama direto a função que criamos para carregar as quadras
+    elementoTerritorio.onchange = function() {
+      if (typeof filtrarQuadrasLocalmente === "function") {
+        filtrarQuadrasLocalmente();
+      }
+    };
   }
   
   if (typeof inicializarPainelComDados === "function") {
