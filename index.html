@@ -889,62 +889,72 @@ function verificarAnotacoesEsquecidas() {
 
   if (divAlerta && containerLista) {
     if (temDados) {
-      divAlerta.style.display = "block";
+  divAlerta.style.display = "block";
+  
+  // 1. Início do card unificado
+  var htmlBlocosDinamicos = `
+    <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
       
-      var htmlBlocosDinamicos = "";
+      <!-- Título Único do Alerta -->
+      <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
+        <p style="margin: 0; font-size: 13px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
+          ⚠️ Você tem marcações não enviadas
+        </p>
+      </div>
 
-      Object.keys(mapasPendentes).forEach(function(t) {
-        var qListadas = mapasPendentes[t].join(", ");
+      <!-- Lista de Territórios e Quadras Agrupados -->
+      <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+  `;
+
+  // 2. Loop para gerar as linhas de cada território com suas quadras
+  Object.keys(mapasPendentes).forEach(function(t) {
+    // Cria as tags/botões para cada quadra
+    var botoesQuadras = mapasPendentes[t].map(function(q) {
+      return `
+        <button onclick="filtrarPorQuadra('${t}', '${q}', event)" style="padding: 6px 10px; background: rgba(0,0,0,0.04); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; -webkit-tap-highlight-color: transparent;">
+          ${q}
+        </button>
+      `;
+    }).join(" ");
+
+    // Adiciona a linha do território na listagem
+    htmlBlocosDinamicos += `
+      <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.03);">
+        <div style="font-size: 14px; color: var(--text); font-weight: 500;">
+          🗺️ Território: <button onclick="filtrarPorTerritorio('${t}', event)" style="background: none; border: none; font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 0; text-decoration: underline; -webkit-tap-highlight-color: transparent;">Nº ${t}</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 22px;">
+          ${botoesQuadras}
+        </div>
+      </div>
+    `;
+  });
+
+  // 3. Fechamento da lista e botões globais no rodapé do card
+  htmlBlocosDinamicos += `
+      </div>
+
+      <!-- Botões de Ação Globais -->
+      <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+        <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+          Verificar Tudo
+        </button>
         
-        htmlBlocosDinamicos += `
-          <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
-            
-            <!-- Título sutil do Alerta -->
-            <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
-              <p style="margin: 0; font-size: 12px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
-                ⚠️ Anotações Pendentes Encontradas
-              </p>
-            </div>
+        <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+          🗑️ Apagar Tudo
+        </button>
+      </div>
 
-            <!-- Item 1: Território -->
-            <div style="margin-bottom: 16px;">
-              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-                <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
-              </p>
-              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">Nº ${t}</span>
-            </div>
-            
-            <!-- Item 2: Quadras -->
-            <div style="margin-bottom: 22px;">
-              <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-                <span style="opacity: 0.7; margin-right: 4px;">📋</span> Quadras com Casas Anotadas
-              </p>
-              <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${qListadas}</span>
-            </div>
+    </div>
+  `;
 
-            <!-- BOTÕES GERADOS APENAS SE HOUVER DADOS -->
-            <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
-              <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                Buscar
-              </button>
-              
-              <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-                🗑️ Apagar
-              </button>
-            </div>
-
-          </div>
-        `;
-      });
-
-      containerLista.innerHTML = htmlBlocosDinamicos;
-    } else {
-      // Esconde completamente o container se estiver vazio
-      divAlerta.style.display = "none";
-      containerLista.innerHTML = "";
-    }
-  }
+  containerLista.innerHTML = htmlBlocosDinamicos;
+} else {
+  // Esconde completamente o container se estiver vazio
+  divAlerta.style.display = "none";
+  containerLista.innerHTML = "";
 }
+
 
 // 1. GARANTIA DE INICIALIZAÇÃO SEGURA (Roda na ordem certa ao ligar/recarregar o app)
 window.addEventListener('DOMContentLoaded', function() {
@@ -1057,6 +1067,22 @@ function abrirBuscaLivre() {
   requestAnimationFrame(function() {
     if (appAntigo) appAntigo.classList.add('ativa');
   });
+}
+    
+function filtrarPorTerritorio(territorio, event) {
+  if(event) event.preventDefault();
+  console.log("Filtrando o app pelo Território:", territorio);
+  
+  // INSIRA AQUI a sua lógica para filtrar a tela principal pelo território
+  // Exemplo: seuInputFiltroTerritorio.value = territorio; seuMetodoDeFiltrar();
+}
+
+function filtrarPorQuadra(territorio, quadra, event) {
+  if(event) event.preventDefault();
+  console.log("Filtrando o app pelo Território:", territorio, "e Quadra:", quadra);
+  
+  // INSIRA AQUI a sua lógica para filtrar a tela principal por ambos os dados
+  // Exemplo: seuInputQuadra.value = quadra; seuMetodoDeFiltrar();
 }
 
 function voltarParaOPainel() {
