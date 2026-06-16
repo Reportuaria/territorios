@@ -638,7 +638,14 @@
 
       <h3 class="titulo-principal" style="margin-top: 16px;">Território do Dia</h3>
        
-      <button id="btnInstalarApp" class="btn-instalar">📥 Instalar Aplicativo no Celular</button>
+     <!-- BOTÃO DE INSTALAÇÃO FIXADO NO RODAPÉ -->
+<button id="btnInstalarApp" onclick="dispararInstalacaoPWA()" style="display: none; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 400px; padding: 14px; background: var(--primary, #1a73e8); color: #ffffff; border: none; border-radius: var(--radius-md, 12px); font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); justify-content: center; align-items: center; gap: 8px; z-index: 9999; -webkit-tap-highlight-color: transparent;" ontouchstart="this.style.transform='translateX(-50%) scale(0.98)'" ontouchend="this.style.transform='translateX(-50%) scale(1)'">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+  </svg>
+  <span>📥 Instalar Aplicativo no Celular</span>
+</button>
+
       
       <div id="container-programacao" class="card-inicial">
         <p class="txt-loading">Buscando escala do dia...</p>
