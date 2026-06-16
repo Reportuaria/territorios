@@ -1410,6 +1410,13 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
     });
     combo.innerHTML = "";
     combo.appendChild(fragmento);
+
+    // ⚡ CORREÇÃO CRUCIAL: Garante que, ao escolher o território, a cascata funcione e destrave a quadra
+    combo.onchange = function() {
+      if (typeof filtrarQuadrasLocalmente === "function") {
+        filtrarQuadrasLocalmente();
+      }
+    };
   }
 
   // Executa a verificação da escala do dia corrente após carregar os dados
