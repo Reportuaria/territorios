@@ -853,7 +853,7 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
       }
     }
     
-    // Salvar numeros temporarios para nao sumir
+// Salvar numeros temporarios para nao sumir
 function verificarAnotacoesEsquecidas() {
   carregarCasasDoDispositivo();
   
@@ -889,72 +889,73 @@ function verificarAnotacoesEsquecidas() {
 
   if (divAlerta && containerLista) {
     if (temDados) {
-  divAlerta.style.display = "block";
-  
-  // 1. Início do card unificado
-  var htmlBlocosDinamicos = `
-    <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
+      divAlerta.style.display = "block";
       
-      <!-- Título Único do Alerta -->
-      <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
-        <p style="margin: 0; font-size: 13px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
-          ⚠️ Você tem marcações não enviadas
-        </p>
-      </div>
+      // 1. Início do card unificado
+      var htmlBlocosDinamicos = `
+        <div class="card-inicial" style="padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--card-bg); border-radius: var(--radius-md);">
+          
+          <!-- Título Único do Alerta -->
+          <div style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 8px;">
+            <p style="margin: 0; font-size: 13px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px;">
+              ⚠️ Você tem marcações não enviadas
+            </p>
+          </div>
 
-      <!-- Lista de Territórios e Quadras Agrupados -->
-      <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
-  `;
-
-  // 2. Loop para gerar as linhas de cada território com suas quadras
-  Object.keys(mapasPendentes).forEach(function(t) {
-    // Cria as tags/botões para cada quadra
-    var botoesQuadras = mapasPendentes[t].map(function(q) {
-      return `
-        <button onclick="filtrarPorQuadra('${t}', '${q}', event)" style="padding: 6px 10px; background: rgba(0,0,0,0.04); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; -webkit-tap-highlight-color: transparent;">
-          ${q}
-        </button>
+          <!-- Lista de Territórios e Quadras Agrupados -->
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
       `;
-    }).join(" ");
 
-    // Adiciona a linha do território na listagem
-    htmlBlocosDinamicos += `
-      <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.03);">
-        <div style="font-size: 14px; color: var(--text); font-weight: 500;">
-          🗺️ Território: <button onclick="filtrarPorTerritorio('${t}', event)" style="background: none; border: none; font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 0; text-decoration: underline; -webkit-tap-highlight-color: transparent;">Nº ${t}</button>
+      // 2. Loop para gerar as linhas de cada território com suas quadras
+      Object.keys(mapasPendentes).forEach(function(t) {
+        // Cria as tags/botões para cada quadra
+        var botoesQuadras = mapasPendentes[t].map(function(q) {
+          return `
+            <button onclick="filtrarPorQuadra('${t}', '${q}', event)" style="padding: 6px 10px; background: rgba(0,0,0,0.04); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; -webkit-tap-highlight-color: transparent;">
+              ${q}
+            </button>
+          `;
+        }).join(" ");
+
+        // Adiciona a linha do território na listagem
+        htmlBlocosDinamicos += `
+          <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.03);">
+            <div style="font-size: 14px; color: var(--text); font-weight: 500;">
+              🗺️ Território: <button onclick="filtrarPorTerritorio('${t}', event)" style="background: none; border: none; font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 0; text-decoration: underline; -webkit-tap-highlight-color: transparent;">Nº ${t}</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 22px;">
+              ${botoesQuadras}
+            </div>
+          </div>
+        `;
+      });
+
+      // 3. Fechamento da lista e botões globais no rodapé do card
+      htmlBlocosDinamicos += `
+          </div>
+
+          <!-- Botões de Ação Globais -->
+          <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+            <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+              Verificar Tudo
+            </button>
+            
+            <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
+              🗑️ Apagar Tudo
+            </button>
+          </div>
+
         </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 22px;">
-          ${botoesQuadras}
-        </div>
-      </div>
-    `;
-  });
+      `;
 
-  // 3. Fechamento da lista e botões globais no rodapé do card
-  htmlBlocosDinamicos += `
-      </div>
-
-      <!-- Botões de Ação Globais -->
-      <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
-        <button onclick="retomarTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: var(--primary); color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-          Verificar Tudo
-        </button>
-        
-        <button onclick="limparTrabalhoPendente(event)" style="flex: 1; padding: 14px 8px; background: #ef4444; color: #ffffff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform='scale(1)'">
-          🗑️ Apagar Tudo
-        </button>
-      </div>
-
-    </div>
-  `;
-
-  containerLista.innerHTML = htmlBlocosDinamicos;
-} else {
-  // Esconde completamente o container se estiver vazio
-  divAlerta.style.display = "none";
-  containerLista.innerHTML = "";
-}
-
+      containerLista.innerHTML = htmlBlocosDinamicos;
+    } else {
+      // Esconde completamente o container se estiver vazio
+      divAlerta.style.display = "none";
+      containerLista.innerHTML = "";
+    }
+  } 
+} 
 
 // 1. GARANTIA DE INICIALIZAÇÃO SEGURA (Roda na ordem certa ao ligar/recarregar o app)
 window.addEventListener('DOMContentLoaded', function() {
@@ -1070,19 +1071,62 @@ function abrirBuscaLivre() {
 }
     
 function filtrarPorTerritorio(territorio, event) {
-  if(event) event.preventDefault();
+  if (event) event.preventDefault();
   console.log("Filtrando o app pelo Território:", territorio);
   
-  // INSIRA AQUI a sua lógica para filtrar a tela principal pelo território
-  // Exemplo: seuInputFiltroTerritorio.value = territorio; seuMetodoDeFiltrar();
+  var campoTerritorio = document.getElementById("territorio");
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+  
+  if (campoTerritorio) {
+    // 1. Preenche o select com o número do território correspondente
+    campoTerritorio.value = territorio;
+    
+    // 2. Dispara a sua função nativa que carrega as quadras do território
+    if (typeof filtrarQuadrasLocalmente === "function") {
+      filtrarQuadrasLocalmente();
+    } else {
+      campoTerritorio.dispatchEvent(new Event('change'));
+    }
+    
+    // 3. Transiciona da tela do painel para a tela do app
+    if (painelInicial) painelInicial.classList.remove('ativa');
+    if (appAntigo) appAntigo.classList.add('ativa');
+  }
 }
 
 function filtrarPorQuadra(territorio, quadra, event) {
-  if(event) event.preventDefault();
+  if (event) event.preventDefault();
   console.log("Filtrando o app pelo Território:", territorio, "e Quadra:", quadra);
   
-  // INSIRA AQUI a sua lógica para filtrar a tela principal por ambos os dados
-  // Exemplo: seuInputQuadra.value = quadra; seuMetodoDeFiltrar();
+  var campoTerritorio = document.getElementById("territorio");
+  var comboQuadra = document.getElementById("quadra");
+  var painelInicial = document.getElementById('tela-painel-inicial');
+  var appAntigo = document.getElementById('tela-seu-app-antigo');
+
+  if (campoTerritorio && comboQuadra) {
+    // 1. Seleciona o território
+    campoTerritorio.value = territorio;
+    
+    // 2. Executa a sua função para renderizar as opções de quadras no HTML
+    if (typeof filtrarQuadrasLocalmente === "function") {
+      filtrarQuadrasLocalmente();
+    } else {
+      campoTerritorio.dispatchEvent(new Event('change'));
+    }
+
+    // 3. Pequena pausa para garantir que o HTML do combo de quadras foi atualizado
+    setTimeout(function() {
+      comboQuadra.value = quadra;
+      
+      // 4. Dispara o evento da quadra para que as ruas/casas apareçam na tela
+      comboQuadra.dispatchEvent(new Event('change'));
+      
+      // 5. Muda para a tela de trabalho do app
+      if (painelInicial) painelInicial.classList.remove('ativa');
+      if (appAntigo) appAntigo.classList.add('ativa');
+    }, 60); // 60ms garante estabilidade em PWAs rodando em celulares mais antigos
+  }
 }
 
 function voltarParaOPainel() {
@@ -1114,7 +1158,7 @@ function voltarParaOPainel() {
     comboQuadra.disabled = true;
   }
 }
-    
+
 // Vincula a escolha do painel com a listagem antiga de quadras
 function acionarPregaçãoDoBloco(nomeTerritorio) {
   // 1. Verifica se os elementos existem e gerencia a troca de telas de forma limpa
