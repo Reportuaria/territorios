@@ -1938,51 +1938,83 @@ function enviarDados() {
   setTimeout(function() { toast.classList.remove("visivel"); }, 3000);
 }
 
-// Monitora a intenção de instalação nativa do navegador
+// Variável global para guardar o gatilho de instalação do navegador
+let gatilhoInstalacao = null;
+
+// 1. Escuta o navegador de forma silenciosa, sem abrir nenhum aviso sozinho
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  gatilhoInstalacao = e; // Guarda o evento na memória
+  
+  // Mostra o botão que estava escondido na parte inferior
+  var btnInstalar = document.getElementById('btnInstalarApp');
+  if (btnInstalar) {
+    btnInstalar.style.display = 'flex'; 
+  }
+});
+
+// 2. Função que executa a instalação APENAS quando o usuário clica no botão
+function dispararInstalacaoPWA() {
+  if (!gatilhoInstalacao) {
+    // Se o navegador bloqueou o evento temporariamente, avisa o usuário de forma amigável
+    exibirToast("", "O sistema está preparando a instalação. Tente novamente em alguns segundos.");
+    return;
+  }
+
+  // Esconde o botão para evitar cliques duplos
+  var btnInstalar = document.getElementById('btnInstalarApp');
+  if (btnInstalar) btnInstalar.style.display = 'none';
+
+  // Abre a janelinha oficial de instalação do navegador
+  gatilhoInstalacao.prompt();
+
+  // Avalia a escolha do usuário
+  gatilhoInstalacao.userChoice.then(function(choiceResult) {
+    if (choiceResult.outcome === 'accepted') {
+      // Abre o progresso apenas após o clique e aceitação
+      var popup = document.getElementById("toastInstalacao");
+      var barra = document.getElementById("barraProgresso");
+      var textoPopup = popup ? popup.querySelector("span") || popup : null;
+      
+      if (popup && barra) {
+        if (textoPopup) textoPopup.innerText = "Instalando o aplicativo...";
+        popup.classList.add("ativo");
+        barra.style.width = "40%";
+      }
+    } else {
+      // Se ele recusou, devolve o botão para a tela
+      if (btnInstalar) btnInstalar.style.display = 'flex';
+    }
+    gatilhoInstalacao = null; // Reseta o gatilho utilizado
+  });
+}
+
+// 3. Executa o sucesso definitivo após o sistema operacional criar o ícone
 window.addEventListener('appinstalled', function() {
   var popup = document.getElementById("toastInstalacao");
   var barra = document.getElementById("barraProgresso");
   var textoPopup = popup ? popup.querySelector("span") || popup : null;
   
   if (popup && barra) {
-    // 1. Descobre se o usuário usa Android ou iPhone/PC para dar a instrução certa
-    var userAgent = navigator.userAgent.toLowerCase();
-    var instrucaoOS = "Procure pelo ícone na tela inicial do seu celular.";
-    
-    if (userAgent.includes("android")) {
-      instrucaoOS = "Deslize para cima na sua tela inicial e procure pelo ícone no final da sua lista de aplicativos.";
-    } else if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
-      instrucaoOS = "O ícone foi adicionado à última página da sua tela de início.";
-    } else {
-      instrucaoOS = "O aplicativo foi adicionado à sua Área de Trabalho ou menu Iniciar.";
-    }
-
-    // 2. Insere a instrução detalhada e estilizada no popup
-    if (textoPopup) {
-      textoPopup.innerHTML = `
-        <div style="text-align: left; line-height: 1.4;">
-          <span style="font-size: 15px; font-weight: 700; color: #10b981; display: block; margin-bottom: 4px;">✨ Instalado com Sucesso!</span>
-          <span style="font-size: 13px; color: var(--text); font-weight: 500;">${instrucaoOS}</span>
-          <div style="margin-top: 8px; font-size: 11px; color: #6b7280; background: rgba(0,0,0,0.03); padding: 6px; border-radius: 4px; border-left: 3px solid var(--primary);">
-            💡 <b>Dica:</b> Você já pode fechar esta aba do navegador e usar o aplicativo direto pelo ícone criado!
-          </div>
-        </div>
-      `;
-    }
-    
+    if (textoPopup) textoPopup.innerText = "✨ Aplicativo instalado com sucesso!";
     barra.style.width = "100%"; 
 
-    // Aumentamos para 7 segundos para que o usuário tenha tempo de ler o minitutorial
     setTimeout(function() {
       popup.classList.remove("ativo");
       setTimeout(function() { 
         barra.style.width = "0%"; 
         if (textoPopup) textoPopup.innerText = "Instalando o aplicativo..."; 
       }, 400); 
-    }, 7000);
+    }, 4000);
   }
 });
 
+// Mantém o registro do Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+    console.error('Falha ao registrar Service Worker do PWA:', err);
+  });
+}
 
 // Registra o Service Worker obrigatório do PWA
 if ('serviceWorker' in navigator) {
