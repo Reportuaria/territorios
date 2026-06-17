@@ -266,19 +266,27 @@
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
   }
     
-/* Estilo padrão da rua (coloque a classe que você já usa, ex: .card-rua) */
+/* 1. Estilo padrão da rua (quando ela está fechada) */
 .card-rua {
-  transition: all 0.3s ease; /* Faz a transição de tamanho e sombra ficar suave */
+  transition: all 0.3s ease; /* Faz a transição de tamanho, borda e sombra ficar suave */
   border: 1px solid var(--border);
   margin-bottom: 8px;
+  border-radius: var(--radius-md); /* Mantém as bordas arredondadas se você usar */
+  background: white; /* Garante o fundo branco */
 }
 
-/* NOVA CLASSE: Efeito de destaque quando a rua for clicada/expandida */
+/* 2. NOVO DESTAQUE: Aplica nas bordas de FORA de toda a rua quando clicada */
 .rua-ativa {
-  border: 2px solid var(--primary) !important; /* Borda mais grossa e na cor do seu app */
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15) !important; /* Sombra para dar profundidade */
-  margin-top: 16px !important; /* Desgruda da rua de cima */
-  margin-bottom: 16px !important; /* Desgruda da rua de baixo */
+  border: 2px solid var(--primary) !important; /* Borda externa mais grossa na cor do seu app */
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15) !important; /* Sombra para desgrudar o bloco do fundo */
+  margin-top: 16px !important; /* Afasta o bloco inteiro da rua de cima */
+  margin-bottom: 16px !important; /* Afasta o bloco inteiro da rua de baixo */
+}
+
+/* 3. O DESTAQUE QUE VOCÊ GOSTOU: Mantém o efeito apenas no container interno */
+.container-ativo {
+  /* Não mexa aqui se você já tinha esse estilo funcionando no seu app, */
+  /* ele serve apenas para garantir o efeito que você elogiou no container de digitar. */
 }
 
   /* ==========================================================================
@@ -862,32 +870,39 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   }
 }
 
-   function alternarAbas(elementoCabecalho) {
-  // Encontra o container principal da rua (o elemento pai que engloba o cabeçalho e o conteúdo)
-  var containerRua = elementoCabecalho.parentElement;
-  var conteudo = elementoCabecalho.nextElementSibling;
+function alternarAbas(elementoCabecalho) {
+  // 1. Encontra o bloco inteiro da rua (que engloba tudo)
+  // IMPORTANTE: Se a classe da sua rua não for '.card-rua', mude o nome abaixo
+  var blocoDaRua = elementoCabecalho.closest('.card-rua') || elementoCabecalho.parentElement;
+  
+  // 2. Encontra o container interno onde ficam as informações
+  var containerInterno = elementoCabecalho.nextElementSibling;
   var seta = elementoCabecalho.querySelector('.seta-aba');
 
-  if (conteudo.style.display === "none" || conteudo.style.display === "") {
-    // 1. REMOVE o destaque de todas as outras ruas antes de abrir a nova
+  if (containerInterno.style.display === "none" || containerInterno.style.display === "") {
+    // Limpa o destaque de outras ruas que possam estar abertas
     document.querySelectorAll('.rua-ativa').forEach(function(rua) {
       rua.classList.remove('rua-ativa');
-      // Se as outras ruas tiverem conteúdo aberto, opcionalmente você pode fechá-las aqui
-      // se o seu sistema permitir apenas uma rua aberta por vez.
+    });
+    document.querySelectorAll('.container-ativo').forEach(function(cont) {
+      cont.classList.remove('container-ativo');
     });
 
-    // 2. ABRE a rua atual e ADICIONA o destaque nela
-    conteudo.style.display = "block";
+    // Abre a rua atual
+    containerInterno.style.display = "block";
     seta.style.transform = "rotate(180deg)";
-    containerRua.classList.add('rua-ativa'); // <--- Aplica o destaque visual
+    
+    // AQUI ESTÁ O SEGREDO:
+    blocoDaRua.classList.add('rua-ativa');            // Destaca a borda de FORA de toda a rua
+    containerInterno.classList.add('container-ativo'); // Mantém o destaque de DENTRO que você gostou
   } else {
-    // 3. FECHA a rua atual e REMOVE o destaque dela
-    conteudo.style.display = "none";
+    // Se fechar a rua, remove todos os destaques
+    containerInterno.style.display = "none";
     seta.style.transform = "rotate(0deg)";
-    containerRua.classList.remove('rua-ativa'); // <--- Remove o destaque visual
+    blocoDaRua.classList.remove('rua-ativa');
+    containerInterno.classList.remove('container-ativo');
   }
 }
-
     
 // Salvar numeros temporarios para nao sumir
 function verificarAnotacoesEsquecidas() {
