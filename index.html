@@ -265,6 +265,21 @@
     border-color: var(--success);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
   }
+    
+/* Estilo padrão da rua (coloque a classe que você já usa, ex: .card-rua) */
+.card-rua {
+  transition: all 0.3s ease; /* Faz a transição de tamanho e sombra ficar suave */
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+/* NOVA CLASSE: Efeito de destaque quando a rua for clicada/expandida */
+.rua-ativa {
+  border: 2px solid var(--primary) !important; /* Borda mais grossa e na cor do seu app */
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15) !important; /* Sombra para dar profundidade */
+  margin-top: 16px !important; /* Desgruda da rua de cima */
+  margin-bottom: 16px !important; /* Desgruda da rua de baixo */
+}
 
   /* ==========================================================================
      4. SISTEMA DE ADICIONAR CASAS (COM DIVISÃO EXCLUSIVA)
@@ -847,18 +862,32 @@ function renderizarTerritorios(banco, combo, btnSalvar) {
   }
 }
 
-    // Gerencia o recolhimento visual das abas (Efeito Sanfona)
-    function alternarAbas(elementoCabecalho) {
-      var conteudo = elementoCabecalho.nextElementSibling;
-      var seta = elementoCabecalho.querySelector('.seta-aba');
-      if (conteudo.style.display === "none" || conteudo.style.display === "") {
-        conteudo.style.display = "block";
-        seta.style.transform = "rotate(180deg)";
-      } else {
-        conteudo.style.display = "none";
-        seta.style.transform = "rotate(0deg)";
-      }
-    }
+   function alternarAbas(elementoCabecalho) {
+  // Encontra o container principal da rua (o elemento pai que engloba o cabeçalho e o conteúdo)
+  var containerRua = elementoCabecalho.parentElement;
+  var conteudo = elementoCabecalho.nextElementSibling;
+  var seta = elementoCabecalho.querySelector('.seta-aba');
+
+  if (conteudo.style.display === "none" || conteudo.style.display === "") {
+    // 1. REMOVE o destaque de todas as outras ruas antes de abrir a nova
+    document.querySelectorAll('.rua-ativa').forEach(function(rua) {
+      rua.classList.remove('rua-ativa');
+      // Se as outras ruas tiverem conteúdo aberto, opcionalmente você pode fechá-las aqui
+      // se o seu sistema permitir apenas uma rua aberta por vez.
+    });
+
+    // 2. ABRE a rua atual e ADICIONA o destaque nela
+    conteudo.style.display = "block";
+    seta.style.transform = "rotate(180deg)";
+    containerRua.classList.add('rua-ativa'); // <--- Aplica o destaque visual
+  } else {
+    // 3. FECHA a rua atual e REMOVE o destaque dela
+    conteudo.style.display = "none";
+    seta.style.transform = "rotate(0deg)";
+    containerRua.classList.remove('rua-ativa'); // <--- Remove o destaque visual
+  }
+}
+
     
 // Salvar numeros temporarios para nao sumir
 function verificarAnotacoesEsquecidas() {
