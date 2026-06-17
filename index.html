@@ -1488,9 +1488,19 @@ function carregarRuasDoCacheLocal() {
 
     var chaveIdentificadora = quadra + "_" + item.nome;
 
-    var jaConcluida = CARTAS_POR_RUA[chaveIdentificadora] === true || 
-                      String(item.historico).includes("Cartas") || 
-                      String(item.historico).includes("Concluída");
+    // CORREÇÃO AQUI: A rua só vem concluída se estiver no histórico oficial da planilha/servidor.
+    // O CARTAS_POR_RUA só entra se o histórico ainda não tiver carregado (fallback).
+    var historicoOficialConcluido = String(item.historico).includes("Cartas") || 
+                                     String(item.historico).includes("Concluída") ||
+                                     (item.status && (item.status === "Concluída" || item.status === "Concluido"));
+
+    // Se a planilha diz que NÃO está concluída, nós limpamos o localStorage velho dessa rua automaticamente
+    if (!historicoOficialConcluido && CARTAS_POR_RUA[chaveIdentificadora]) {
+      delete CARTAS_POR_RUA[chaveIdentificadora];
+      localStorage.setItem('CARTAS_POR_RUA', JSON.stringify(CARTAS_POR_RUA));
+    }
+
+    var jaConcluida = historicoOficialConcluido || CARTAS_POR_RUA[chaveIdentificadora] === true;
    
     // Tratamento limpo para construir os quadradinhos do histórico sem quebras de layout
     var htmlQuadradinhos = "";
@@ -1590,7 +1600,6 @@ function carregarRuasDoCacheLocal() {
   // Valida o botão geral de enviar para o dirigente
   verificarSeTemDadosParaEnviar();
 }
-
 
     // Gerencia o estado e a beleza do botão principal baseado na presença de rascunhos
    function verificarSeTemDadosParaEnviar() {
