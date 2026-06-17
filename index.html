@@ -1835,6 +1835,7 @@ function carregarCasasDoDispositivo() {
 }
 
   // Expande ou recolhe o bloco principal das ruas
+// Expande ou recolhe o bloco principal das ruas
 function alternarExpansaoRua(index) {
   var corpo = document.getElementById("corpoRua_" + index);
   var seta = document.getElementById("setaRua_" + index);
@@ -1855,9 +1856,9 @@ function alternarExpansaoRua(index) {
   } else {
     // ---- QUANDO ABRE A RUA ----
     
-    // 1. Limpa o destaque de QUALQUER outra rua que esteja aberta na tela antes de abrir a nova
-    document.querySelectorAll('.rua-ativa').forEach(function(rua Aberta) {
-      rua Aberta.classList.remove('rua-active', 'rua-ativa');
+    // 1. Limpa o destaque de QUALQUER outra rua que esteja aberta na tela
+    document.querySelectorAll('.rua-ativa').forEach(function(rua) {
+      rua.classList.remove('rua-ativa');
     });
 
     corpo.style.display = "block";
