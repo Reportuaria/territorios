@@ -1,5 +1,5 @@
 // Altere o número da versão (ex: v1 para v1) sempre que fizer uma atualização grande no site!
-const CACHE_NAME = 'territorios-cache-v1'; 
+const CACHE_NAME = 'territorios-cache-v2'; 
 const URLS_TO_CACHE = [
   './',
   './index.html', // ou o nome do seu arquivo principal
