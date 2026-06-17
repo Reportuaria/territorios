@@ -1564,14 +1564,14 @@ function carregarRuasDoCacheLocal() {
               >
           </form>
                      
-          <!-- BOTÃO 1: Cartas embaixo do input -->
+         <!-- BOTÃO 1: Cartas embaixo do input -->
           <div id="wrapperBotao_${index}" style="margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 14px; display: block; width: 100%; box-sizing: border-box;">
             <button type="button" class="btn-cartas" id="btnCartas_${index}" onclick="alternarCartas(${index}, '${item.nome.replace(/'/g, "\\'")}')" style="width: 100%; padding: 16px 12px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; gap: 8px;" ontouchstart="this.style.transform='scale(0.99)'" ontouchend="this.style.transform='scale(1)'">
               <span>✉️ Deixou Cartas?</span>
             </button>
           </div>
 
-          <!-- BOTÃO 2: "Adicionar Registro" no final -->
+          <!-- BOTÃO 2: Marcar Casa (Garante o salvamento se o teclado fechar) -->
           <button 
             type="submit" 
             form="formCasa_${index}"
@@ -1579,6 +1579,11 @@ function carregarRuasDoCacheLocal() {
             ontouchstart="this.style.transform='scale(0.98)'"
             ontouchend="this.style.transform='scale(1)'"
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#60A5FA">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span>Marcar Casa</span>
+          </button>
         </div>
       </div>
     `;
