@@ -678,7 +678,7 @@
 
        <!-- Linha divisória e contêiner para os próximos dias -->
       <div id="secao-proximos-dias" class="proximos-dias-secao" style="display: none;">
-        <h3 class="subtitulo-secao">📅 Próximos Dias</h3>
+        <h3 class="subtitulo-secao">Próximos Dias</h3>
         <div id="container-proximos-dias"></div>
       </div>
     </div> <!-- Fim do container page-spacing -->
@@ -1281,7 +1281,7 @@ var htmlBloco = `
     <div class="conteudo-sanfona" style="display: none; padding: 20px;">
       <div style="margin-bottom: 16px;">
         <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-          <span style="opacity: 0.7; margin-right: 4px;">🗺️</span> Território
+          <span style="opacity: 0.7; margin-right: 4px;">📍</span> Local
         </p>
         <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.territorio || '---'}</span>
       </div>
@@ -1295,7 +1295,7 @@ var htmlBloco = `
       
       <div style="margin-bottom: 22px;">
         <p style="margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">
-          <span style="opacity: 0.7; margin-right: 4px;">📋</span> Fase do Trabalho
+          <span style="opacity: 0.7; margin-right: 4px;">📋</span> Observação
         </p>
         <span style="font-size: 17px; font-weight: 600; color: var(--text); display: block;">${item.visita || '---'}</span>
       </div>
@@ -1343,9 +1343,9 @@ var htmlBloco = `
                   <span class="seta-aba" style="font-size: 13px; color: #6b7280; transition: transform 0.2s;">▼</span>
                 </div>
                 <div class="conteudo-aba" style="display: none; padding: 16px; border-top: 1px solid #e5e7eb; background: #ffffff;">
-                  <div style="margin-bottom: 12px;"><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">🗺️ Território</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.territorio || '---'}</span></div>
+                  <div style="margin-bottom: 12px;"><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">📍 Local</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.territorio || '---'}</span></div>
                   <div style="margin-bottom: 12px;"><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">👔 Dirigente</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.dirigente || '---'}</span></div>
-                  <div><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">📋 Fase do Trabalho</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.visita || '---'}</span></div>
+                  <div><p style="margin: 0 0 2px 0; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold;">📋 Observação</p><span style="font-size: 15px; font-weight: 600; color: #111827;">${item.visita || '---'}</span></div>
                 </div>
               </div>`;
           containerFuturo.innerHTML += htmlBlocoFuturo;
