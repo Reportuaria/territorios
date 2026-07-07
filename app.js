@@ -1,5 +1,5 @@
 // CONFIGURAÇÕES INICIAIS (Substitua com os seus dados)
-const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_://googleusercontent.com";
+const GOOGLE_CLIENT_ID = "1032457585178-v9geqen8g0utp7fapc5pk5put5qlvp8k.apps.googleusercontent.com";
 const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxBJ65YpMRkxUrs4DFcn7Ek_9o0FPEXJnjRz4fM9tbpz7ndTIrBeFiHYDRmjjSROwLf/exec";
 
 // 1. INICIALIZAR O GOOGLE SIGN-IN ASSIM QUE O APP CARREGA
