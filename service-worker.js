@@ -37,9 +37,9 @@ self.addEventListener('activate', event => {
 
 // Busca de arquivos (Fetch): Tenta buscar da internet primeiro, se falhar/tiver offline usa o cache
 self.addEventListener('fetch', event => {
-  // Ignora requisições do Google Script para não cachear os dados enviados/recebidos
-  if (event.request.url.includes('://google.com')) {
-    return;
+  // CORREÇÃO AQUI: Ignora a API do Google Sheets e requisições POST para não quebrar o envio de dados
+  if (event.request.url.includes('script.google.com') || event.request.method === 'POST') {
+    return; // Deixa a requisição passar direto para a internet sem interferência do cache
   }
 
   event.respondWith(
@@ -60,3 +60,4 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
