@@ -9,8 +9,8 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#1a73e8">
 
-  
-  <script src="https://google.com" async defer></script>
+  <!-- LINK CORRIGIDO DA API DO GOOGLE: Avisa ao script para rodar a função assim que carregar -->
+  <script src="https://google.com" onload="inicializarGoogleLogin()" async defer></script>
 
   <style>
     /* Estilos Básicos para o App parecer um Aplicativo de Celular */
