@@ -1,8 +1,8 @@
 // CONFIGURAÇÕES INICIAIS
-const GOOGLE_CLIENT_ID = "1032457585178-v9geqen8g0utp7fapc5pk5put5qlvp8k.apps.googleusercontent.com";
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxBJ65YpMRkxUrs4DFcn7Ek_9o0FPEXJnjRz4fM9tbpz7ndTIrBeFiHYDRmjjSROwLf/exec";
+const GOOGLE_CLIENT_ID = "://googleusercontent.com";
+const URL_APPS_SCRIPT = "https://google.com";
 
-// 1. REGISTRO DO SERVICE WORKER (Executa de forma limpa ao carregar a página do PWA)
+// 1. REGISTRO DO SERVICE WORKER
 window.addEventListener('load', function () {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
@@ -11,37 +11,47 @@ window.addEventListener('load', function () {
   }
 });
 
-// 2. FUNÇÃO QUE O GOOGLE CHAMA AUTOMATICAMENTE ASSIM QUE A BIBLIOTECA CARREGAR
+// 2. FUNÇÃO INTELIGENTE DE INICIALIZAÇÃO
 window.inicializarGoogleLogin = function () {
-  console.log("Biblioteca do Google carregada com sucesso!");
-  
-  if (typeof google !== 'undefined') {
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: tratarLogin // Função que roda após o login bem-sucedido
-    });
+  let tentativas = 0;
 
-    // Renderiza o botão oficial do Google dentro da div correspondente no HTML
-    google.accounts.id.renderButton(
-      document.getElementById("buttonDiv"),
-      { theme: "outline", size: "large", text: "signin_with" } 
-    );
-  } else {
-    console.error("Erro: Objeto 'google' não foi encontrado mesmo após o carregamento.");
+  function verificarEInicializar() {
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+      console.log("Biblioteca do Google carregada e pronta!");
+      
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: tratarLogin
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large", text: "signin_with" } 
+      );
+    } else {
+      tentativas++;
+      if (tentativas < 10) {
+        // Se não achou o objeto 'google', espera 200ms e tenta de novo (máximo 2 segundos)
+        setTimeout(verificarEInicializar, 200);
+      } else {
+        console.error("Erro crítico: A biblioteca do Google não pôde ser carregada. Verifique se o seu AdBlock ou Bloqueador de Rastreamento está ativo.");
+        const container = document.getElementById("buttonDiv");
+        if (container) {
+          container.innerHTML = "<p style='color:red; font-size:14px;'>Desative o AdBlock/Bloqueador do navegador para fazer login.</p>";
+        }
+      }
+    }
   }
+
+  verificarEInicializar();
 };
 
 // 3. FUNÇÃO APÓS O LOGIN BEM-SUCEDIDO
 function tratarLogin(resposta) {
-  // Captura o ID Token (JWT) enviado pelo Google
   const token = resposta.credential;
-  
-  // Esconde a tela de login e exibe a interface do aplicativo
   document.getElementById("tela-login").style.display = "none";
   document.getElementById("conteudo-app").style.display = "block";
   document.getElementById("btn-sair").style.display = "block";
-  
-  // Busca os dados cadastrados na planilha passando o token de identificação
   buscarDadosPlanilha(token);
 }
 
@@ -53,7 +63,6 @@ function buscarDadosPlanilha(token) {
   if (loading) loading.style.display = "block";
   if (listaContainer) listaContainer.innerHTML = "";
 
-  // Faz a requisição enviando o token para validação no Apps Script
   fetch(`${URL_APPS_SCRIPT}?accessToken=${token}`)
     .then(res => {
       if (!res.ok) throw new Error("Erro na resposta do servidor.");
@@ -63,23 +72,18 @@ function buscarDadosPlanilha(token) {
       if (loading) loading.style.display = "none";
       if (!listaContainer) return;
       
-      // Se o e-mail não for autorizado, o Apps Script devolve um erro formatado
       if (dados.erro) {
         listaContainer.innerHTML = `<p style="color:red; text-align:center; font-weight:bold;">${dados.erro}</p>`;
         return;
       }
 
-      // Valida se existem territórios a serem listados
       if (!dados || dados.length === 0) {
         listaContainer.innerHTML = "<p style='text-align:center;'>Nenhum território cadastrado.</p>";
         return;
       }
 
-      // Cria dinamicamente os elementos na tela
       dados.forEach(item => {
         const card = document.createElement("div");
-        
-        // Define a classe CSS de cor baseada na coluna Status da sua Planilha
         let classeStatus = "";
         const status = item["Status"] ? item["Status"].trim() : "";
         if (status === "Em Andamento") classeStatus = "em-andamento";
@@ -106,8 +110,7 @@ function buscarDadosPlanilha(token) {
     });
 }
 
-// 5. FUNÇÃO DE LOGOUT (SAIR)
+// 5. FUNÇÃO DE LOGOUT
 function deslogar() {
-  // Limpa a sessão atual recarregando a página do aplicativo
   window.location.reload();
 }
